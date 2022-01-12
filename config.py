@@ -10,10 +10,10 @@ from flask_appbuilder.security.manager import (
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Your App secret key
-SECRET_KEY = "\2\1thisismyscretkey\1\2\e\y\y\h"
+SECRET_KEY = os.environ("SECRET_KEY", "\2\1thisismyscretkey\1\2\e\y\y\h")
 
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "app.db")
+SQLALCHEMY_DATABASE_URI = os.environ("SQLALCHEMY_DATABASE_URI", "sqlite:///" + os.path.join(basedir, "app.db"))
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
 
@@ -24,7 +24,7 @@ CSRF_ENABLED = True
 # GLOBALS FOR APP Builder
 # ------------------------------
 # Uncomment to setup Your App name
-# APP_NAME = "My App Name"
+APP_NAME = "IGFPortal"
 
 # Uncomment to setup Setup an App icon
 # APP_ICON = "static/img/logo.jpg"
@@ -40,7 +40,7 @@ CSRF_ENABLED = True
 AUTH_TYPE = AUTH_DB
 
 # Uncomment to setup Full admin role name
-# AUTH_ROLE_ADMIN = 'Admin'
+AUTH_ROLE_ADMIN = 'Admin'
 
 # Uncomment to setup Public role name, no authentication needed
 # AUTH_ROLE_PUBLIC = 'Public'
@@ -69,15 +69,15 @@ BABEL_DEFAULT_LOCALE = "en"
 BABEL_DEFAULT_FOLDER = "translations"
 # The allowed translation for you app
 LANGUAGES = {
-    "en": {"flag": "gb", "name": "English"},
-    "pt": {"flag": "pt", "name": "Portuguese"},
-    "pt_BR": {"flag": "br", "name": "Pt Brazil"},
-    "es": {"flag": "es", "name": "Spanish"},
-    "de": {"flag": "de", "name": "German"},
-    "zh": {"flag": "cn", "name": "Chinese"},
-    "ru": {"flag": "ru", "name": "Russian"},
-    "pl": {"flag": "pl", "name": "Polish"},
-}
+    "en": {"flag": "gb", "name": "English"}}#,
+#    "pt": {"flag": "pt", "name": "Portuguese"},
+#    "pt_BR": {"flag": "br", "name": "Pt Brazil"},
+#    "es": {"flag": "es", "name": "Spanish"},
+#    "de": {"flag": "de", "name": "German"},
+#    "zh": {"flag": "cn", "name": "Chinese"},
+#    "ru": {"flag": "ru", "name": "Russian"},
+#    "pl": {"flag": "pl", "name": "Polish"},
+#}
 # ---------------------------------------------------
 # Image and file configuration
 # ---------------------------------------------------
