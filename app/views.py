@@ -1,36 +1,28 @@
 from flask import render_template
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi
+from flask_appbuilder.baseviews import BaseView, expose
 
 from . import appbuilder, db
 
 """
-    Create your Model based REST API::
-
-    class MyModelApi(ModelRestApi):
-        datamodel = SQLAInterface(MyModel)
-
-    appbuilder.add_api(MyModelApi)
-
-
-    Create your Views::
-
-
-    class MyModelView(ModelView):
-        datamodel = SQLAInterface(MyModel)
-
-
-    Next, register your Views::
-
-
-    appbuilder.add_view(
-        MyModelView,
-        "My View",
-        icon="fa-folder-open-o",
-        category="My Category",
-        category_icon='fa-envelope'
-    )
+Home view
 """
+class HomeView(BaseView):
+    route_base = "/"
+    @expose('/user_home')
+    def general(self):
+        #greeting = "Hello {0}".format(g.user.username)
+        return self.render_template('user_index.html')
+
+    @expose('/admin_home')
+    def admin_home(self):
+        #greeting = "Hello {0}".format(g.user.username)
+        return self.render_template('admin_index.html')
+
+
+appbuilder.add_view_no_menu(HomeView())
+
 
 """
     Application wide 404 error handler
