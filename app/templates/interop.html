@@ -68,13 +68,12 @@ var layout1 = {
         tickson: 'boundaries'},
       yaxis: {
         autosize: false,
-        width: 700,
         height: 400,
         tickson:'boundaries'
       }
     }
 
-Plotly.newPlot('surfaceDiv1', surface_data1, layout1);
+Plotly.newPlot('surfaceDiv1', surface_data1, layout1, {displayModeBar: false, responsive: true, displaylogo: false});
 </script>
 <script>
 var surface_data2 = [
@@ -96,12 +95,11 @@ var layout2 = {
         tickson: 'boundaries'},
       yaxis: {
         autosize: false,
-        width: 700,
         height: 400,
         tickson:'boundaries'
       }
     }
-Plotly.newPlot('surfaceDiv2', surface_data2, layout2);
+Plotly.newPlot('surfaceDiv2', surface_data2, layout2, {displayModeBar: false, responsive: true, displaylogo: false});
 </script>
 
 <h3>Intensity plots</h3>
@@ -268,9 +266,12 @@ cluster_data.push({
 });
 {% endfor %}
 var cluster_layout = {
-    title: 'ClusterCount'
+    title: 'ClusterCount',
+    yaxis: {
+      autosize: false,
+      height: 400}
 }
-Plotly.newPlot('ClusterCountDiv', cluster_data, cluster_layout);
+Plotly.newPlot('ClusterCountDiv', cluster_data, cluster_layout, {displayModeBar: false, responsive: true, displaylogo: false});
 </script>
 
 <script>
@@ -296,13 +297,16 @@ density_data.push({
 });
 {% endfor %}
 var density_layout = {
-    title: 'Density'
+    title: 'Density',
+    yaxis: {
+      autosize: false,
+      height: 400}
 }
-Plotly.newPlot('DensityDiv', density_data, density_layout);
+Plotly.newPlot('DensityDiv', density_data, density_layout, {displayModeBar: false, responsive: true, displaylogo: false});
 </script>
 
 <h3>QScore distribution by bins</h3>
-<div class="chart-container" style="width:700px;height:400px">
+<div class="chart-container" style="height:400px">
     <canvas id="qscoreByBins"></canvas>
 </div>
 <script>
@@ -320,6 +324,7 @@ Plotly.newPlot('DensityDiv', density_data, density_layout);
         {% endfor %}
         ]},
     options : {
+      maintainAspectRatio: false,
       responsive: true,
       animation: {
         duration: 0
@@ -356,6 +361,7 @@ Plotly.newPlot('DensityDiv', density_data, density_layout);
   );
 </script>
 
+<div>
 <h3>QScore cycle plots</h3>
 <div class="container">
   <div class="row">
@@ -379,13 +385,13 @@ Plotly.newPlot('DensityDiv', density_data, density_layout);
             {% for entry in qsocre_cycles_data %}
               {% if loop.first %}
             <div class="tab-pane active" id="qscoreplot{{ entry.lane_id }}" role="tabpanel" aria-labelledby="qscoreplot{{ entry.lane_id }}-tab">
-              <div class="chart-container" style="width:700px;height:300px">
+              <div class="chart-container" style="height:400px">
                 <canvas id='qscoreByCycle{{ entry.lane_id }}'></canvas>
               </div>
             </div>
               {% else %}
             <div class="tab-pane" id="qscoreplot{{ entry.lane_id }}" role="tabpanel" aria-labelledby="qscoreplot{{ entry.lane_id }}-tab">  
-              <div class="chart-container" style="width:700px;height:300px">
+              <div class="chart-container" style="height:400px">
                 <canvas id='qscoreByCycle{{ entry.lane_id }}'></canvas>
               </div>
             </div>
@@ -417,6 +423,7 @@ $('#qscoreplot-list a').on('click', function (e) {
         }]
     },
     options: {
+      maintainAspectRatio: false,
       animation: {
         duration: 0
       },
@@ -453,4 +460,39 @@ $('#qscoreplot-list a').on('click', function (e) {
   );
 </script>
 {% endfor %}
+</div>
+
+<div>
+{% if occupied_pass_filter != "" %}
+<h3>%Occupied vs %Pass filter</h3>
+<div id="OccupiedVsPassFilterDiv"></div>
+<script>
+  var ocu_pass_dataset = [];
+  {% for entry in occupied_pass_filter %}
+  ocu_pass_dataset.push({
+    x: {{ entry.x|safe }},
+    y: {{ entry.y|safe }},
+    name: 'Lane {{ entry.lane_id }}',
+    mode: 'markers',
+    type: 'scatter',
+    marker: {
+      color: '{{ entry.color }}'}
+    })
+  {% endfor %}
+  var occu_pass_layout = {
+    title: '% Occupied vs % Pass Filter',
+    xaxis: {
+      side: 'bottom',
+      title: '% Occupied',
+      tickson: 'boundaries'},
+    yaxis: {
+      autosize: true,
+      width: 700,
+      title: '% Pass Filter',
+      tickson: 'boundaries'}
+  };
+  Plotly.newPlot('OccupiedVsPassFilterDiv', ocu_pass_dataset, occu_pass_layout, {displayModeBar: false, responsive: true, displaylogo: false});
+</script>
+{% endif %}
+</div>
 {% endblock %}
