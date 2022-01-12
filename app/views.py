@@ -46,21 +46,22 @@ def fetch_interop_data(run_name):
     density_data = results.density_data
     qscore_bins_data = results.qscore_bins_data
     qsocre_cycles_data = results.qsocre_cycles_data
+    occupied_pass_filter = results.occupied_pass_filter
     date_stamp = results.date_stamp
     if intensity_data is not None or \
        intensity_data != "":
        intensity_data = json.loads(intensity_data)
     return intensity_data, table_data, flowcell_data, \
            cluster_count_data, density_data, qscore_bins_data, \
-           qsocre_cycles_data, date_stamp
+           qsocre_cycles_data, occupied_pass_filter, date_stamp
 
 class SeqrunInteropFormView(SimpleFormView):
     form = SeqrunInteropForm
     form_title = "Get Interop data"
     def form_post(self, form):
         (intensity_data, table_data, flowcell_data,
-         cluster_count_data, density_data,
-         qscore_bins_data, qsocre_cycles_data, date_stamp) = \
+         cluster_count_data, density_data, qscore_bins_data,
+         qsocre_cycles_data, occupied_pass_filter, date_stamp) = \
             fetch_interop_data(
                 run_name=form.run_name.data.run_name)
         chart_data = intensity_data.get("chart_data")
@@ -72,6 +73,8 @@ class SeqrunInteropFormView(SimpleFormView):
         density_data = json.loads(density_data)
         qscore_bins_data = json.loads(qscore_bins_data)
         qsocre_cycles_data = json.loads(qsocre_cycles_data)
+        if occupied_pass_filter != '':
+            occupied_pass_filter = json.loads(occupied_pass_filter)
         return \
             self.render_template(
                 'interop.html',
@@ -85,6 +88,7 @@ class SeqrunInteropFormView(SimpleFormView):
                 density_data=density_data,
                 qscore_bins_data = qscore_bins_data,
                 qsocre_cycles_data=qsocre_cycles_data,
+                occupied_pass_filter=occupied_pass_filter,
                 chart_data=chart_data)
 
 
