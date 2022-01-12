@@ -1,0 +1,456 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<h1>Run {{ run_name }}</h1>
+<p>Updated on: {{ date_stamp }}</p>
+
+<h3>Table</h3>
+<div class="table-responsive">
+    {{ table_data|safe }}
+</div>
+
+<h3>Surface plots</h3>
+<div class="container">
+  <div class="row">
+    <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="surface-plot" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" href="#surface1" role="tab" aria-controls="surface1" aria-selected="true">Surface 1</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"  href="#surface2" role="tab" aria-controls="surface2" aria-selected="false">Surface 2</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+           <div class="tab-content mt-3">
+            <div class="tab-pane active" id="surface1" role="tabpanel" aria-labelledby="surface1-tab">
+              <div id="surfaceDiv1"></div>
+            </div>
+            <div class="tab-pane" id="surface2" role="tabpanel" aria-labelledby="surface2-tab">  
+              <div id="surfaceDiv2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#surface-plot a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
+
+<script>
+var surface_data1 = [
+  {
+    z: {{ surface1.z|safe }},
+    x: {{ surface1.x|safe }},
+    y: {{ surface1.y|safe }},
+    type: 'heatmap',
+    colorscale: 'Viridis'
+  }
+];
+
+var layout1 = {
+      title: 'Flowcell surface 1 heatmap',
+      xaxis: {
+        autosize: false,
+        side: 'bottom',
+        title: 'Tiles',
+        tickson: 'boundaries'},
+      yaxis: {
+        autosize: false,
+        width: 700,
+        height: 400,
+        tickson:'boundaries'
+      }
+    }
+
+Plotly.newPlot('surfaceDiv1', surface_data1, layout1);
+</script>
+<script>
+var surface_data2 = [
+  {
+    z: {{ surface2.z|safe }},
+    x: {{ surface2.x|safe }},
+    y: {{ surface2.y|safe }},
+    type: 'heatmap',
+    colorscale: 'Viridis'
+  }
+];
+
+var layout2 = {
+      title: 'Flowcell surface 2 heatmap',
+      xaxis: {
+        autosize: false,
+        side: 'bottom',
+        title: 'Tiles',
+        tickson: 'boundaries'},
+      yaxis: {
+        autosize: false,
+        width: 700,
+        height: 400,
+        tickson:'boundaries'
+      }
+    }
+Plotly.newPlot('surfaceDiv2', surface_data2, layout2);
+</script>
+
+<h3>Intensity plots</h3>
+<div class="container">
+  <div class="row">
+    <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="plot-list" role="tablist">
+            {% for lane_id in chart_data.keys() %}
+            <li class="nav-item">
+              {% if loop.first %}
+              <a class="nav-link active" href="#plot{{ lane_id }}" role="tab" aria-controls="plot{{ lane_id }}" aria-selected="true">Lane {{ lane_id }}</a>
+              {% else %}
+              <a class="nav-link"  href="#plot{{ lane_id }}" role="tab" aria-controls="plot{{ lane_id }}" aria-selected="false">Lane {{ lane_id }}</a>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">Plots</h4>
+           <div class="tab-content mt-3">
+            {% for lane_id in chart_data.keys() %}
+              {% if loop.first %}
+            <div class="tab-pane active" id="plot{{ lane_id }}" role="tabpanel" aria-labelledby="plot{{ lane_id }}-tab">
+              <div>
+                <canvas id="myChart{{ lane_id }}"></canvas>
+              </div>
+            </div>
+              {% else %}
+            <div class="tab-pane" id="plot{{ lane_id }}" role="tabpanel" aria-labelledby="plot{{ lane_id }}-tab">  
+              <div>
+                <canvas id="myChart{{ lane_id }}"></canvas>
+              </div>
+            </div>
+               {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#plot-list a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
+
+
+{% for lane_id, ldata in chart_data.items() %}
+<script>
+const config{{ lane_id }} = {
+    type: 'line',
+    data: {
+        labels: {{ labels }},
+        datasets: [
+        {% for item in ldata %}
+        {
+            label: "{{ item.label }}",
+            data: {{ item.data }},
+            type: "line",
+            fill: false,
+            pointBorderColor: "transparent",
+            borderColor: "{{ item.color }}",
+            backgroundColor: "{{ item.color }}",
+            lineTension: 0
+        },
+        {% endfor %}
+        ]
+    },
+    options: {
+        animation: {
+            duration: 0
+        },
+        title: {
+            display: true,
+            text: "Intensity plots for lane {{ lane_id }}",
+            fontSize:16
+        },
+        scales: {
+            yAxes:[{
+                scaleLabel:{
+                    display: true,
+                    labelString:"Intensity values"
+                }
+            }],
+            xAxes:[{
+            	scaleLabel:{
+                	display:true,
+                	labelString:"Cycles"
+                }
+            }]
+        }
+    }
+}
+</script>
+<script>
+  const myChart{{ lane_id }} = new Chart(
+    document.getElementById('myChart{{ lane_id }}'),
+    config{{ lane_id }}
+  );
+</script>
+{% endfor %}
+
+<h3>Cluster and density counts</h3>
+<div class="container">
+  <div class="row">
+    <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="box-plot" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" href="#clustercounts" role="tab" aria-controls="clustercounts" aria-selected="true">Cluster counts</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"  href="#densitycounts" role="tab" aria-controls="densitycounts" aria-selected="false">Density counts</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+           <div class="tab-content mt-3">
+            <div class="tab-pane active" id="clustercounts" role="tabpanel" aria-labelledby="clustercounts-tab">
+              <div id="ClusterCountDiv"></div>
+            </div>
+            <div class="tab-pane" id="densitycounts" role="tabpanel" aria-labelledby="densitycounts-tab">  
+              <div id="DensityDiv"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#box-plot a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
+
+<script>
+var cluster_data = [];
+{% for entry in cluster_count_data %}
+cluster_data.push({
+    y: {{ entry.ClusterCount }},
+    type: 'box',
+    name: 'Lane {{ entry.lane_id }}',
+    marker: {
+        color: '{{ entry.color }}'
+    },
+    boxpoints: 'Outliers'
+});
+cluster_data.push({
+    y: {{ entry.ClusterCountPF }},
+    type: 'box',
+    name: 'Lane {{ entry.lane_id }}',
+    marker: {
+        color: '{{ entry.color }}'
+    },
+    boxpoints: 'Outliers'
+});
+{% endfor %}
+var cluster_layout = {
+    title: 'ClusterCount'
+}
+Plotly.newPlot('ClusterCountDiv', cluster_data, cluster_layout);
+</script>
+
+<script>
+var density_data = [];
+{% for entry in density_data %}
+density_data.push({
+    y: {{ entry.Density }},
+    type: 'box',
+    name: 'Lane {{ entry.lane_id }}',
+    marker: {
+        color: '{{ entry.color }}'
+    },
+    boxpoints: 'Outliers'
+});
+density_data.push({
+    y: {{ entry.DensityPF }},
+    type: 'box',
+    name: 'Lane {{ entry.lane_id }}',
+    marker: {
+        color: '{{ entry.color }}'
+    },
+    boxpoints: 'Outliers'
+});
+{% endfor %}
+var density_layout = {
+    title: 'Density'
+}
+Plotly.newPlot('DensityDiv', density_data, density_layout);
+</script>
+
+<h3>QScore distribution by bins</h3>
+<div class="chart-container" style="width:700px;height:400px">
+    <canvas id="qscoreByBins"></canvas>
+</div>
+<script>
+  const qscore_bin_config = {
+    type: 'bar',
+    data: {
+        labels: {{ qscore_bins_data.labels|safe }},
+        datasets: [
+        {% for entry in qscore_bins_data.data %}
+        {
+            label: '{{ entry.label }}',
+            data: {{ entry.data }},
+            backgroundColor: '{{ entry.backgroundColor }}',
+        },
+        {% endfor %}
+        ]},
+    options : {
+      responsive: true,
+      animation: {
+        duration: 0
+      },
+      legend: {
+        display: true
+      },
+      title: {
+        display: true,
+        text: 'QScore distribution plot',
+        fontSize: 16
+      },
+      scales: {
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString:"Mean score values"
+            }
+          }],
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: "Lanes"
+            }
+          }]
+        }
+    }
+  }
+</script>
+<script>
+  const qscoreBinChart = new Chart(
+    document.getElementById('qscoreByBins'),
+    qscore_bin_config
+  );
+</script>
+
+<h3>QScore cycle plots</h3>
+<div class="container">
+  <div class="row">
+    <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="qscoreplot-list" role="tablist">
+            {% for entry in qsocre_cycles_data %}
+            <li class="nav-item">
+              {% if loop.first %}
+              <a class="nav-link active" href="#qscoreplot{{ entry.lane_id }}" role="tab" aria-controls="qscoreplot{{ entry.lane_id }}" aria-selected="true">Lane {{ entry.lane_id }}</a>
+              {% else %}
+              <a class="nav-link"  href="#qscoreplot{{ entry.lane_id }}" role="tab" aria-controls="qscoreplot{{ entry.lane_id }}" aria-selected="false">Lane {{ entry.lane_id }}</a>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card-body">
+           <div class="tab-content mt-3">
+            {% for entry in qsocre_cycles_data %}
+              {% if loop.first %}
+            <div class="tab-pane active" id="qscoreplot{{ entry.lane_id }}" role="tabpanel" aria-labelledby="qscoreplot{{ entry.lane_id }}-tab">
+              <div class="chart-container" style="width:700px;height:300px">
+                <canvas id='qscoreByCycle{{ entry.lane_id }}'></canvas>
+              </div>
+            </div>
+              {% else %}
+            <div class="tab-pane" id="qscoreplot{{ entry.lane_id }}" role="tabpanel" aria-labelledby="qscoreplot{{ entry.lane_id }}-tab">  
+              <div class="chart-container" style="width:700px;height:300px">
+                <canvas id='qscoreByCycle{{ entry.lane_id }}'></canvas>
+              </div>
+            </div>
+               {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#qscoreplot-list a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
+
+{% for entry in qsocre_cycles_data %}
+<script>
+  const qcore_conf{{ entry.lane_id }} = {
+    type: 'bar',
+    data: {
+        labels: {{ entry.labels|safe }},
+        datasets: [{
+            label: 'Lane {{ entry.lane_id }}',
+            data: {{ entry.data|safe }},
+            backgroundColor: '{{ entry.backgroundColor }}'
+        }]
+    },
+    options: {
+      animation: {
+        duration: 0
+      },
+      title: {
+        display: true,
+        text:'QScore distribution bar plot lane {{ entry.lane_id }}',
+        fontSize: 16
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            min:0,
+            max:45,
+          },
+          scaleLabel: {
+            display: true,
+            labelString: "Mean QScore value"
+          }
+        }],
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: "Cycles"
+          }
+        }]
+      }
+    }
+}
+</script>
+<script>
+  const qscoreCycleChart{{ entry.lane_id }} = new Chart(
+    document.getElementById('qscoreByCycle{{ entry.lane_id }}'),
+    qcore_conf{{ entry.lane_id }}
+  );
+</script>
+{% endfor %}
+{% endblock %}

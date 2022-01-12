@@ -51,3 +51,4 @@ def inject_template_scope():
 
 
 from . import views
+from . import apis
