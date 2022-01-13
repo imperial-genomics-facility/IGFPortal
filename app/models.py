@@ -1,4 +1,5 @@
 import datetime, json
+from flask import Markup, url_for
 from flask_appbuilder import Model
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
@@ -67,3 +68,6 @@ class IlluminaInteropData(Model):
     date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
     def __repr__(self):
         return self.run_name
+
+    def seqrun(self):
+        return Markup('<a href="'+url_for('IlluminaInteropDataView.get_seqrun',id=self.run_id)+'">'+self.run_name+'</a>')
