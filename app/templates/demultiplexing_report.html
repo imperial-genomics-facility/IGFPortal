@@ -1,0 +1,433 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+
+<h1>Run {{ run_name }}</h1>
+<p>Updated on: {{ date_stamp }}</p>
+
+<h3>Flowcell summary</h3>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="card shadow">
+            <div class="card-header">Flowcell PF Clusters</div>
+            <div class="card-body">
+                <canvas id="summary_plot1"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="card shadow">
+            <div class="card-header">Flowcell yield</div>
+            <div class="card-body">
+                <canvas id="summary_plot2"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const config_summary_plot1 = {
+        type: 'bar',
+        data: {
+            labels: {{ flowcell_labels|safe }},
+            datasets: [{
+                label: "Total cluster raw",
+                data: {{ total_cluster_raw|safe }},
+                backgroundColor: 'rgba(255, 99, 132, 0.4)',
+                borderColor: 'rgba(255, 99, 132, 0.8)',
+                borderWidth: 1
+            }, {
+                label: "Total cluster pf",
+                data: {{ total_cluster_pf|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.4)',
+                borderColor: 'rgba(54, 162, 235, 0.8)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Raw vs PF cluster counts per lane',
+                position: "bottom"
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    };
+</script>
+<script>
+    const summary_plot1 = new Chart(
+      document.getElementById('summary_plot1'),
+      config_summary_plot1
+    );
+</script>
+
+<script>
+    const config_summary_plot2 = {
+        type: 'bar',
+        data: {
+            "labels": {{ flowcell_labels|safe }},
+            "datasets": [{
+                "label": "Total yield",
+                "data": {{ total_yield|safe }},
+                "backgroundColor": 'rgba(75, 192, 192, 0.2)',
+                "borderColor": 'rgba(75, 192, 192, 1)',
+                "borderWidth": 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Total yield per lane',
+                position: "bottom"
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    }
+</script>
+<script>
+    const summary_plot2 = new Chart(
+      document.getElementById('summary_plot2'),
+      config_summary_plot2
+    );
+</script>
+
+<h3>Project summary table</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" role="tab" aria-selected="true"></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content mt-3">
+                        <div class="tab-pane active" role="tabpanel">
+                            {{ project_summary_table|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Project summary plot</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" role="tab" aria-selected="true"></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content mt-3">
+                        <div class="tab-pane active" role="tabpanel">
+                            <div id="project_summary_plot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var data = new google.visualization.DataTable({{ project_summary_plot|safe }});
+        var chart = new google.visualization.BarChart(document.getElementById('project_summary_plot'));
+        var options = {
+            title: 'Project summary plot',
+            width: 600,
+            height: 400,
+            chartArea: {left: 50, width: "60%"},
+            legend: {position: 'right', maxLines: 20, fontSize: 3},
+            dataOpacity: 0.5,
+            colors: [
+                '#0173B2', '#DE8F05', '#029E73', '#D55E00', '#CC78BC', '#CA9161',
+                '#FBAFE4', '#949494', '#ECE133', '#56B4E9', '#0173B2'],
+            bar: {groupWidth: '70%'},
+            isStacked: "percent"}
+        chart.draw(data, options);
+    }
+</script>
+
+{% for lane_id in lanes %}
+<h3>Lane {{ lane_id }}</h3>
+<div class="container">
+  <div class="row">
+    <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="lane{{ lane_id }}-plot" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" href="#lanetable{{ lane_id }}" role="tab" aria-controls="lanetable{{ lane_id }}" aria-selected="true">Lane {{ lane_id }} table</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"  href="#laneunknown{{ lane_id }}" role="tab" aria-controls="laneunknown{{ lane_id }}" aria-selected="false">Lane {{ lane_id }} undetermined</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"  href="#lanedist{{ lane_id }}" role="tab" aria-controls="lanedist{{ lane_id }}" aria-selected="false">Lane {{ lane_id }} sample bar plot</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"  href="#laneundist{{ lane_id }}" role="tab" aria-controls="laneundist{{ lane_id }}" aria-selected="false">Lane {{ lane_id }} undetermined bar plot</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+           <div class="tab-content mt-3">
+            <div class="tab-pane active" id="lanetable{{ lane_id }}" role="tabpanel" aria-labelledby="lanetable{{ lane_id }}-tab">
+                <div>
+                    <div id="dashboard_div_{{ lane_id }}" style='width: 100%; height: 100%' >
+                        <div id="filter_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div id="filter_sample_name_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div id="filter_project_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div id="filter_barcode_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div style="clear:both;"></div>
+                        <div id="table_div_{{ lane_id }}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="laneunknown{{ lane_id }}" role="tabpanel" aria-labelledby="laneunknown{{ lane_id }}-tab">
+                <div>
+                    <div id="un_dashboard_div_{{ lane_id }}" style='width: 100%; height: 100%' >
+                        <div id="un_filter_barcode_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div id="un_filter_barcode_i1_rc_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div id="un_filter_barcode_i2_rc_div_{{ lane_id }}" style="float:left; margin:10px;"></div>
+                        <div style="clear:both;"></div>
+                        <div id="un_table_div_{{ lane_id }}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="lanedist{{ lane_id }}" role="tabpanel" aria-labelledby="lanedist{{ lane_id }}-tab">
+                <canvas id="lane{{ lane_id }}_sample_dist_plot"></canvas>
+            </div>
+            <div class="tab-pane" id="laneundist{{ lane_id }}" role="tabpanel" aria-labelledby="laneundist{{ lane_id }}-tab">
+                <canvas id="lane{{ lane_id }}_unknown_dist_plot"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#lane{{ lane_id }}-plot a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
+
+
+
+
+
+
+<script type='text/javascript'>
+    google.charts.load('current', {'packages':['corechart', 'controls']});
+    google.charts.setOnLoadCallback(drawDashboard{{ lane_id }});
+    function drawDashboard{{ lane_id }}() {
+      var data{{ lane_id }} = new google.visualization.DataTable({{ sample_table.get(lane_id)|safe }});
+      var dashboard{{ lane_id }} = new google.visualization.Dashboard(document.getElementById('dashboard_div_1'));
+      var filter_barcode_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                               'controlType': 'StringFilter',
+                               'containerId': 'filter_barcode_div_{{ lane_id }}',
+                               'options': {
+                                   'filterColumnLabel': 'Barcode sequence',
+                                   'matchType': 'any'
+                               }
+                         });
+      var filter_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                               'controlType': 'StringFilter',
+                               'containerId': 'filter_div_{{ lane_id }}',
+                               'options': {
+                                   'filterColumnLabel': 'Sample_ID',
+                                   'matchType': 'any'
+                               }
+                         });
+      var filter_sampe_name_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                               'controlType': 'StringFilter',
+                               'containerId': 'filter_sample_name_div_{{ lane_id }}',
+                               'options': {
+                                   'filterColumnLabel': 'Sample_Name',
+                                   'matchType': 'any'
+                               }
+                         });
+      var filter_project_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                               'controlType': 'StringFilter',
+                               'containerId': 'filter_project_div_{{ lane_id }}',
+                               'options': {
+                                   'filterColumnLabel': 'Sample_Project',
+                                   'matchType': 'any'
+                               }
+                         });
+      var table{{ lane_id }} = new google.visualization.ChartWrapper({
+                       'chartType': 'Table',
+                       'containerId': 'table_div_{{ lane_id }}',
+                       'options': {'width': '100%', 
+                                   'height': '100%', 
+                                   'page': 'enable',
+                                   'showRowNumber': false,
+                                   'allowHtml': true,
+                                   'pageSize': 100}
+                       });
+      dashboard{{ lane_id }}.bind(filter_col{{ lane_id }}, table{{ lane_id }});
+      dashboard{{ lane_id }}.bind(filter_sampe_name_col{{ lane_id }}, table{{ lane_id }});
+      dashboard{{ lane_id }}.bind(filter_project_col{{ lane_id }}, table{{ lane_id }});
+      dashboard{{ lane_id }}.bind(filter_barcode_col{{ lane_id }}, table{{ lane_id }});
+      dashboard{{ lane_id }}.draw(data{{ lane_id }});
+    }
+  </script>
+
+
+  <script>
+      const config_lane_sample_dist_plot{{ lane_id }} = {
+        type: 'bar',
+        data:{
+            "labels": {{ sample_plot.get(lane_id).get("labels")|safe }},
+            "datasets": [
+                {% for entry in sample_plot.get(lane_id).get("datasets") %}
+                {label: "{{ entry.get("label")|safe }}",
+                data: {{ entry.get("data")|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1},
+                {% endfor %}
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top'}
+            }}
+        };
+  </script>
+  <script>
+    const lane_sample_dist_plot{{ lane_id }} = new Chart(
+      document.getElementById('lane{{ lane_id }}_sample_dist_plot'),
+      config_lane_sample_dist_plot{{ lane_id }}
+    );
+</script>
+<script type='text/javascript'>
+          google.charts.load('current', {'packages':['corechart', 'controls']});
+          google.charts.setOnLoadCallback(drawUnDashboard{{ lane_id }});
+          function drawUnDashboard{{ lane_id }}() {
+            var data{{ lane_id }} = new google.visualization.DataTable({{ undetermined_table.get(lane_id)|safe }});
+            var dashboard{{ lane_id }} = new google.visualization.Dashboard(document.getElementById('un_dashboard_div_1'));
+            var filter_barcode_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                                     'controlType': 'StringFilter',
+                                     'containerId': 'un_filter_barcode_div_{{ lane_id }}',
+                                     'options': {
+                                         'filterColumnLabel': 'Barcode',
+                                         'matchType': 'any'
+                                     }
+                               });
+            var filter_barcode_I1_RC_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                                     'controlType': 'StringFilter',
+                                     'containerId': 'un_filter_barcode_i1_rc_div_{{ lane_id }}',
+                                     'options': {
+                                         'filterColumnLabel': 'Barcode_I1_RC',
+                                         'matchType': 'any'
+                                     }
+                               });
+            var filter_barcode_I2_RC_col{{ lane_id }} = new google.visualization.ControlWrapper({
+                                     'controlType': 'StringFilter',
+                                     'containerId': 'un_filter_barcode_i2_rc_div_{{ lane_id }}',
+                                     'options': {
+                                         'filterColumnLabel': 'Barcode_I2_RC',
+                                         'matchType': 'any'
+                                     }
+                               });
+            var table{{ lane_id }} = new google.visualization.ChartWrapper({
+                             'chartType': 'Table',
+                             'containerId': 'un_table_div_{{ lane_id }}',
+                             'options': {'width': '100%', 
+                                         'height': '100%', 
+                                         'page': 'enable',
+                                         'showRowNumber': false,
+                                         'allowHtml': true,
+                                         'pageSize': 200}
+                             });
+            dashboard{{ lane_id }}.bind(filter_barcode_col{{ lane_id }}, table{{ lane_id }});
+            dashboard{{ lane_id }}.bind(filter_barcode_I1_RC_col{{ lane_id }}, table{{ lane_id }});
+            dashboard{{ lane_id }}.bind(filter_barcode_I2_RC_col{{ lane_id }}, table{{ lane_id }});
+            dashboard{{ lane_id }}.draw(data{{ lane_id }});
+          }
+</script>
+
+
+  <script>
+      const config_lane_unknown_dist_plot{{ lane_id }} = {
+        type: 'bar',
+        data:{
+            "labels": {{ undetermined_plot.get(lane_id).get("labels")|safe }},
+            "datasets": [{
+                label: "Lane {{ lane_id }}",
+                data: {{ undetermined_plot.get(lane_id).get("data")|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1}
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top'}
+            }}
+        };
+  </script>
+  <script>
+    const lane_unknown_dist_plot{{ lane_id }} = new Chart(
+      document.getElementById('lane{{ lane_id }}_unknown_dist_plot'),
+      config_lane_unknown_dist_plot{{ lane_id }}
+    );
+</script>
+{% endfor %}
+{% endblock %}

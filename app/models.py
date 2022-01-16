@@ -71,3 +71,28 @@ class IlluminaInteropData(Model):
 
     def seqrun(self):
         return Markup('<a href="'+url_for('IlluminaInteropDataView.get_seqrun',id=self.run_id)+'">'+self.run_name+'</a>')
+
+"""
+Pre de-multiplexing data
+"""
+
+class PreDeMultiplexingData(Model):
+    __tablename__ = 'pre_demultiplexing_data'
+    __table_args__ = (
+        UniqueConstraint('run_name', 'samplesheet_tag'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    demult_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+    run_name = Column(String(50), nullable=False)
+    samplesheet_tag = Column(String(50), nullable=False)
+    flowcell_cluster_plot = Column(TEXT())
+    project_summary_table = Column(TEXT())
+    project_summary_plot = Column(TEXT())
+    sample_table = Column(TEXT())
+    sample_plot= Column(TEXT())
+    undetermined_table = Column(TEXT())
+    undetermined_plot = Column(TEXT())
+    date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+    def __repr__(self):
+        return self.run_name
+    def report(self):
+        return Markup('<a href="'+url_for('PreDeMultiplexingDataView.get_report', id=self.demult_id)+'">report</a>')
