@@ -96,3 +96,21 @@ class PreDeMultiplexingData(Model):
         return self.run_name
     def report(self):
         return Markup('<a href="'+url_for('PreDeMultiplexingDataView.get_report', id=self.demult_id)+'">report</a>')
+
+class AdminHomeData(Model):
+	__tablename__ = 'admin_home_data'
+	__table_args__ = (
+    UniqueConstraint('admin_data_id'),
+    UniqueConstraint('admin_data_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+	admin_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+	admin_data_tag = Column(String(50), nullable=False)
+	recent_finished_runs = Column(INTEGER, nullable=False)
+	recent_finished_analysis = Column(INTEGER, nullable=False)
+	ongoing_runs = Column(INTEGER, nullable=False)
+	ongoing_analysis = Column(INTEGER, nullable=False)
+	sequence_bases_plot = Column(TEXT())
+	sequence_counts_plot = Column(TEXT())
+	storage_stat_plot = Column(TEXT())
+	def __repr__(self):
+		return self.admin_data_tag

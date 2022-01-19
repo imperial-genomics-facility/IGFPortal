@@ -1,4 +1,123 @@
 {% extends "appbuilder/base.html" %}
 {% block content %}
-<h1>Admin</h1>
+<h1>Admin view</h1>
+<h2>Overview</h2>
+<div class="row">
+  <div class="col-xl-1 col-lg-2">
+    <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+      <div class="card-header">Sequencing (30 days): {{ finished_seqrun }}</div>
+    </div>
+  </div>
+  <div class="col-xl-1 col-lg-2">
+    <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
+      <div class="card-header">Analysis (30 days): {{ finished_analysis }}</div>
+    </div>
+  </div>
+  <div class="col-xl-1 col-lg-2">
+    <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
+      <div class="card-header">Ongoing de-multiplexing: {{ ongoing_seqrun }}</div>
+    </div>
+  </div>
+  <div class="col-xl-1 col-lg-2">
+    <div class="card bg-info mb-3" style="max-width: 18rem;">
+      <div class="card-header">Ongoing analysis: {{ ongoing_analysis }}</div>
+    </div>
+  </div>
+</div>
+
+<h2>Plots</h2>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card shadow">
+      <div class="card-header">Sequencing runs</div>
+      <div>
+          <canvas id="myChart1"></canvas>
+      </div>
+      <div class="card-body">
+        <p>Number of sequencing runs</p> 
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card shadow">
+      <div class="card-header">Server storage</div>
+      <div>
+          <canvas id="myChart2"></canvas>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title">Server storage utilization</h6>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  const config1 = {
+    type: 'bar',
+    data: {{ data1|safe  }},
+    options: {
+      plugins: {
+        title: {
+          display: false,
+          text: 'Sequencing runs'
+        },
+      },
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+          	maxRotation: 45,
+            minRotation: 45
+          }
+        },
+        y: {
+          stacked: true
+        }
+      }
+    }
+  };
+</script>
+
+<script>
+  const config2 = {
+    type: 'bar',
+    data: {{ data2|safe  }},
+    options: {
+      plugins: {
+        title: {
+          display: false,
+          text: 'Storage chart'
+        },
+      },
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+          	maxRotation: 45,
+            minRotation: 45
+          }
+        },
+        y: {
+          stacked: true
+        }
+      }
+    }
+  };
+</script>
+
+<script>
+  const myChart1 = new Chart(
+    document.getElementById('myChart1'),
+    config1
+  );
+
+  const myChart2 = new Chart(
+    document.getElementById('myChart2'),
+    config2
+  );
+ </script>
 {% endblock %}

@@ -8,10 +8,30 @@ from flask_appbuilder.baseviews import BaseView, expose
 from . import appbuilder, db
 from .models import IlluminaInteropData, PreDeMultiplexingData
 from .forms import SeqrunInteropForm
+from .models import AdminHomeData
 
 """
 Home view
 """
+
+def fetch_admin_home_data():
+    results = \
+        db.session.\
+        query(AdminHomeData).\
+        filter(AdminHomeData.admin_data_tag=="production_data").\
+        all()
+    finished_seqrun = results[0].recent_finished_runs
+    finished_analysis = results[0].recent_finished_analysis
+    ongoing_seqrun = results[0].ongoing_runs
+    ongoing_analysis = results[0].ongoing_analysis
+    data1 = results[0].sequence_counts_plot
+    data2 = results[0].storage_stat_plot
+    return finished_seqrun, finished_analysis, ongoing_seqrun, ongoing_analysis, data1, data2
+
+
+class AdminHomeDataView(ModelView):
+    datamodel = SQLAInterface(AdminHomeData)
+
 class HomeView(BaseView):
     route_base = "/"
     @expose('/user_home')
@@ -21,8 +41,22 @@ class HomeView(BaseView):
 
     @expose('/admin_home')
     def admin_home(self):
+        (finished_seqrun,
+         finished_analysis,
+         ongoing_seqrun,
+         ongoing_analysis,
+         data1,
+         data2) = \
+            fetch_admin_home_data()
         #greeting = "Hello {0}".format(g.user.username)
-        return self.render_template('admin_index.html')
+        return self.render_template(
+                'admin_index.html',
+                data1=data1,
+                data2=data2,
+                finished_seqrun=finished_seqrun,
+                finished_analysis=finished_analysis,
+                ongoing_seqrun=ongoing_seqrun,
+                ongoing_analysis=ongoing_analysis)
 
 
 appbuilder.add_view_no_menu(HomeView())
@@ -299,6 +333,9 @@ appbuilder.add_view(
     PreDeMultiplexingDataView, "Pre de-multiplication", category_icon="fa-database", icon="fa-line-chart", category="Sequencing runs"
 )
 
+appbuilder.add_view(
+    AdminHomeDataView, "Temp admin data table", icon="fa-folder-open-o", category="Temp"
+)
 
 appbuilder.add_view_no_menu(TestPreDeMultiplexingDataView())
 
