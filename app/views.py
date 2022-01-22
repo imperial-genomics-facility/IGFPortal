@@ -23,10 +23,29 @@ from .pre_demultiplexing_view import PreDeMultiplexingDataView
 def page_not_found(e):
     return (
         render_template(
-            "404.html", base_template=appbuilder.base_template, appbuilder=appbuilder
+            "404.html",
+            base_template=appbuilder.base_template,
+            appbuilder=appbuilder
         ),
         404,
     )
+
+"""
+    Application wide 500 error handler
+"""
+
+
+@appbuilder.app.errorhandler(500)
+def page_not_found(e):
+    return (
+        render_template(
+            "500.html",
+            base_template=appbuilder.base_template,
+            appbuilder=appbuilder
+        ),
+        500,
+    )
+
 
 """
     View
