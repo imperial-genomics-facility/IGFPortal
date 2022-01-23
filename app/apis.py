@@ -36,7 +36,7 @@ def add_interop_data(run_data):
                 cluster_count_data = run_data.get('cluster_count_data'),
                 density_data = run_data.get('density_data'),
                 qscore_bins_data = run_data.get('qscore_bins_data'),
-                qsocre_cycles_data = run_data.get('qsocre_cycles_data'),
+                qscore_cycles_data = run_data.get('qscore_cycles_data'),
                 occupied_pass_filter = run_data.get('occupied_pass_filter'))
         try:
             db.session.add(interop_entry)

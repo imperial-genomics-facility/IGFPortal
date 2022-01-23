@@ -49,7 +49,7 @@ class IlluminaInteropDataView(ModelView):
     def get_seqrun(self, id):
         (run_name, intensity_data, table_data, flowcell_data,
          cluster_count_data, density_data, qscore_bins_data,
-         qsocre_cycles_data, occupied_pass_filter, date_stamp) = \
+         qscore_cycles_data, occupied_pass_filter, date_stamp) = \
             fetch_interop_data_by_id(run_id=id)
         chart_data = intensity_data.get("chart_data")
         labels = intensity_data.get("labels")
@@ -59,7 +59,7 @@ class IlluminaInteropDataView(ModelView):
         cluster_count_data = json.loads(cluster_count_data)
         density_data = json.loads(density_data)
         qscore_bins_data = json.loads(qscore_bins_data)
-        qsocre_cycles_data = json.loads(qsocre_cycles_data)
+        qscore_cycles_data = json.loads(qscore_cycles_data)
         if occupied_pass_filter != '':
             occupied_pass_filter = json.loads(occupied_pass_filter)
         return \
@@ -74,7 +74,7 @@ class IlluminaInteropDataView(ModelView):
                 cluster_count_data=cluster_count_data,
                 density_data=density_data,
                 qscore_bins_data = qscore_bins_data,
-                qsocre_cycles_data=qsocre_cycles_data,
+                qsocre_cycles_data=qscore_cycles_data,
                 occupied_pass_filter=occupied_pass_filter,
                 chart_data=chart_data)
 

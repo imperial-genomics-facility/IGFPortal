@@ -63,7 +63,7 @@ class IlluminaInteropData(Model):
     cluster_count_data = Column(TEXT())
     density_data = Column(TEXT())
     qscore_bins_data = Column(TEXT())
-    qsocre_cycles_data = Column(TEXT())
+    qscore_cycles_data = Column(TEXT())
     occupied_pass_filter = Column(TEXT())
     date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
     def __repr__(self):
