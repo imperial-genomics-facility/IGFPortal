@@ -1,5 +1,7 @@
 *.pyc
-app.db
+*.db
+*.egg-info
+.tox/*
 ./tmp
 ./build/*
 .idea
@@ -11,3 +13,6 @@ run.sh
 redis_run.sh
 app_run.sh
 dump.rdb
+.tox/log/.lock
+.tox/.package.lock
+.tox/dist/UNKNOWN-0.0.0.zip

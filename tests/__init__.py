@@ -5,8 +5,10 @@ def get_tests():
 
 def full_suite():
     # import statements
+    from .test_apis import TestApiCase
     return unittest.TestSuite([
         unittest.TestLoader().loadTestsFromTestCase(t)
-        for t in [
+            for t in [
+                TestApiCase
             ]
     ])
