@@ -11,11 +11,15 @@ from .models import IlluminaInteropData
 InterOp data
 """
 def search_interop_for_run(run_name):
-    result = \
-        db.session.\
-        query(IlluminaInteropData).\
-        filter(IlluminaInteropData.run_name==run_name).one_or_none()
-    return result
+    try:
+        result = \
+            db.session.\
+            query(IlluminaInteropData).\
+            filter(IlluminaInteropData.run_name==run_name).one_or_none()
+        return result
+    except Exception as e:
+        raise ValueError("Failed lookup for interop data, error: {0}".format(e))
+
 
 def add_interop_data(run_data):
     try:
@@ -41,8 +45,8 @@ def add_interop_data(run_data):
         except:
             db.session.rollback()
             raise
-    except:
-        raise
+    except Exception as e:
+        raise ValueError("Failed adding interop data, error: {0}".format(e))
 
 def edit_interop_data(run_data):
     try:
@@ -61,8 +65,27 @@ def edit_interop_data(run_data):
         except:
             db.session.rollback()
             raise
-    except:
-        raise
+    except Exception as e:
+        raise ValueError("Failed to update interop data, error: {0}".format(e))
+
+
+def add_or_edit_interop_data(run_data):
+    try:
+        if isinstance(run_data, str):
+            run_data = json.loads(run_data)
+        if isinstance(run_data, bytes):
+            run_data = json.loads(run_data.decode())
+        if "run_name" not in run_data:
+            raise ValueError("Missing run name")
+        result = \
+            search_interop_for_run(
+                run_name=run_data.get('run_name'))
+        if result is None:
+            add_interop_data(run_data=run_data)
+        else:
+            edit_interop_data(run_data=run_data)
+    except Exception as e:
+        raise ValueError("Failed to add or edit interop data, error: {0}".format(e))
 
 
 class SeqrunInteropApi(ModelRestApi):
@@ -112,6 +135,21 @@ class SeqrunInteropApi(ModelRestApi):
             run_data = file_obj.read()
             edit_interop_data(run_data=run_data)
             return self.response(200, message='updated run data')
+        except Exception as e:
+            logging.error(e)
+
+    @expose('/add_or_edit_run',  methods=['POST'])
+    @protect()
+    def add_or_edit_run(self):
+        try:
+            if not request.files:
+                return self.response_400('No files')
+            file_objs = request.files.getlist('file')
+            file_obj = file_objs[0]
+            file_obj.seek(0)
+            run_data = file_obj.read()
+            add_or_edit_interop_data(run_data)
+            return self.response(200, message='successfully added or updated run data')
         except Exception as e:
             logging.error(e)
 
