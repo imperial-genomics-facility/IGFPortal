@@ -6,3 +6,8 @@ app.db
 env
 venv
 *.sublime*
+celery_run.sh
+run.sh
+redis_run.sh
+app_run.sh
+dump.rdb
