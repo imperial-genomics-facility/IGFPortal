@@ -4,11 +4,16 @@ from app.apis import search_interop_for_run
 from app.apis import add_interop_data
 from app.apis import edit_interop_data
 from app.apis import add_or_edit_interop_data
+from app.apis import search_predemultiplexing_data
+from app.apis import add_predemultiplexing_data
+from app.apis import edit_predemultiplexing_data
+from app.apis import add_or_edit_predemultiplexing_data
 
 class TestApiCase(unittest.TestCase):
     def setUp(self):
         db.create_all()
         self.json_file = "data/interop_example.json"
+        self.demult_file = "data/demultiplexing_example.json"
 
     def tearDown(self):
         db.drop_all()
@@ -55,6 +60,66 @@ class TestApiCase(unittest.TestCase):
             search_interop_for_run(run_name=run_name)
         self.assertEqual(result.table_data, "AAAAA")
 
+    def test_search_predemultiplexing_data(self):
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertTrue(result is None)
+
+    def test_add_predemultiplexing_data(self):
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertTrue(result is None)
+        with open(self.demult_file, 'r') as fp:
+            json_data = json.load(fp)
+        add_predemultiplexing_data(data=json_data)
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertTrue(result is not None)
+
+    def test_edit_predemultiplexing_data(self):
+        with open(self.demult_file, 'r') as fp:
+            json_data = json.load(fp)
+        add_predemultiplexing_data(data=json_data)
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertTrue(result is not None)
+        json_data["flowcell_cluster_plot"] = "CCCC"
+        edit_predemultiplexing_data(data=json_data)
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertEqual(result.flowcell_cluster_plot, "CCCC")
+
+    def test_add_or_edit_predemultiplexing_data(self):
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertTrue(result is None)
+        with open(self.demult_file, 'r') as fp:
+            json_data = json.load(fp)
+        add_or_edit_predemultiplexing_data(data=json_data)
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertTrue(result is not None)
+        json_data["flowcell_cluster_plot"] = "CCCC"
+        add_or_edit_predemultiplexing_data(data=json_data)
+        result = \
+            search_predemultiplexing_data(
+                run_name="AAAA",
+                samplesheet_tag="BBBB")
+        self.assertEqual(result.flowcell_cluster_plot, "CCCC")
 
 if __name__ == '__main__':
   unittest.main()

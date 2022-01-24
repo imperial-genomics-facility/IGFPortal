@@ -1,0 +1,10 @@
+{
+    "run_name": "AAAA",
+    "samplesheet_tag": "BBBB",
+    "flowcell_cluster_plot": "{\"plot1\": \"data1\"}",
+    "project_summary_table": "{\"plot2\": \"data2\"}",
+    "project_summary_plot": "{\"plot3\": \"data3\"}",
+    "sample_table": "{\"table1\": \"data1\"}",
+    "undetermined_table": "{\"table2\": \"data2\"}",
+    "undetermined_plot" : "{\"plot4\": \"data4\"}"
+}
