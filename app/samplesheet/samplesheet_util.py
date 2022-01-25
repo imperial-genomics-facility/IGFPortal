@@ -1,7 +1,7 @@
 import os, json, re
 import pandas as pd
 import numpy as np
-from jsonschema import Draft4Validator
+from jsonschema import Draft4Validator, ValidationError
 from collections import defaultdict, deque
 
 class SampleSheet:
@@ -20,9 +20,6 @@ class SampleSheet:
         data_header, raw_data = self._load_data()                               # loading data and data header information
         self._data_header = data_header
         self._data = raw_data
-        self.columns = ("Lane", "Sample_ID", "Sample_Name", "Sample_Plate",
-                        "Sample_Well", "I7_Index_ID", "index", "I5_Index_ID",
-                        "index2", "Sample_Project", "Description")
 
     @property
     def samplesheet_version(self):
@@ -160,7 +157,106 @@ class SampleSheet:
                         format(e))
 
 
-    def validate_samplesheet_data(self, schema_json=os.path.join(os.path.dirname(__file__), 'samplesheet_validation.json')):
+    def _validate_samplesheet_columns(self, schema_json):
+        try:
+            with open(schema_json, 'r') as jp:
+                json_data = json.load(jp)
+            allowed_samplesheet_fields = \
+                list(json_data['items']['properties'].keys())
+            errors = list()
+            for header_name in self._data_header:
+                if header_name not in allowed_samplesheet_fields:
+                    errors.\
+                        append(
+                            'Header {0} is not supported. Validation incomplete.'.\
+                                format(header_name))
+            return errors
+        except Exception as e:
+            raise ValueError(
+                    "Failed to validate samplesheet columns, error: {0}".\
+                        format(e))
+
+
+    def _get_duplicate_entries(
+        self, sample_id_col='Sample_ID', sample_name_col="Sample_Name",
+        lane_col='Lane', index_columns=("index", "index2")):
+        try:
+            errors = list()
+            df = pd.DataFrame(self._data)
+            df.fillna('', inplace=True)
+            # get samplesheet wide duplicates
+            duplicates = df[df.duplicated()]
+            for entry in duplicates.to_dict(orient="records"):
+                errors.\
+                    append("Duplicte entry found for sample {0}".\
+                        format(entry.get(sample_id_col)))
+            # get duplicate indices
+            index_lookup_columns = \
+                [i for i in index_columns 
+                    if i in df.columns]
+            if len(index_lookup_columns) == 0:
+                raise ValueError("No index lookup column found in samplesheet")
+            if lane_col in df.columns:
+                for lane, l_data in df.drop_duplicates().groupby(lane_col):
+                    duplicate_entries = \
+                        l_data[l_data[index_lookup_columns].duplicated()]
+                    for entry in duplicate_entries.to_dict(orient="records"):
+                        errors.append(
+                            "Duplicate index for lane {0} sample {1}: {2}".\
+                                format(
+                                    lane,
+                                    entry.get(sample_id_col),
+                                    ', '.join([entry.get(i) for i in index_lookup_columns])) )
+            else:
+                duplicate_entries = \
+                    df[df[index_lookup_columns].duplicated()]
+                for entry in duplicate_entries.to_dict(orient="records"):
+                    errors.append(
+                        "Duplicate index for sample {0}: {1}".\
+                            format(
+                                entry.get(sample_id_col),
+                                ', '.join([entry.get(i) for i in index_lookup_columns])) )
+            # get duplicate samples ids and names
+            if lane_col in df.columns:
+                for lane, l_data in df.drop_duplicates().groupby(lane_col):
+                    duplicate_ids = \
+                        l_data[l_data[sample_id_col].duplicated()][sample_id_col].\
+                            values.tolist()
+                    if len(duplicate_ids) > 0:
+                        errors.append(
+                            "Duplicate sample ids present on lane {0}: {1}".\
+                                format(lane, ', '.join(duplicate_ids)) )
+                    duplicate_names = \
+                        l_data[l_data[sample_name_col].duplicated()][sample_name_col].\
+                            values.tolist()
+                    if len(duplicate_names) > 0:
+                        errors.append(
+                            "Duplicate sample names present on lane {0}: {1}".\
+                                format(lane, ', '.join(duplicate_names)) )
+            else:
+                duplicate_ids = \
+                    df[df[sample_id_col].duplicated()][sample_id_col].\
+                        values.tolist()
+                if len(duplicate_ids) > 0:
+                    errors.append({
+                        "Duplicate sample ids present: {0}".\
+                            format(', '.join(duplicate_ids)) })
+                duplicate_names = \
+                    df[df[sample_name_col].duplicated()][sample_name_col].\
+                        values.tolist()
+                if len(duplicate_names) > 0:
+                    errors.append({
+                        "Duplicate sample names present: {0}".\
+                            format(', '.join(duplicate_names)) })
+            return errors
+        except Exception as e:
+            raise ValueError(
+                    "Failed to get duplicate entries, error: {0}".\
+                        format(e))
+
+
+    def validate_samplesheet_data(
+        self, schema_json=os.path.join(os.path.dirname(__file__), 'samplesheet_validation.json')):
         '''
             A method for validation of samplesheet data
 
@@ -185,6 +281,10 @@ class SampleSheet:
                 sorted(
                     v_s.iter_errors(json_data),
                     key=lambda e: e.path)                                       # overwrite error_list with validation error
+            error_list = [
+                "{0}: {1}".format(err.schema_path[2], err.message)
+                    if isinstance(err, ValidationError) else err
+                        for err in error_list]
             # semantic validation
             other_errors = \
                 data.apply(
@@ -195,12 +295,19 @@ class SampleSheet:
             if len(other_errors) > 0:
                 error_list.extend([
                     value for value in other_errors.to_dict().values()])        # add other errors to the list
-            for c in data.columns.tolist():
-                if c not in self.columns:
-                    error_list.\
-                        append('Unknown column {0} found on samplesheet'.\
-                                 format(c))
-            return error_list
+            column_errors = \
+                self._validate_samplesheet_columns(schema_json=schema_json)
+            if len(column_errors) > 0:
+                error_list.extend(column_errors)
+            duplicate_errors = \
+                self._get_duplicate_entries()
+            if len(duplicate_errors) > 0:
+                error_list.extend(duplicate_errors)
+            formatted_errors = list()
+            for index, entry in enumerate(error_list):
+                formatted_errors.\
+                    append("{0}. {1}".format(index + 1, entry))
+            return formatted_errors
         except Exception as e:
             raise ValueError(
                     "Failed to validate samplesheet. Error: {0}".\
