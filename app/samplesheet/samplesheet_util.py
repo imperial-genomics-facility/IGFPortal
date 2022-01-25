@@ -281,28 +281,41 @@ class SampleSheet:
                 sorted(
                     v_s.iter_errors(json_data),
                     key=lambda e: e.path)                                       # overwrite error_list with validation error
-            error_list = [
-                "{0}: {1}".format(err.schema_path[2], err.message)
-                    if isinstance(err, ValidationError) else err
-                        for err in error_list]
+            temp_error_list = list()
+            for err in error_list:
+                if isinstance(err, str):
+                    temp_error_list.append(err)
+                else:
+                    if len(err.schema_path) > 2:
+                        temp_error_list.append(
+                            "{0}: {1}".format(err.schema_path[2], err.message))
+                    else:
+                        temp_error_list.append(
+                            "{0}".format(err.message))
+            error_list = temp_error_list
+            #error_list = [
+            #    "{0}: {1}".format(err.schema_path[2], err.message)
+            #        if isinstance(err, ValidationError) else err
+            #            for err in error_list]
             # semantic validation
-            other_errors = \
-                data.apply(
-                    lambda x: \
-                        self._check_samplesheet_data_row(data_series=x),
-                    axis=1)                                                     # check for additional errors
-            other_errors.dropna(inplace=True)
-            if len(other_errors) > 0:
-                error_list.extend([
-                    value for value in other_errors.to_dict().values()])        # add other errors to the list
             column_errors = \
                 self._validate_samplesheet_columns(schema_json=schema_json)
             if len(column_errors) > 0:
                 error_list.extend(column_errors)
-            duplicate_errors = \
-                self._get_duplicate_entries()
-            if len(duplicate_errors) > 0:
-                error_list.extend(duplicate_errors)
+            else:
+                other_errors = \
+                    data.apply(
+                        lambda x: \
+                            self._check_samplesheet_data_row(data_series=x),
+                        axis=1)                                                 # check for additional errors
+                other_errors.dropna(inplace=True)
+                if len(other_errors) > 0:
+                    error_list.extend([
+                        value for value in other_errors.to_dict().values()])    # add other errors to the list
+                    duplicate_errors = \
+                        self._get_duplicate_entries()
+                    if len(duplicate_errors) > 0:
+                        error_list.extend(duplicate_errors)
             formatted_errors = list()
             for index, entry in enumerate(error_list):
                 formatted_errors.\

@@ -51,6 +51,6 @@
                "pattern" : "^10[Xx]$|^$"
            }
         },
-        "required": ["Sample_ID","Sample_Name","Sample_Project","I7_Index_ID","index"]
+        "required": ["Sample_ID","Sample_Name","Sample_Project","index"]
     }
 }
