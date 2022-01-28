@@ -1,8 +1,11 @@
-import os, json, re
 import pandas as pd
 import numpy as np
+import os, json, re, tempfile
+from datetime import datetime
 from jsonschema import Draft4Validator, ValidationError
 from collections import defaultdict, deque
+from .. import db
+from ..models import SampleSheetModel
 
 class SampleSheet:
     '''
@@ -293,10 +296,6 @@ class SampleSheet:
                         temp_error_list.append(
                             "{0}".format(err.message))
             error_list = temp_error_list
-            #error_list = [
-            #    "{0}: {1}".format(err.schema_path[2], err.message)
-            #        if isinstance(err, ValidationError) else err
-            #            for err in error_list]
             # semantic validation
             column_errors = \
                 self._validate_samplesheet_columns(schema_json=schema_json)
@@ -325,3 +324,69 @@ class SampleSheet:
             raise ValueError(
                     "Failed to validate samplesheet. Error: {0}".\
                         format(e))
+
+
+def update_samplesheet_validation_entry_in_db(samplesheet_tag, report, status=''):
+    try:
+        entry = \
+            db.session.\
+                query(SampleSheetModel).\
+                filter(SampleSheetModel.samplesheet_tag==samplesheet_tag).\
+                one_or_none()
+        if entry is None:
+            raise ValueError("No entr found for samplesheet tag {0}".format(samplesheet_tag))
+        if status == 'pass':
+            status = 'PASS'
+        else:
+            status='FAILED'
+        samplesheeet_data = {
+            'status': status,
+            'report': report,
+            'validation_time': datetime.now(),
+            'update_time': datetime.now()}
+        try:
+            db.session.\
+                query(SampleSheetModel).\
+                filter(SampleSheetModel.samplesheet_tag==samplesheet_tag).\
+                update(samplesheeet_data)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(
+                    "Failed db update for {0}, error: {1}".\
+                        format(samplesheet_tag, e))
+    except Exception as e:
+        raise ValueError(
+                "Failed to update samplesheet validation status, error: {0}".\
+                    format(e))
+
+
+def validate_samplesheet_data_and_update_db(samplesheet_tag):
+    try:
+        entry = \
+            db.session.\
+                query(SampleSheetModel).\
+                filter(SampleSheetModel.samplesheet_tag==samplesheet_tag).\
+                one_or_none()
+        if entry is not None:
+            csv_data = entry.csv_data
+            with tempfile.TemporaryDirectory() as temp_dir :
+                csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+                with open(csv_file, 'w') as fp:
+                    fp.write(csv_data)
+                sa = SampleSheet(infile=csv_file)
+                errors = sa.validate_samplesheet_data()
+                if len(errors) > 0:
+                    update_samplesheet_validation_entry_in_db(
+                        samplesheet_tag=samplesheet_tag,
+                        report='\n'.join(errors),
+                        status='failed')
+                else:
+                    update_samplesheet_validation_entry_in_db(
+                        samplesheet_tag=samplesheet_tag,
+                        report='',
+                        status='pass')
+    except Exception as e:
+        raise ValueError(
+                "Failed samplesheet validation wrapper, error: {0}".\
+                    format(e))

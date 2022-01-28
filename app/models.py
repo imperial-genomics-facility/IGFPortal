@@ -114,3 +114,21 @@ class AdminHomeData(Model):
 	storage_stat_plot = Column(TEXT())
 	def __repr__(self):
 		return self.admin_data_tag
+
+"""
+  SampleSheet
+"""
+class SampleSheetModel(Model):
+	__tablename__ = 'samplesheet'
+	__table_args__ = (
+		UniqueConstraint('samplesheet_tag'),
+		{ 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+	samplesheet_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+	samplesheet_tag = Column(String(20), nullable=False)
+	csv_data = Column(TEXT(), nullable=False)
+	status = Column(Enum("PASS", "FAILED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+	report = Column(TEXT())
+	validation_time = Column(TIMESTAMP())
+	update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+	def __repr__(self):
+		return self.samplesheet_tag
