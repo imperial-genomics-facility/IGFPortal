@@ -12,6 +12,7 @@ from .models import AdminHomeData
 from .interop_view import IlluminaInteropDataView
 from .home_view import HomeView
 from .pre_demultiplexing_view import PreDeMultiplexingDataView
+from .samplesheet_view import SampleSheetView
 
 
 """
@@ -65,5 +66,12 @@ appbuilder.\
         "Pre de-multiplication",
         category_icon="fa-database",
         icon="fa-line-chart",
+        category="Sequencing runs")
+appbuilder.\
+    add_view(
+        SampleSheetView,
+        "Samplesheet",
+        category_icon="fa-database",
+        icon="fa-excel",
         category="Sequencing runs")
 db.create_all()
