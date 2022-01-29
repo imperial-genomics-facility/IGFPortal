@@ -51,7 +51,7 @@ class SampleSheetView(ModelView):
     @action("download_samplesheet", "Download samplesheet", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def download_samplesheet(self, item):
         output = BytesIO(item.csv_data.encode())
-        samplesheet_tag = item.samplesheet_tag.decode()
+        samplesheet_tag = item.samplesheet_tag.encode()
         output.seek(0)
         self.update_redirect()
         return send_file(output, attachment_filename='SampleSheet_{0}.csv'.format(samplesheet_tag), as_attachment=True)
