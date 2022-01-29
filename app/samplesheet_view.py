@@ -13,12 +13,13 @@ from .samplesheet.samplesheet_util import validate_samplesheet_data_and_update_d
 @celery.task(bind=True)
 def async_validate_samplesheet(self, id_list):
     try:
+        results = list()
         for samplesheet_id in id_list:
-            print(samplesheet_id)
             msg = \
                 validate_samplesheet_data_and_update_db(
                     samplesheet_id=samplesheet_id)
-        return msg
+            results.append(msg)
+        return dict(zip(id_list, results))
     except Exception as e:
         logging.error(
             "Failed to run celery job, error: {0}".\

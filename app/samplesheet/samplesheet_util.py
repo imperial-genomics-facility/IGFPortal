@@ -390,6 +390,8 @@ def validate_samplesheet_data_and_update_db(samplesheet_id):
                         report='',
                         status='pass')
                     return 'pass'
+        else:
+            return None
     except Exception as e:
         raise ValueError(
                 "Failed samplesheet validation wrapper, error: {0}".\
