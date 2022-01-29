@@ -101,7 +101,7 @@ class TestSampleSheetDbUpdate(unittest.TestCase):
             db.session.rollback()
             raise
         validate_samplesheet_data_and_update_db(
-            samplesheet_tag='test1')
+            samplesheet_id=1)
         entry = \
             db.session.\
                 query(SampleSheetModel).\

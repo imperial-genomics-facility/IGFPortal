@@ -361,13 +361,15 @@ def update_samplesheet_validation_entry_in_db(samplesheet_tag, report, status=''
                     format(e))
 
 
-def validate_samplesheet_data_and_update_db(samplesheet_tag):
+def validate_samplesheet_data_and_update_db(samplesheet_id):
     try:
+        print(type(samplesheet_id))
         entry = \
             db.session.\
                 query(SampleSheetModel).\
-                filter(SampleSheetModel.samplesheet_tag==samplesheet_tag).\
+                filter(SampleSheetModel.samplesheet_id==samplesheet_id).\
                 one_or_none()
+        print(entry)
         if entry is not None:
             csv_data = entry.csv_data
             with tempfile.TemporaryDirectory() as temp_dir :
@@ -378,14 +380,16 @@ def validate_samplesheet_data_and_update_db(samplesheet_tag):
                 errors = sa.validate_samplesheet_data()
                 if len(errors) > 0:
                     update_samplesheet_validation_entry_in_db(
-                        samplesheet_tag=samplesheet_tag,
+                        samplesheet_tag=entry.samplesheet_tag,
                         report='\n'.join(errors),
                         status='failed')
+                    return 'failed'
                 else:
                     update_samplesheet_validation_entry_in_db(
-                        samplesheet_tag=samplesheet_tag,
+                        samplesheet_tag=entry.samplesheet_tag,
                         report='',
                         status='pass')
+                    return 'pass'
     except Exception as e:
         raise ValueError(
                 "Failed samplesheet validation wrapper, error: {0}".\

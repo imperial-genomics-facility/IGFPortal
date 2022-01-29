@@ -11,12 +11,14 @@ from .samplesheet.samplesheet_util import validate_samplesheet_data_and_update_d
 
 
 @celery.task(bind=True)
-def async_validate_samplesheet(self, tag_list):
+def async_validate_samplesheet(self, id_list):
     try:
-        for samplesheet_tag in tag_list:
-            validate_samplesheet_data_and_update_db(
-                samplesheet_tag=samplesheet_tag)
-        return {}
+        for samplesheet_id in id_list:
+            print(samplesheet_id)
+            msg = \
+                validate_samplesheet_data_and_update_db(
+                    samplesheet_id=samplesheet_id)
+        return msg
     except Exception as e:
         logging.error(
             "Failed to run celery job, error: {0}".\
@@ -45,7 +47,7 @@ class SampleSheetView(ModelView):
         "csv_data"]
     base_order = ("samplesheet_id", "desc")
 
-    @action("download_samplesheet", "Download samplesheet", confirmation=None, icon="fa-excel", multiple=False, single=True)
+    @action("download_samplesheet", "Download samplesheet", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def download_samplesheet(self, item):
         output = BytesIO(item.csv_data.encode())
         samplesheet_tag = item.samplesheet_tag.decode()
@@ -56,13 +58,13 @@ class SampleSheetView(ModelView):
 
     @action("validate_samplesheet", "Validate SampleSheets", confirmation="Run validation?", icon="fa-rocket")
     def validate_samplesheet(self, item):
-        data = list()
+        id_list = list()
         if isinstance(item, list):
-            data = [i.samplesheet_tag for i in item]
+            id_list = [i.samplesheet_id for i in item]
         else:
-            data = [item.samplesheet_tag]
+            id_list = [item.samplesheet_id]
         _ = \
             async_validate_samplesheet.\
-                apply_async(args=[data])
+                apply_async(args=[id_list])
         self.update_redirect()
         return redirect(self.get_redirect())

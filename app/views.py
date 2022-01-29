@@ -70,8 +70,8 @@ appbuilder.\
 appbuilder.\
     add_view(
         SampleSheetView,
-        "Samplesheet",
+        "SampleSheets",
         category_icon="fa-database",
-        icon="fa-excel",
+        icon="fa-th-list",
         category="Sequencing runs")
 db.create_all()
