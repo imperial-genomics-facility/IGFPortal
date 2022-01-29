@@ -26,7 +26,7 @@ def fetch_interop_data_by_id(run_id):
         cluster_count_data = results.cluster_count_data
         density_data = results.density_data
         qscore_bins_data = results.qscore_bins_data
-        qsocre_cycles_data = results.qsocre_cycles_data
+        qscore_cycles_data = results.qscore_cycles_data
         occupied_pass_filter = results.occupied_pass_filter
         date_stamp = results.date_stamp
         if intensity_data is not None or \
@@ -34,7 +34,7 @@ def fetch_interop_data_by_id(run_id):
            intensity_data = json.loads(intensity_data)
         return run_name, intensity_data, table_data, flowcell_data, \
                cluster_count_data, density_data, qscore_bins_data, \
-               qsocre_cycles_data, occupied_pass_filter, date_stamp
+               qscore_cycles_data, occupied_pass_filter, date_stamp
     except Exception as e:
         logging.error(e)
 
@@ -74,7 +74,7 @@ class IlluminaInteropDataView(ModelView):
                 cluster_count_data=cluster_count_data,
                 density_data=density_data,
                 qscore_bins_data = qscore_bins_data,
-                qsocre_cycles_data=qscore_cycles_data,
+                qscore_cycles_data=qscore_cycles_data,
                 occupied_pass_filter=occupied_pass_filter,
                 chart_data=chart_data)
 
@@ -91,7 +91,7 @@ def fetch_interop_data(run_name):
     cluster_count_data = results.cluster_count_data
     density_data = results.density_data
     qscore_bins_data = results.qscore_bins_data
-    qsocre_cycles_data = results.qsocre_cycles_data
+    qscore_cycles_data = results.qscore_cycles_data
     occupied_pass_filter = results.occupied_pass_filter
     date_stamp = results.date_stamp
     if intensity_data is not None or \
@@ -99,7 +99,7 @@ def fetch_interop_data(run_name):
        intensity_data = json.loads(intensity_data)
     return intensity_data, table_data, flowcell_data, \
            cluster_count_data, density_data, qscore_bins_data, \
-           qsocre_cycles_data, occupied_pass_filter, date_stamp
+           qscore_cycles_data, occupied_pass_filter, date_stamp
 
 class SeqrunInteropFormView(SimpleFormView):
     form = SeqrunInteropForm
@@ -107,7 +107,7 @@ class SeqrunInteropFormView(SimpleFormView):
     def form_post(self, form):
         (intensity_data, table_data, flowcell_data,
          cluster_count_data, density_data, qscore_bins_data,
-         qsocre_cycles_data, occupied_pass_filter, date_stamp) = \
+         qscore_cycles_data, occupied_pass_filter, date_stamp) = \
             fetch_interop_data(
                 run_name=form.run_name.data.run_name)
         chart_data = intensity_data.get("chart_data")
@@ -118,7 +118,7 @@ class SeqrunInteropFormView(SimpleFormView):
         cluster_count_data = json.loads(cluster_count_data)
         density_data = json.loads(density_data)
         qscore_bins_data = json.loads(qscore_bins_data)
-        qsocre_cycles_data = json.loads(qsocre_cycles_data)
+        qscore_cycles_data = json.loads(qscore_cycles_data)
         if occupied_pass_filter != '':
             occupied_pass_filter = json.loads(occupied_pass_filter)
         return \
@@ -133,7 +133,7 @@ class SeqrunInteropFormView(SimpleFormView):
                 cluster_count_data=cluster_count_data,
                 density_data=density_data,
                 qscore_bins_data = qscore_bins_data,
-                qsocre_cycles_data=qsocre_cycles_data,
+                qscore_cycles_data=qscore_cycles_data,
                 occupied_pass_filter=occupied_pass_filter,
                 chart_data=chart_data)
 """

@@ -369,7 +369,7 @@ Plotly.newPlot('DensityDiv', density_data, density_layout, {displayModeBar: fals
       <div class="card">
         <div class="card-header">
           <ul class="nav nav-tabs card-header-tabs" id="qscoreplot-list" role="tablist">
-            {% for entry in qsocre_cycles_data %}
+            {% for entry in qscore_cycles_data %}
             <li class="nav-item">
               {% if loop.first %}
               <a class="nav-link active" href="#qscoreplot{{ entry.lane_id }}" role="tab" aria-controls="qscoreplot{{ entry.lane_id }}" aria-selected="true">Lane {{ entry.lane_id }}</a>
@@ -382,7 +382,7 @@ Plotly.newPlot('DensityDiv', density_data, density_layout, {displayModeBar: fals
         </div>
         <div class="card-body">
            <div class="tab-content mt-3">
-            {% for entry in qsocre_cycles_data %}
+            {% for entry in qscore_cycles_data %}
               {% if loop.first %}
             <div class="tab-pane active" id="qscoreplot{{ entry.lane_id }}" role="tabpanel" aria-labelledby="qscoreplot{{ entry.lane_id }}-tab">
               <div class="chart-container" style="height:400px">
@@ -410,7 +410,7 @@ $('#qscoreplot-list a').on('click', function (e) {
 })
 </script>
 
-{% for entry in qsocre_cycles_data %}
+{% for entry in qscore_cycles_data %}
 <script>
   const qcore_conf{{ entry.lane_id }} = {
     type: 'bar',
