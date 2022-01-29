@@ -60,12 +60,16 @@ class SampleSheetView(ModelView):
     @action("validate_samplesheet", "Validate SampleSheets", confirmation="Run validation?", icon="fa-rocket")
     def validate_samplesheet(self, item):
         id_list = list()
+        tag_list = list()
         if isinstance(item, list):
             id_list = [i.samplesheet_id for i in item]
+            tag_list = [i.samplesheet_tag for i in item]
         else:
             id_list = [item.samplesheet_id]
+            tag_list = [item.samplesheet_tag]
         _ = \
             async_validate_samplesheet.\
                 apply_async(args=[id_list])
+        flash("Submitted jobs for {0}".format(', '.join(tag_list)))
         self.update_redirect()
         return redirect(self.get_redirect())
