@@ -44,6 +44,7 @@ class IlluminaInteropDataView(ModelView):
     label_columns = {'seqrun':'Sequencing run', 'date_stamp': 'Updated on'}
     list_columns = ['seqrun', 'date_stamp']
     base_permissions = ['can_list']
+    base_order = ("date_stamp" , "desc")
 
     @expose('/interop/<int:id>')
     def get_seqrun(self, id):

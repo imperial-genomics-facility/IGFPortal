@@ -24,6 +24,7 @@ class PreDeMultiplexingDataView(ModelView):
         'date_stamp',
         'report']
     base_permissions = ['can_list']
+    base_order = ("date_stamp", "desc")
 
     @expose('/predemult_report/<int:id>')
     def get_report(self, id):
