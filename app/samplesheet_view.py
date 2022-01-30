@@ -70,6 +70,6 @@ class SampleSheetView(ModelView):
         _ = \
             async_validate_samplesheet.\
                 apply_async(args=[id_list])
-        flash("Submitted jobs for {0}".format(', '.join(tag_list)))
+        flash("Submitted jobs for {0}".format(', '.join(tag_list)), "info")
         self.update_redirect()
         return redirect(self.get_redirect())

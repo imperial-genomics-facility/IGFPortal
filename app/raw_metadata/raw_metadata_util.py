@@ -1,6 +1,7 @@
 from multiprocessing.sharedctypes import Value
+from numpy import isin
 import pandas as pd
-import os, json, re, tempfile
+import os, json, re, tempfile, logging
 from jsonschema import Draft4Validator, ValidationError
 from .. import db
 from ..models import RawMetadataModel
@@ -319,10 +320,12 @@ def validate_raw_metadata_and_set_db_status(
                 raw_metadata_id=raw_metadata_id,
                 status='FAILED',
                 report='\n'.join(error_list))
+            return 'FAILED'
         else:
             _set_metadata_validation_status(
                 raw_metadata_id=raw_metadata_id,
                 status='PASS')
+            return 'PASS'
     except Exception as e:
         raise ValueError(
                 "Failed to get metadata for id {0}, error: {1}".\
@@ -405,5 +408,22 @@ def _validate_metadata_library_type(
                    library_source)
 
       return error_msg
-    except:
-      raise
+    except Exception as e:
+      raise ValueError(
+                "Failed to validate library type, error: {0}".\
+                    format(e))
+
+def mark_raw_metadata_as_ready(id_list):
+    try:
+        try:
+            db.session.\
+                query(RawMetadataModel).\
+                filter(RawMetadataModel.raw_metadata_id.in_(id_list)).\
+                filter(RawMetadataModel.status=="VALIDATED").\
+                update({'status': 'READY'}, synchronize_session='fetch')
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+    except Exception as e:
+        raise ValueError("Failed to mark metadata as ready, error: {0}".format(e))

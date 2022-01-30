@@ -13,6 +13,7 @@ from .interop_view import IlluminaInteropDataView
 from .home_view import HomeView
 from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
+from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 
 
 """
@@ -47,6 +48,10 @@ def page_not_found(e):
         500,
     )
 
+"""
+    Create DB
+"""
+db.create_all()
 
 """
     View
@@ -74,4 +79,17 @@ appbuilder.\
         category_icon="fa-database",
         icon="fa-th-list",
         category="Sequencing runs")
-db.create_all()
+appbuilder.\
+    add_view(
+        RawMetadataValidationView,
+        "Create metadata and validate",
+        category_icon="fa-folder-open-o",
+        icon="fa-th",
+        category="Metadata submission")
+appbuilder.\
+    add_view(
+        RawMetadataSubmitView,
+        "Upload metadata to pipeline",
+        category_icon="fa-folder-open-o",
+        icon="fa-upload",
+        category="Metadata submission")
