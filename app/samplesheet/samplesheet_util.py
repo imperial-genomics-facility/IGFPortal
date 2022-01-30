@@ -369,10 +369,9 @@ def validate_samplesheet_data_and_update_db(samplesheet_id):
                 query(SampleSheetModel).\
                 filter(SampleSheetModel.samplesheet_id==samplesheet_id).\
                 one_or_none()
-        print(entry)
         if entry is not None:
             csv_data = entry.csv_data
-            with tempfile.TemporaryDirectory() as temp_dir :
+            with tempfile.TemporaryDirectory() as temp_dir:
                 csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
                 with open(csv_file, 'w') as fp:
                     fp.write(csv_data)

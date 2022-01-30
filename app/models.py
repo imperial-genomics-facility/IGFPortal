@@ -98,22 +98,23 @@ class PreDeMultiplexingData(Model):
         return Markup('<a href="'+url_for('PreDeMultiplexingDataView.get_report', id=self.demult_id)+'">report</a>')
 
 class AdminHomeData(Model):
-	__tablename__ = 'admin_home_data'
-	__table_args__ = (
+  __tablename__ = 'admin_home_data'
+  __table_args__ = (
     UniqueConstraint('admin_data_id'),
     UniqueConstraint('admin_data_tag'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
-	admin_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-	admin_data_tag = Column(String(50), nullable=False)
-	recent_finished_runs = Column(INTEGER, nullable=False)
-	recent_finished_analysis = Column(INTEGER, nullable=False)
-	ongoing_runs = Column(INTEGER, nullable=False)
-	ongoing_analysis = Column(INTEGER, nullable=False)
-	sequence_bases_plot = Column(TEXT())
-	sequence_counts_plot = Column(TEXT())
-	storage_stat_plot = Column(TEXT())
-	def __repr__(self):
-		return self.admin_data_tag
+  admin_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  admin_data_tag = Column(String(50), nullable=False)
+  recent_finished_runs = Column(INTEGER, nullable=False)
+  recent_finished_analysis = Column(INTEGER, nullable=False)
+  ongoing_runs = Column(INTEGER, nullable=False)
+  ongoing_analysis = Column(INTEGER, nullable=False)
+  sequence_bases_plot = Column(TEXT())
+  sequence_counts_plot = Column(TEXT())
+  storage_stat_plot = Column(TEXT())
+  def __repr__(self):
+    return self.admin_data_tag
+
 
 """
   SampleSheet
@@ -132,3 +133,19 @@ class SampleSheetModel(Model):
 	update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
 	def __repr__(self):
 		return self.samplesheet_tag
+
+
+class RawMetadataModel(Model):
+  __tablename__ = 'raw_metadata_entry'
+  __table_args__ = (
+    UniqueConstraint('metadata_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+  raw_metadata_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  metadata_tag = Column(String(80), nullable=False)
+  raw_csv_data = Column(TEXT())
+  formatted_csv_data = Column(TEXT(), nullable=False)
+  report = Column(TEXT())
+  status = Column(Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"), nullable=False, server_default='UNKNOWN')
+  update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.metadata_tag
