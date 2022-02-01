@@ -1,7 +1,7 @@
 import unittest, json
 from app import appbuilder, db
-from app.apis import search_predemultiplexing_data
-from app.apis import add_predemultiplexing_data
+from app.pre_demultiplexing_data_api import search_predemultiplexing_data
+from app.pre_demultiplexing_data_api import add_predemultiplexing_data
 from app.pre_demultiplexing_view import get_pre_demultiplexing_data
 
 class TestPreDemultView(unittest.TestCase):
