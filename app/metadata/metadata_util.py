@@ -108,3 +108,26 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json, cleanup=True):
                 os.remove(input_json)
     except Exception as e:
         raise ValueError("Failed to load new metadata, error: {0}".format(e))
+
+
+def check_for_projects_in_metadata_db(project_list):
+    try:
+        results = \
+            db.session.\
+                query(Project.project_igf_id).\
+                filter(Project.project_igf_id.in_(project_list)).\
+                all()
+        results = [
+            i[0] if isinstance(i, tuple) else i
+                for i in results]
+        output = dict()
+        for i in project_list:
+            if i in results:
+                output.update({i: True})
+            else:
+                output.update({i: False})
+        return output
+    except Exception as e:
+        raise ValueError(
+                "Failed to check projects in db, error: {0}".\
+                    format(e))

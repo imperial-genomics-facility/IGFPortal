@@ -363,7 +363,6 @@ def update_samplesheet_validation_entry_in_db(samplesheet_tag, report, status=''
 
 def validate_samplesheet_data_and_update_db(samplesheet_id):
     try:
-        print(type(samplesheet_id))
         entry = \
             db.session.\
                 query(SampleSheetModel).\
@@ -394,4 +393,27 @@ def validate_samplesheet_data_and_update_db(samplesheet_id):
     except Exception as e:
         raise ValueError(
                 "Failed samplesheet validation wrapper, error: {0}".\
+                    format(e))
+
+def compare_sample_with_metadata_db(samplesheet_id):
+    try:
+        entry = \
+            db.session.\
+                query(SampleSheetModel).\
+                filter(SampleSheetModel.samplesheet_id==samplesheet_id).\
+                one_or_none()
+        if entry is None:
+            raise ValueError(
+                    "No samplesheet record found for id {0}".\
+                        format(samplesheet_id))
+        csv_data = entry.csv_data
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+            with open(csv_file, 'w') as fp:
+                fp.write(csv_data)
+            sa = SampleSheet(infile=csv_file)
+            df = pd.DataFrame(sa._data)
+    except Exception as e:
+        raise ValueError(
+                "Failed to compare samplesheet with metadata, error: {0}".\
                     format(e))
