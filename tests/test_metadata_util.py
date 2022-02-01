@@ -1,8 +1,9 @@
 import os, unittest, json, tempfile
 from app import appbuilder, db
-from app.models import Project
+from app.models import Project, Sample
 from app.metadata.metadata_util import cleanup_and_load_new_data_to_metadata_tables
 from app.metadata.metadata_util import check_for_projects_in_metadata_db
+from app.metadata.metadata_util import check_sample_and_project_ids_in_metadata_db
 
 class TestMetadataUtil1(unittest.TestCase):
     def setUp(self):
@@ -76,10 +77,61 @@ class TestMetadataUtil2(unittest.TestCase):
                 one_or_none()
         self.assertTrue(result is not None)
         self.assertEqual(result.project_id, 1)
-        output = \
+        output, errors = \
             check_for_projects_in_metadata_db(project_list=["test1", "test2"])
         self.assertTrue(output.get('test1'))
         self.assertFalse(output.get('test2'))
+        self.assertEqual(len(errors), 1)
+
+class TestMetadataUtil3(unittest.TestCase):
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.drop_all()
+
+    def test_check_sample_and_project_ids_in_metadata_db(self):
+        project1 = \
+            Project(
+                project_id=1,
+                project_igf_id="test1")
+        project2 = \
+            Project(
+                project_id=2,
+                project_igf_id="test2")
+        sample1 = \
+            Sample(
+                sample_id=1,
+                sample_igf_id='test_sample1',
+                project_id=1)
+        sample2 = \
+            Sample(
+                sample_id=2,
+                sample_igf_id='test_sample2',
+                project_id=2)
+        try:
+            db.session.add(project1)
+            db.session.add(project2)
+            db.session.add(sample1)
+            db.session.add(sample2)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        sample_project_list = [{
+            'sample_igf_id':'test_sample1',
+            'project_igf_id':'test1'},{
+            'sample_igf_id':'test_sample2',
+            'project_igf_id':'test1'},{
+            'sample_igf_id':'test_sample3',
+            'project_igf_id':'test1'}]
+        errors = \
+            check_sample_and_project_ids_in_metadata_db(
+                sample_project_list)
+        self.assertTrue('Missing metadata for sample test_sample3' in errors)
+        self.assertTrue("Sample test_sample2 is linked to project test2, not test1" in errors)
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -112,6 +112,7 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json, cleanup=True):
 
 def check_for_projects_in_metadata_db(project_list):
     try:
+        errors = list()
         results = \
             db.session.\
                 query(Project.project_igf_id).\
@@ -126,8 +127,58 @@ def check_for_projects_in_metadata_db(project_list):
                 output.update({i: True})
             else:
                 output.update({i: False})
-        return output
+        for key, val in output.items():
+            if not val:
+                errors.\
+                    append(
+                        "Project {0} is missing in db".\
+                            format(key))
+        return output, errors
     except Exception as e:
         raise ValueError(
                 "Failed to check projects in db, error: {0}".\
+                    format(e))
+
+
+def check_sample_and_project_ids_in_metadata_db(sample_project_list):
+    try:
+        input_sample_project_dict = dict()
+        output_sample_project_dict = dict()
+        errors = list()
+        for entry in sample_project_list:
+            if 'sample_igf_id' not in entry.keys() or \
+               'project_igf_id' not in entry.keys():
+               raise KeyError(
+                        "Missing sample id or project id in {0}".\
+                            format(entry))
+            input_sample_project_dict.\
+                update({entry.get('sample_igf_id'): entry.get('project_igf_id')})
+        results = \
+            db.session.\
+                query(Sample.sample_igf_id, Project.project_igf_id).\
+                join(Project, Project.project_id==Sample.project_id).\
+                filter(Sample.sample_igf_id.in_(input_sample_project_dict.keys())).\
+                all()
+        for entry in results:
+            output_sample_project_dict.\
+                update({entry[0]: entry[1]})
+        for sample, project in input_sample_project_dict.items():
+            if sample not in output_sample_project_dict:
+                errors.\
+                    append(
+                        'Missing metadata for sample {0}'.\
+                            format(sample))
+            if sample in output_sample_project_dict and \
+               project != output_sample_project_dict.get(sample):
+               errors.\
+                   append(
+                       "Sample {0} is linked to project {1}, not {2}".\
+                           format(
+                               sample,
+                               output_sample_project_dict.get(sample),
+                               project))
+        return errors
+    except Exception as e:
+        raise ValueError(
+                "Failed to check sample projects in db, error: {0}".\
                     format(e))
