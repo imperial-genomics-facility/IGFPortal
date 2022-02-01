@@ -1,9 +1,10 @@
-import unittest
+import os, unittest, tempfile
 from app import db
-from app.models import SampleSheetModel
+from app.models import SampleSheetModel, Project, Sample
 from app.samplesheet.samplesheet_util import SampleSheet
 from app.samplesheet.samplesheet_util import update_samplesheet_validation_entry_in_db
 from app.samplesheet.samplesheet_util import validate_samplesheet_data_and_update_db
+from app.samplesheet.samplesheet_util import compare_sample_with_metadata_db
 
 class TestSampleSheetUtil(unittest.TestCase):
     def setUp(self):
@@ -101,7 +102,8 @@ class TestSampleSheetDbUpdate(unittest.TestCase):
             db.session.rollback()
             raise
         validate_samplesheet_data_and_update_db(
-            samplesheet_id=1)
+            samplesheet_id=1,
+            check_metadata=False)
         entry = \
             db.session.\
                 query(SampleSheetModel).\
@@ -109,6 +111,44 @@ class TestSampleSheetDbUpdate(unittest.TestCase):
                 one_or_none()
         self.assertTrue(entry is not None)
         self.assertEqual(entry.status, 'FAILED')
+
+    def test_compare_sample_with_metadata_db(self):
+        samplesheet_file = "data/SampleSheet_v3.csv"
+        project1 = \
+            Project(
+                project_id=1,
+                project_igf_id="test1")
+        project2 = \
+            Project(
+                project_id=2,
+                project_igf_id="test2")
+        sample1 = \
+            Sample(
+                sample_id=1,
+                sample_igf_id='test_sample1',
+                project_id=1)
+        sample2 = \
+            Sample(
+                sample_id=2,
+                sample_igf_id='test_sample2',
+                project_id=2)
+        try:
+            db.session.add(project1)
+            db.session.add(project2)
+            db.session.add(sample1)
+            db.session.add(sample2)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        metadata_errors = \
+            compare_sample_with_metadata_db(
+                samplesheet_file=samplesheet_file)
+        self.assertTrue('Missing metadata for sample test_sample3' in metadata_errors)
+        self.assertTrue("Sample test_sample2 is linked to project test2, not test1" in metadata_errors)
+
+
 
 if __name__ == '__main__':
   unittest.main()

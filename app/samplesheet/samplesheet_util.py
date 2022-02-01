@@ -6,6 +6,8 @@ from jsonschema import Draft4Validator, ValidationError
 from collections import defaultdict, deque
 from .. import db
 from ..models import SampleSheetModel
+from ..metadata.metadata_util import check_for_projects_in_metadata_db
+from ..metadata.metadata_util import check_sample_and_project_ids_in_metadata_db
 
 class SampleSheet:
     '''
@@ -361,7 +363,7 @@ def update_samplesheet_validation_entry_in_db(samplesheet_tag, report, status=''
                     format(e))
 
 
-def validate_samplesheet_data_and_update_db(samplesheet_id):
+def validate_samplesheet_data_and_update_db(samplesheet_id, check_metadata=True):
     try:
         entry = \
             db.session.\
@@ -376,6 +378,12 @@ def validate_samplesheet_data_and_update_db(samplesheet_id):
                     fp.write(csv_data)
                 sa = SampleSheet(infile=csv_file)
                 errors = sa.validate_samplesheet_data()
+                if check_metadata:
+                    metadata_errors = \
+                        compare_sample_with_metadata_db(
+                            samplesheet_file=csv_file)
+                    if len(metadata_errors) > 0:
+                        errors.extend(metadata_errors)
                 if len(errors) > 0:
                     update_samplesheet_validation_entry_in_db(
                         samplesheet_tag=entry.samplesheet_tag,
@@ -395,24 +403,38 @@ def validate_samplesheet_data_and_update_db(samplesheet_id):
                 "Failed samplesheet validation wrapper, error: {0}".\
                     format(e))
 
-def compare_sample_with_metadata_db(samplesheet_id):
+
+def compare_sample_with_metadata_db(
+    samplesheet_file, project_column='Sample_Project', sample_cplumn='Sample_ID'):
     try:
-        entry = \
-            db.session.\
-                query(SampleSheetModel).\
-                filter(SampleSheetModel.samplesheet_id==samplesheet_id).\
-                one_or_none()
-        if entry is None:
-            raise ValueError(
-                    "No samplesheet record found for id {0}".\
-                        format(samplesheet_id))
-        csv_data = entry.csv_data
-        with tempfile.TemporaryDirectory() as temp_dir:
-            csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
-            with open(csv_file, 'w') as fp:
-                fp.write(csv_data)
-            sa = SampleSheet(infile=csv_file)
-            df = pd.DataFrame(sa._data)
+        errors = list()
+        sa = SampleSheet(infile=samplesheet_file)
+        df = pd.DataFrame(sa._data)
+        project_list = \
+            df[project_column].\
+                drop_duplicates().\
+                values.\
+                tolist()
+        sample_projects_df = \
+            df[[sample_cplumn, project_column]].\
+                drop_duplicates()
+        sample_projects_df.columns = [
+            'sample_igf_id',
+            'project_igf_id']
+        sample_project_list = \
+            sample_projects_df.\
+                to_dict(orient='records')
+        _, project_errors = \
+            check_for_projects_in_metadata_db(
+                project_list=project_list)
+        if len(project_errors) > 0:
+            errors.extend(project_errors)
+        sample_project_errors = \
+            check_sample_and_project_ids_in_metadata_db(
+                sample_project_list)
+        if len(sample_project_errors) > 0:
+            errors.extend(sample_project_errors)
+        return sample_project_errors
     except Exception as e:
         raise ValueError(
                 "Failed to compare samplesheet with metadata, error: {0}".\
