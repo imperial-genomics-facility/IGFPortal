@@ -1,4 +1,5 @@
 import os, json
+import pandas as pd
 from ..models import Project
 from ..models import IgfUser
 from ..models import ProjectUser
@@ -28,8 +29,10 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json):
     try:
         if not os.path.exists(input_json):
             raise IOError("Input file {0} not found".format(input_json))
-        with open(input_json, "r") as fp:
+        with open(input_json, "rb") as fp:
             json_data = json.load(fp)
+        if not isinstance(json_data, dict):
+            raise TypeError('No dictionary found for metadata update')
         delete_order_tables = [
             File_attribute,
             File,
@@ -41,8 +44,9 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json):
             Analysis,
             Platform,
             Flowcell_barcode_rule,
-            Seqrun,
+            Seqrun_attribute,
             Seqrun_stats,
+            Seqrun,
             Run_attribute,
             Run,
             Experiment_attribute,
@@ -66,6 +70,7 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json):
             Flowcell_barcode_rule,
             Seqrun,
             Seqrun_stats,
+            Seqrun_attribute,
             Run,
             Run_attribute,
             Pipeline,
@@ -77,11 +82,12 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json):
             File_attribute]
         try:
             for table in delete_order_tables:
-                if table.__tablename__ in json_data:
+                if table.__tablename__ in json_data.keys():
                     db.session.query(table).delete()
             for table in create_order_tables:
-                if table.__tablename__ in json_data:
-                    df = json_data.get(table.__tablename__)
+                if table.__tablename__ in json_data.keys():
+                    table_data = json_data.get(table.__tablename__)
+                    df = pd.DataFrame(table_data)
                     if table.__tablename__=='project_user':
                         pass
                     elif table.__tablename__=='sample':

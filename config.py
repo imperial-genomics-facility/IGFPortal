@@ -12,6 +12,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # Celery
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", 'memory://')
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", 'cache+memory://')
+CELERY_WORK_DIR = os.environ.get("CELERY_WORK_DIR", '/tmp')
 
 # Your App secret key
 SECRET_KEY = os.environ.get("SECRET_KEY", "\2\1thisismyscretkey\1\2\e\y\y\h")

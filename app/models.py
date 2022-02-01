@@ -186,7 +186,7 @@ class Project(Model):
      { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
   project_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_igf_id = Column(String(50), nullable=False)
+  project_igf_id = Column(String(70), nullable=False)
   project_name = Column(String(40))
   start_timestamp = Column(TIMESTAMP(), nullable=True, server_default=current_timestamp())
   description = Column(TEXT())

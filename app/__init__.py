@@ -34,8 +34,8 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 celery = \
     Celery(
         app.name,
-        broker=app.config['CELERY_BROKER_URL'],
-        backend=app.config['CELERY_RESULT_BACKEND'])
+        broker_url=app.config['CELERY_BROKER_URL'],
+        result_backend=app.config['CELERY_RESULT_BACKEND'])
 celery.conf.update(app.config)
 
 ## GDPR
