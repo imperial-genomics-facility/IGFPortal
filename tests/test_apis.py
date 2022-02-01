@@ -1,13 +1,13 @@
 import unittest, json
 from app import appbuilder, db
-from app.apis import search_interop_for_run
-from app.apis import add_interop_data
-from app.apis import edit_interop_data
-from app.apis import add_or_edit_interop_data
-from app.apis import search_predemultiplexing_data
-from app.apis import add_predemultiplexing_data
-from app.apis import edit_predemultiplexing_data
-from app.apis import add_or_edit_predemultiplexing_data
+from app.interop_data_api import search_interop_for_run
+from app.interop_data_api import add_interop_data
+from app.interop_data_api import edit_interop_data
+from app.interop_data_api import add_or_edit_interop_data
+from app.pre_demultiplexing_data_api import search_predemultiplexing_data
+from app.pre_demultiplexing_data_api import add_predemultiplexing_data
+from app.pre_demultiplexing_data_api import edit_predemultiplexing_data
+from app.pre_demultiplexing_data_api import add_or_edit_predemultiplexing_data
 
 class TestApiCase(unittest.TestCase):
     def setUp(self):
