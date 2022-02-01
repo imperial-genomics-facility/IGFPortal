@@ -25,7 +25,7 @@ from ..models import Pipeline_seed
 from ..models import Analysis
 from .. import db
 
-def cleanup_and_load_new_data_to_metadata_tables(input_json):
+def cleanup_and_load_new_data_to_metadata_tables(input_json, cleanup=True):
     try:
         if not os.path.exists(input_json):
             raise IOError("Input file {0} not found".format(input_json))
@@ -103,5 +103,8 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json):
         except Exception as e:
             db.session.rollback()
             raise ValueError("Failed to load data db, error: {0}".format(e))
+        finally:
+            if cleanup:
+                os.remove(input_json)
     except Exception as e:
         raise ValueError("Failed to load new metadata, error: {0}".format(e))
