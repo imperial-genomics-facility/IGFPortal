@@ -1,10 +1,11 @@
 import unittest
 from app import db
-from app.models import RawMetadataModel
+from app.models import RawMetadataModel, Project, Sample
 from app.raw_metadata.raw_metadata_util import _run_metadata_json_validation
 from app.raw_metadata.raw_metadata_util import _validate_metadata_library_type
 from app.raw_metadata.raw_metadata_util import _set_metadata_validation_status
 from app.raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status
+from app.raw_metadata.raw_metadata_util import compare_metadata_sample_with_db
 
 class TestMetaDataValidation1(unittest.TestCase):
     def setUp(self):
@@ -114,7 +115,8 @@ class TestMetaDataValidation2(unittest.TestCase):
                 db.session.rollback()
                 raise
         validate_raw_metadata_and_set_db_status(
-            raw_metadata_id=1)
+            raw_metadata_id=1,
+            check_db=True)
         result = \
             db.session.\
                 query(RawMetadataModel).\
@@ -124,6 +126,30 @@ class TestMetaDataValidation2(unittest.TestCase):
         self.assertEqual(result.metadata_tag, 'test1')
         self.assertEqual(result.status, 'FAILED')
         self.assertTrue(result.report is not None)
+
+    def test_compare_metadata_sample_with_db(self):
+        project = \
+            Project(
+                project_id=1,
+                project_igf_id="test1")
+        sample = \
+            Sample(
+                sample_id=1,
+                sample_igf_id='sample105799',
+                project_id=1)
+        try:
+            db.session.add(project)
+            db.session.add(sample)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        metadata_errors = \
+            compare_metadata_sample_with_db(
+                metadata_file="data/metadata_file1.csv")
+        self.assertTrue("Sample sample105799 is linked to project test1, not IGFQ000001_cs_23-5-2018_SC" in metadata_errors)
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -405,7 +405,7 @@ def validate_samplesheet_data_and_update_db(samplesheet_id, check_metadata=True)
 
 
 def compare_sample_with_metadata_db(
-    samplesheet_file, project_column='Sample_Project', sample_cplumn='Sample_ID'):
+    samplesheet_file, project_column='Sample_Project', sample_column='Sample_ID'):
     try:
         errors = list()
         sa = SampleSheet(infile=samplesheet_file)
@@ -416,7 +416,7 @@ def compare_sample_with_metadata_db(
                 values.\
                 tolist()
         sample_projects_df = \
-            df[[sample_cplumn, project_column]].\
+            df[[sample_column, project_column]].\
                 drop_duplicates()
         sample_projects_df.columns = [
             'sample_igf_id',
@@ -434,7 +434,7 @@ def compare_sample_with_metadata_db(
                 sample_project_list)
         if len(sample_project_errors) > 0:
             errors.extend(sample_project_errors)
-        return sample_project_errors
+        return errors
     except Exception as e:
         raise ValueError(
                 "Failed to compare samplesheet with metadata, error: {0}".\

@@ -140,7 +140,7 @@ def check_for_projects_in_metadata_db(project_list):
                     format(e))
 
 
-def check_sample_and_project_ids_in_metadata_db(sample_project_list):
+def check_sample_and_project_ids_in_metadata_db(sample_project_list, check_missing=True):
     try:
         input_sample_project_dict = dict()
         output_sample_project_dict = dict()
@@ -163,7 +163,8 @@ def check_sample_and_project_ids_in_metadata_db(sample_project_list):
             output_sample_project_dict.\
                 update({entry[0]: entry[1]})
         for sample, project in input_sample_project_dict.items():
-            if sample not in output_sample_project_dict:
+            if sample not in output_sample_project_dict and \
+               check_missing:
                 errors.\
                     append(
                         'Missing metadata for sample {0}'.\

@@ -5,6 +5,8 @@ import os, json, re, tempfile, logging
 from jsonschema import Draft4Validator, ValidationError
 from .. import db
 from ..models import RawMetadataModel
+from ..metadata.metadata_util import check_for_projects_in_metadata_db
+from ..metadata.metadata_util import check_sample_and_project_ids_in_metadata_db
 
 EXPERIMENT_TYPE_LOOKUP = \
 [{'library_preparation': 'WHOLE GENOME SEQUENCING - SAMPLE', 'library_type': 'WHOLE GENOME',
@@ -268,6 +270,7 @@ def _set_metadata_validation_status(raw_metadata_id, status, report=''):
 
 def validate_raw_metadata_and_set_db_status(
     raw_metadata_id,
+    check_db=True,
     schema_json=os.path.join(os.path.dirname(__file__), 'metadata_validation.json')):
     try:
         error_list = list()
@@ -312,6 +315,12 @@ def validate_raw_metadata_and_set_db_status(
                     error_list.append(
                         "Metadata error: {0}, {1}".\
                             format(sample_id, err))
+            if check_db:
+                existing_metadata_errors = \
+                    compare_metadata_sample_with_db(
+                        metadata_file=metadata_file)
+                if len(existing_metadata_errors) > 0:
+                    error_list.extend(existing_metadata_errors)
         if len(error_list) > 0:
             error_list = \
                 ["{0}, {1}".format(i+1, e)
@@ -330,6 +339,35 @@ def validate_raw_metadata_and_set_db_status(
         raise ValueError(
                 "Failed to get metadata for id {0}, error: {1}".\
                     format(raw_metadata_id, e))
+
+
+def compare_metadata_sample_with_db(
+    metadata_file, project_column='project_igf_id', sample_column='sample_igf_id'):
+    try:
+        errors = list()
+        df = pd.read_csv(metadata_file)
+        project_list = \
+            df[project_column].\
+                drop_duplicates().\
+                values.\
+                tolist()
+        sample_projects_df = \
+            df[[sample_column, project_column]].\
+                drop_duplicates()
+        sample_project_list = \
+            sample_projects_df.\
+                to_dict(orient='records')
+        sample_project_errors = \
+            check_sample_and_project_ids_in_metadata_db(
+                sample_project_list=sample_project_list,
+                check_missing=False)
+        if len(sample_project_errors) > 0:
+            errors.extend(sample_project_errors)
+        return errors
+    except Exception as e:
+        raise ValueError(
+                "Failed to compare metadata with db, error: {0}".\
+                    format(e))
 
 
 def _validate_metadata_library_type(
