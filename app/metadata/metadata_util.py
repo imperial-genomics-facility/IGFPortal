@@ -142,6 +142,7 @@ def check_for_projects_in_metadata_db(project_list):
 
 def check_sample_and_project_ids_in_metadata_db(
     sample_project_list: list,
+    check_user: bool = True,
     check_missing: bool =True) -> list:
     try:
         input_sample_project_dict = dict()
@@ -156,18 +157,20 @@ def check_sample_and_project_ids_in_metadata_db(
                             format(entry))
             input_sample_project_dict.\
                 update({entry.get('sample_igf_id'): entry.get('project_igf_id')})
-            if 'name' not in entry.keys() or \
-               'email_id' not in entry.keys():
-                raise KeyError('Missing name or email id from metadata: {0}'.format(entry))
-            input_username_list.\
-                append({'name': entry.get('name'), 'email_id': entry.get('email_id')})
-        # check for name and email mismatch
-        name_email_errors = \
-            check_user_name_and_email_in_metadata_db(
-                name_email_list=input_username_list,
-                check_missing=False)
-        if len(name_email_errors) > 0:
-            errors.extend(name_email_errors)
+            if check_user:
+                if 'name' not in entry.keys() or \
+                   'email_id' not in entry.keys():
+                    raise KeyError('Missing name or email id from metadata: {0}'.format(entry))
+                input_username_list.\
+                    append({'name': entry.get('name'), 'email_id': entry.get('email_id')})
+        if check_user:
+            # check for name and email mismatch
+            name_email_errors = \
+                check_user_name_and_email_in_metadata_db(
+                    name_email_list=input_username_list,
+                    check_missing=False)
+            if len(name_email_errors) > 0:
+                errors.extend(name_email_errors)
         results = \
             db.session.\
                 query(Sample.sample_igf_id, Project.project_igf_id).\

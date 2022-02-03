@@ -431,7 +431,8 @@ def compare_sample_with_metadata_db(
             errors.extend(project_errors)
         sample_project_errors = \
             check_sample_and_project_ids_in_metadata_db(
-                sample_project_list)
+                sample_project_list=sample_project_list,
+                check_user=False)
         if len(sample_project_errors) > 0:
             errors.extend(sample_project_errors)
         return errors
