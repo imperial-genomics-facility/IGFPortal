@@ -1,4 +1,4 @@
-import os, json
+import os, json, typing
 import pandas as pd
 from ..models import Project
 from ..models import IgfUser
@@ -140,9 +140,12 @@ def check_for_projects_in_metadata_db(project_list):
                     format(e))
 
 
-def check_sample_and_project_ids_in_metadata_db(sample_project_list, check_missing=True):
+def check_sample_and_project_ids_in_metadata_db(
+    sample_project_list: list,
+    check_missing: bool =True) -> list:
     try:
         input_sample_project_dict = dict()
+        input_username_list = list()
         output_sample_project_dict = dict()
         errors = list()
         for entry in sample_project_list:
@@ -153,6 +156,18 @@ def check_sample_and_project_ids_in_metadata_db(sample_project_list, check_missi
                             format(entry))
             input_sample_project_dict.\
                 update({entry.get('sample_igf_id'): entry.get('project_igf_id')})
+            if 'name' not in entry.keys() or \
+               'email_id' not in entry.keys():
+                raise KeyError('Missing name or email id from metadata: {0}'.format(entry))
+            input_username_list.\
+                append({'name': entry.get('name'), 'email_id': entry.get('email_id')})
+        # check for name and email mismatch
+        name_email_errors = \
+            check_user_name_and_email_in_metadata_db(
+                name_email_list=input_username_list,
+                check_missing=False)
+        if len(name_email_errors) > 0:
+            errors.extend(name_email_errors)
         results = \
             db.session.\
                 query(Sample.sample_igf_id, Project.project_igf_id).\
@@ -182,4 +197,85 @@ def check_sample_and_project_ids_in_metadata_db(sample_project_list, check_missi
     except Exception as e:
         raise ValueError(
                 "Failed to check sample projects in db, error: {0}".\
+                    format(e))
+
+def get_email_ids_for_user_name(name_list: list) -> dict:
+    try:
+        results = \
+            db.session.\
+                query(IgfUser.name, IgfUser.email_id).\
+                filter(IgfUser.name.in_(name_list)).\
+                all()
+        results = {
+            i[0]: i[1]
+                for i in results}
+        return results
+    except Exception as e:
+        raise ValueError("Failed fetch email ids for user name, error: {0}".format(e))
+
+
+def get_names_for_user_email(email_list: list) -> dict:
+    try:
+        results = \
+            db.session.\
+                query(IgfUser.email_id, IgfUser.name).\
+                filter(IgfUser.email_id.in_(email_list)).\
+                all()
+        results = {
+            i[0]: i[1]
+                for i in results}
+        return results
+    except Exception as e:
+        raise ValueError()
+
+
+def check_user_name_and_email_in_metadata_db(
+    name_email_list: list,
+    name_column: str = 'name',
+    email_column: str = 'email_id',
+    check_missing: bool = True) -> list:
+    try:
+        for entry in name_email_list:
+            if entry.get(name_column) is None or \
+               entry.get(email_column) is None:
+               raise KeyError("Missing name or email id in the input list")
+            df = pd.DataFrame(name_email_list)
+            name_list = \
+                df[name_column].\
+                    drop_duplicates().\
+                    values.\
+                    tolist()
+            email_list = \
+                df[email_column].\
+                    drop_duplicates().\
+                    values.\
+                    tolist()
+            name_dict = \
+                get_email_ids_for_user_name(
+                    name_list)
+            email_dict = \
+                get_names_for_user_email(
+                    email_list)
+            errors = list()
+            for entry in name_email_list:
+                name = entry.get('name')
+                email_id = entry.get('email_id')
+                if name_dict.get(name) is None and check_missing:
+                    errors.append('Missing name {0} in db'.format(name))
+                if email_dict.get(email_id) is None and check_missing:
+                    errors.append('Missing email {0} in db'.format(email_id))
+                if name_dict.get(name) is not None and \
+                   email_id != name_dict.get(name):
+                   errors.append(
+                       "User {0} registered with email id {1}, not {2}".\
+                           format(name, name_dict.get(name), email_id))
+                if email_dict.get(email_id) is not None and \
+                   name != email_dict.get(email_id):
+                   errors.append(
+                       "Email {0} registered with name {1}, not {2}".\
+                           format(email_id, email_dict.get(email_id), name))
+        return errors
+    except Exception as e:
+        raise ValueError(
+                "Failed to compate user name and email in db, error: {0}".\
                     format(e))

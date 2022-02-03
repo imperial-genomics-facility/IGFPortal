@@ -121,11 +121,17 @@ class TestMetadataUtil3(unittest.TestCase):
             raise
         sample_project_list = [{
             'sample_igf_id':'test_sample1',
-            'project_igf_id':'test1'},{
+            'project_igf_id':'test1',
+            'name':'',
+            'email_id':''},{
             'sample_igf_id':'test_sample2',
-            'project_igf_id':'test1'},{
+            'project_igf_id':'test1',
+            'name':'',
+            'email_id':''},{
             'sample_igf_id':'test_sample3',
-            'project_igf_id':'test1'}]
+            'project_igf_id':'test1',
+            'name':'',
+            'email_id':''}]
         errors = \
             check_sample_and_project_ids_in_metadata_db(
                 sample_project_list)

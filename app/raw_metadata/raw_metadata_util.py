@@ -342,7 +342,8 @@ def validate_raw_metadata_and_set_db_status(
 
 
 def compare_metadata_sample_with_db(
-    metadata_file, project_column='project_igf_id', sample_column='sample_igf_id'):
+    metadata_file: str, project_column: str ='project_igf_id', sample_column: str ='sample_igf_id',
+    name_column: str ='name', email_column: str ='email_id') -> list:
     try:
         errors = list()
         df = pd.read_csv(metadata_file)
@@ -352,7 +353,7 @@ def compare_metadata_sample_with_db(
                 values.\
                 tolist()
         sample_projects_df = \
-            df[[sample_column, project_column]].\
+            df[[sample_column, project_column, name_column, email_column]].\
                 drop_duplicates()
         sample_project_list = \
             sample_projects_df.\
