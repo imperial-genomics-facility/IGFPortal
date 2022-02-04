@@ -61,6 +61,8 @@ class IlluminaInteropDataView(ModelView):
         density_data = json.loads(density_data)
         qscore_bins_data = json.loads(qscore_bins_data)
         qscore_cycles_data = json.loads(qscore_cycles_data)
+        if occupied_pass_filter is None:
+            occupied_pass_filter=''
         if occupied_pass_filter != '':
             occupied_pass_filter = json.loads(occupied_pass_filter)
         return \
