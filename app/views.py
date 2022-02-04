@@ -61,14 +61,14 @@ appbuilder.\
 appbuilder.\
     add_view(
         IlluminaInteropDataView,
-        "InterOp data",
+        "InterOp SAV reports",
         category_icon="fa-database",
         icon="fa-bar-chart",
         category="Sequencing runs")
 appbuilder.\
     add_view(
         PreDeMultiplexingDataView,
-        "Pre de-multiplication",
+        "Pre de-multiplexing reports",
         category_icon="fa-database",
         icon="fa-line-chart",
         category="Sequencing runs")
