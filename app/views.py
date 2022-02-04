@@ -14,6 +14,7 @@ from .home_view import HomeView
 from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
+from .raw_seqrun_view import RawSeqrunView
 
 
 """
@@ -54,10 +55,14 @@ def page_not_found(e):
 db.create_all()
 
 """
-    View
+    Home view
 """
 appbuilder.\
     add_view_no_menu(HomeView())
+
+"""
+    Seqrun view
+"""
 appbuilder.\
     add_view(
         IlluminaInteropDataView,
@@ -79,6 +84,16 @@ appbuilder.\
         category_icon="fa-database",
         icon="fa-th-list",
         category="Sequencing runs")
+appbuilder.\
+    add_view(
+        RawSeqrunView,
+        "New sequencing runs",
+        category_icon="fa-database",
+        icon="fa-th-list",
+        category="Sequencing runs")
+"""
+    Metadata upload
+"""
 appbuilder.\
     add_view(
         RawMetadataValidationView,

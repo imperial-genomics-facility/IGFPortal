@@ -138,6 +138,9 @@ class SampleSheetModel(Model):
 	def __repr__(self):
 		return self.samplesheet_tag
 
+"""
+  Raw metadata
+"""
 
 class RawMetadataModel(Model):
   __tablename__ = 'raw_metadata_entry'
@@ -153,6 +156,24 @@ class RawMetadataModel(Model):
   update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
     return self.metadata_tag
+
+"""
+  List of raw seqrun
+"""
+class RawSeqrun(Model):
+  __tablename__ = 'raw_seqrun'
+  __table_args__ = (
+    UniqueConstraint('raw_seqrun_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+  raw_seqrun_id =  Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  raw_seqrun_igf_id = Column(String(80), nullable=False)
+  status = Column(Enum("ACTIVE", "REJECTED", "FINISHED"), nullable=False, server_default='ACTIVE')
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  samplesheet_id = Column(INTEGER(unsigned=True), ForeignKey("samplesheet.samplesheet_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
+  samplesheet = relationship('SampleSheetModel')
+  def __repr__(self):
+    return self.raw_seqrun_igf_id
+
 
 """
   Metadata db
