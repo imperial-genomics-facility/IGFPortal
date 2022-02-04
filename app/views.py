@@ -15,6 +15,7 @@ from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
+from .metadata_view import ProjectView, UserView, SeqrunView
 
 
 """
@@ -108,3 +109,27 @@ appbuilder.\
         category_icon="fa-folder-open-o",
         icon="fa-upload",
         category="Metadata submission")
+"""
+    Metadata view
+"""
+appbuilder.\
+    add_view(
+        ProjectView,
+        "Projects",
+        category_icon="fa-table",
+        icon="fa-home",
+        category="Metadata table")
+appbuilder.\
+    add_view(
+        UserView,
+        "Users",
+        category_icon="fa-table",
+        icon="fa-users",
+        category="Metadata table")
+appbuilder.\
+    add_view(
+        SeqrunView,
+        "Sequencing runs",
+        category_icon="fa-table",
+        icon="fa-paper-plane-o",
+        category="Metadata table")

@@ -31,17 +31,9 @@ class RawSeqrunView(ModelView):
     }
     list_columns = ["raw_seqrun_igf_id", "status", "samplesheet.samplesheet_tag", "date_stamp"]
     show_columns = ["raw_seqrun_igf_id", "status", "samplesheet.samplesheet_tag", "date_stamp"]
-    add_columns = ["raw_seqrun_igf_id", "samplesheet.samplesheet_tag"]
     edit_columns = ["raw_seqrun_igf_id", "samplesheet.samplesheet_tag"]
-    base_permissions = ["can_list", "can_show", "can_add", "can_edit"]
+    base_permissions = ["can_list", "can_show", "can_edit"]
     base_order = ("raw_seqrun_igf_id", "desc")
-    add_form_extra_fields = {
-        "samplesheet.samplesheet_tag": QuerySelectField(
-            "SamplesheetModel",
-            query_factory=samplesheet_query,
-            widget=Select2Widget()
-        )
-    }
     edit_form_extra_fields = {
         "samplesheet.samplesheet_tag": QuerySelectField(
             "SamplesheetModel",
