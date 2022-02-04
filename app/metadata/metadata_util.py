@@ -155,14 +155,22 @@ def check_sample_and_project_ids_in_metadata_db(
                raise KeyError(
                         "Missing sample id or project id in {0}".\
                             format(entry))
-            input_sample_project_dict.\
-                update({entry.get('sample_igf_id'): entry.get('project_igf_id')})
+            if entry.get('sample_igf_id') is not None and \
+               entry.get('project_igf_id') is not None:
+                input_sample_project_dict.\
+                    update({entry.get('sample_igf_id'): entry.get('project_igf_id')})
+            else:
+                errors.append('Missing data found in entry: {0}'.format(entry))
             if check_user:
                 if 'name' not in entry.keys() or \
                    'email_id' not in entry.keys():
                     raise KeyError('Missing name or email id from metadata: {0}'.format(entry))
-                input_username_list.\
-                    append({'name': entry.get('name'), 'email_id': entry.get('email_id')})
+                if entry.get('name') is not None and \
+                   entry.get('email_id') is not None:
+                    input_username_list.\
+                        append({'name': entry.get('name'), 'email_id': entry.get('email_id')})
+                else:
+                    errors.append('Missing data found in entry: {0}'.format(entry))
         if check_user:
             # check for name and email mismatch
             name_email_errors = \

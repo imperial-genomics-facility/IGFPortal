@@ -317,11 +317,11 @@ class SampleSheet:
                         self._get_duplicate_entries()
                     if len(duplicate_errors) > 0:
                         error_list.extend(duplicate_errors)
-            formatted_errors = list()
-            for index, entry in enumerate(error_list):
-                formatted_errors.\
-                    append("{0}. {1}".format(index + 1, entry))
-            return formatted_errors
+            #formatted_errors = list()
+            #for index, entry in enumerate(error_list):
+            #    formatted_errors.\
+            #        append("{0}. {1}".format(index + 1, entry))
+            return error_list #formatted_errors
         except Exception as e:
             raise ValueError(
                     "Failed to validate samplesheet. Error: {0}".\
@@ -385,9 +385,13 @@ def validate_samplesheet_data_and_update_db(samplesheet_id, check_metadata=True)
                     if len(metadata_errors) > 0:
                         errors.extend(metadata_errors)
                 if len(errors) > 0:
+                    formatted_errors = list()
+                    for index, err_str in enumerate(errors):
+                        formatted_errors.\
+                            append("{0}. {1}".format(index + 1, err_str))
                     update_samplesheet_validation_entry_in_db(
                         samplesheet_tag=entry.samplesheet_tag,
-                        report='\n'.join(errors),
+                        report='\n'.join(formatted_errors),
                         status='failed')
                     return 'failed'
                 else:
