@@ -87,9 +87,9 @@ appbuilder.\
 appbuilder.\
     add_view(
         RawSeqrunView,
-        "New sequencing runs",
+        "Assign samplesheet to run",
         category_icon="fa-database",
-        icon="fa-th-list",
+        icon="fa-pencil-square-o",
         category="Sequencing runs")
 """
     Metadata upload
