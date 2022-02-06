@@ -174,7 +174,21 @@ class RawSeqrun(Model):
   def __repr__(self):
     return self.raw_seqrun_igf_id
 
+"""
+  Raw analysis
+"""
 
+class RawAnalysis(Model):
+  __tablename__ = 'raw_analysis'
+  __table_args__ = (
+    UniqueConstraint('analysis_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  raw_analysis_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  analysis_tag = Column(String(50), nullable=False)
+  analysis_yaml = Column(TEXT(), nullable=False)
+  status = Column(Enum("VALIDATED", "FAILED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+  report = Column(TEXT())
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
 """
   Metadata db
 """

@@ -15,7 +15,8 @@ from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
-from .metadata_view import ProjectView, UserView, SeqrunView
+from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView
+from .raw_analysis_view import RawAnalysisView
 
 
 """
@@ -109,6 +110,23 @@ appbuilder.\
         category_icon="fa-folder-open-o",
         icon="fa-upload",
         category="Metadata submission")
+"""
+    Raw analysis view
+"""
+appbuilder.\
+    add_view(
+        RawAnalysisView,
+        "Add and submit analysis design",
+        category_icon="fa-flask",
+        icon="fa-file-text-o",
+        category="Analysis")
+appbuilder.\
+    add_view(
+        AnalysisView,
+        "Trigger analysis pipeline",
+        category_icon="fa-flask",
+        icon="fa-space-shuttle",
+        category="Analysis")
 """
     Metadata view
 """
