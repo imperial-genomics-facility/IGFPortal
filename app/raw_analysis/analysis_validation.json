@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF analysis validation schema",
+    "description": "Schema for validation of analysis yaml file",
+    "type" : "array",
+    "version": "1.0.1",
+    "minItems": 1,
+    "uniqueItems": true,
+    "items": {
+        "type": "object",
+        "properties" : {
+            "analysis_name": {
+                "type" : "string",
+                "pattern": "[a-zA-Z0-9-_]+$",
+                "maxLength": 120
+            },
+            "analysis_type": {
+                "type" : "string",
+                "pattern": "[a-zA-Z0-9-_]+$",
+                "maxLength": 120
+            },
+            "project_igf_id" : {
+                "type" : "string",
+                "pattern": "^IGF[a-zA-Z0-9-_]+$",
+                "maxLength": 70
+            },
+            "analysis_description": {
+                "type" : "array",
+                "minItems": 1,
+                "uniqueItems": true
+            }
+        },
+        "required": ["project_igf_id",
+            "analysis_name",
+            "analysis_type",
+            "analysis_description"]
+    }
+}
