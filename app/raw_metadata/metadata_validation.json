@@ -13,7 +13,7 @@
             "project_igf_id" : {
               "type" : "string",
               "pattern": "^IGF[a-zA-Z0-9-_]+$",
-              "maxLength": 50
+              "maxLength": 70
             },
             "name" : {
               "type" : "string",
