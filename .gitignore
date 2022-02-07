@@ -17,3 +17,4 @@ dump.rdb
 .tox/.package.lock
 .tox/dist/UNKNOWN-0.0.0.zip
 celery_flower.sh
+.env
