@@ -33,7 +33,7 @@ services:
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
         container_name: webserver
-        command: ["bash -c 'gunicorn -b 0.0.0.0:8080 server:app'"]
+        command: ["flask run -h 0.0.0.0 -p 8080 --reload --debugger --without-threads"]
         networks:
           - portal_network
     celery_worker1:
@@ -49,7 +49,7 @@ services:
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:r
         container_name: celery_worker1
-        command: ["bash -c 'celery -A app.celery worker --loglevel=INFO'"]
+        command: ["celery -A app.celery worker --loglevel=INFO"]
         networks:
           - portal_network
     celery_flower:
@@ -67,7 +67,7 @@ services:
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:r
         container_name: celery_flower
-        command: ["bash -c 'celery -A app.celery flower --basic_auth=$${BASIC_AUTH}'"]
+        command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
         networks:
           - portal_network
     adminer:
