@@ -24,18 +24,25 @@ def samplesheet_query():
 class RawSeqrunView(ModelView):
     datamodel = SQLAInterface(RawSeqrun)
     label_columns = {
-        "raw_seqrun_igf_id": "Sequencing id",
+        "raw_seqrun_igf_id": "Sequencing Id",
         "status": "Status",
-        "samplesheet.samplesheet_tag": "SampleSheet tag",
+        "samplesheet": "SampleSheet tag",
         "date_stamp": "Updated on"
     }
-    list_columns = ["raw_seqrun_igf_id", "status", "samplesheet.samplesheet_tag", "date_stamp"]
-    show_columns = ["raw_seqrun_igf_id", "status", "samplesheet.samplesheet_tag", "date_stamp"]
-    edit_columns = ["raw_seqrun_igf_id", "samplesheet.samplesheet_tag"]
+    list_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "date_stamp"]
+    show_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "date_stamp"]
+    edit_columns = ["raw_seqrun_igf_id", "samplesheet"]
     base_permissions = ["can_list", "can_show", "can_edit"]
     base_order = ("raw_seqrun_igf_id", "desc")
+    add_form_extra_fields = {
+        "samplesheet": QuerySelectField(
+            "SampleSheetModel",
+            query_factory=samplesheet_query,
+            widget=Select2Widget()
+        )
+    }
     edit_form_extra_fields = {
-        "samplesheet.samplesheet_tag": QuerySelectField(
+        "samplesheet": QuerySelectField(
             "SamplesheetModel",
             query_factory=samplesheet_query,
             widget=Select2Widget()
