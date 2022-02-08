@@ -17,6 +17,7 @@ from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
 from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView
 from .raw_analysis_view import RawAnalysisView
+from .rds_project_backup_view import RDSProjectBackupView
 
 
 """
@@ -123,10 +124,20 @@ appbuilder.\
 appbuilder.\
     add_view(
         AnalysisView,
-        "Trigger analysis pipeline",
+        "Trigger analysis pipelines",
         category_icon="fa-flask",
         icon="fa-space-shuttle",
         category="Analysis")
+"""
+    Data transfer
+"""
+appbuilder.\
+    add_view(
+        RDSProjectBackupView,
+        "Transfer project via RDS",
+        category_icon="fa-cubes",
+        icon="fa-paper-plane",
+        category="Data transfer")
 """
     Metadata view
 """

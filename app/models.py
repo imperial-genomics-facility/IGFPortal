@@ -189,6 +189,25 @@ class RawAnalysis(Model):
   status = Column(Enum("VALIDATED", "FAILED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
   report = Column(TEXT())
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.analysis_tag
+"""
+  RDS project backup
+"""
+class RDSProject_backup(Model):
+  __tablename__ = 'rds_project_backup'
+  __table_args__ = (
+    UniqueConstraint('project_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  rds_backup_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_id =  Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True)
+  project = relationship('Project')
+  status = Column(Enum("PENDING", "FAILED", "FINISHED"), nullable=False, server_default='PENDING')
+  rds_path = Column(TEXT(), nullable=False)
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.project.project_igf_id
+
 """
   Metadata db
 """

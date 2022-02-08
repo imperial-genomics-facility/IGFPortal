@@ -1,7 +1,8 @@
+from io import BytesIO
 from .models import RawAnalysis
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.filters import FilterInFunction
-from flask import redirect, flash
+from flask import redirect, flash, send_file
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from . import db
@@ -28,3 +29,11 @@ class RawAnalysisView(ModelView):
         flash("Submitted jobs for {0}".format(', '.join(analysis_list)), "info")
         self.update_redirect()
         return redirect(self.get_redirect())
+
+    @action("download_raw_analysis_yamp", "Download analysis yaml", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def download_raw_analysis_yamp(self, item):
+        output = BytesIO(item.analysis_yaml.encode('utf-8'))
+        analysis_tag = item.analysis_tag.encode('utf-8').decode()
+        output.seek(0)
+        self.update_redirect()
+        return send_file(output, attachment_filename='{0}_analysis.yaml'.format(analysis_tag), as_attachment=True)
