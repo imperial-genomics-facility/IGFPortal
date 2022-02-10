@@ -1,4 +1,5 @@
 import os, json, typing
+from typing import Tuple
 import pandas as pd
 from ..models import Project
 from ..models import IgfUser
@@ -25,7 +26,9 @@ from ..models import Pipeline_seed
 from ..models import Analysis
 from .. import db
 
-def cleanup_and_load_new_data_to_metadata_tables(input_json, cleanup=True):
+def cleanup_and_load_new_data_to_metadata_tables(
+    input_json: str,
+    cleanup: bool=True) -> None:
     try:
         if not os.path.exists(input_json):
             raise IOError("Input file {0} not found".format(input_json))
@@ -110,7 +113,9 @@ def cleanup_and_load_new_data_to_metadata_tables(input_json, cleanup=True):
         raise ValueError("Failed to load new metadata, error: {0}".format(e))
 
 
-def check_for_projects_in_metadata_db(project_list):
+def check_for_projects_in_metadata_db(
+    project_list: list) -> \
+        Tuple[dict, list]:
     try:
         errors = list()
         results = \

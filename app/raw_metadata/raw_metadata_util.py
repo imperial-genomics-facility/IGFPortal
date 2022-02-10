@@ -1,7 +1,8 @@
 from multiprocessing.sharedctypes import Value
 from numpy import isin
 import pandas as pd
-import os, json, re, tempfile, logging
+import os, json, re, tempfile, logging, typing
+from typing import Tuple
 from jsonschema import Draft4Validator, ValidationError
 from .. import db
 from ..models import RawMetadataModel
@@ -182,7 +183,8 @@ EXPERIMENT_TYPE_LOOKUP = \
 
 
 def _run_metadata_json_validation(
-    metadata_file, schema_json):
+    metadata_file: str,
+    schema_json: str) -> list:
     try:
         if not os.path.exists(metadata_file) or \
            not os.path.exists(schema_json):
@@ -230,7 +232,10 @@ def _run_metadata_json_validation(
                     format(e))
 
 
-def _set_metadata_validation_status(raw_metadata_id, status, report=''):
+def _set_metadata_validation_status(
+    raw_metadata_id: int,
+    status: str,
+    report: str='') -> None:
     try:
         if status.upper() == 'VALIDATED':
             try:
@@ -269,9 +274,9 @@ def _set_metadata_validation_status(raw_metadata_id, status, report=''):
 
 
 def validate_raw_metadata_and_set_db_status(
-    raw_metadata_id,
-    check_db=True,
-    schema_json=os.path.join(os.path.dirname(__file__), 'metadata_validation.json')):
+    raw_metadata_id: int,
+    check_db: bool=True,
+    schema_json: str=os.path.join(os.path.dirname(__file__), 'metadata_validation.json')) -> str:
     try:
         error_list = list()
         raw_metadata = \
@@ -342,8 +347,11 @@ def validate_raw_metadata_and_set_db_status(
 
 
 def compare_metadata_sample_with_db(
-    metadata_file: str, project_column: str ='project_igf_id', sample_column: str ='sample_igf_id',
-    name_column: str ='name', email_column: str ='email_id') -> list:
+    metadata_file: str,
+    project_column: str='project_igf_id',
+    sample_column: str='sample_igf_id',
+    name_column: str='name',
+    email_column: str='email_id') -> list:
     try:
         errors = list()
         df = pd.read_csv(metadata_file)
@@ -372,7 +380,10 @@ def compare_metadata_sample_with_db(
 
 
 def _validate_metadata_library_type(
-    sample_id, library_source, library_strategy, experiment_type):
+    sample_id: str,
+    library_source: str,
+    library_strategy: str,
+    experiment_type: str) -> str:
     '''
     A staticmethod for validating library metadata information for sample
 
@@ -452,7 +463,7 @@ def _validate_metadata_library_type(
                 "Failed to validate library type, error: {0}".\
                     format(e))
 
-def mark_raw_metadata_as_ready(id_list):
+def mark_raw_metadata_as_ready(id_list: list) -> None:
     try:
         try:
             db.session.\

@@ -1,5 +1,5 @@
 from multiprocessing.sharedctypes import Value
-import os, json, logging, tempfile, time
+import os, json, logging, tempfile, time, typing
 from flask_appbuilder import ModelRestApi
 from flask import request
 from flask_appbuilder.api import BaseApi, expose, rison
@@ -9,7 +9,8 @@ from . import app, db, celery
 from .metadata.metadata_util import cleanup_and_load_new_data_to_metadata_tables
 
 @celery.task(bind=True)
-def async_cleanup_and_load_new_data_to_metadata_tables(self, json_file):
+def async_cleanup_and_load_new_data_to_metadata_tables(
+    self, json_file: str) -> dict:
     try:
         cleanup_and_load_new_data_to_metadata_tables(json_file)
         return {"message": "success"}

@@ -1,4 +1,5 @@
-import json, logging
+import json, logging, typing
+from typing import Any
 from flask_appbuilder import ModelRestApi
 from flask import request
 from flask_appbuilder.api import expose, rison
@@ -10,7 +11,7 @@ from .models import IlluminaInteropData
 """
     InterOp data Api
 """
-def search_interop_for_run(run_name):
+def search_interop_for_run(run_name: str) -> Any:
     try:
         result = \
             db.session.\
@@ -21,7 +22,7 @@ def search_interop_for_run(run_name):
         raise ValueError("Failed lookup for interop data, error: {0}".format(e))
 
 
-def add_interop_data(run_data):
+def add_interop_data(run_data: Any) -> None:
     try:
         if isinstance(run_data, str):
             run_data = json.loads(run_data)
@@ -48,7 +49,7 @@ def add_interop_data(run_data):
     except Exception as e:
         raise ValueError("Failed adding interop data, error: {0}".format(e))
 
-def edit_interop_data(run_data):
+def edit_interop_data(run_data: Any) -> None:
     try:
         if isinstance(run_data, str):
             run_data = json.loads(run_data)
@@ -69,7 +70,7 @@ def edit_interop_data(run_data):
         raise ValueError("Failed to update interop data, error: {0}".format(e))
 
 
-def add_or_edit_interop_data(run_data):
+def add_or_edit_interop_data(run_data: Any) -> None:
     try:
         if isinstance(run_data, str):
             run_data = json.loads(run_data)

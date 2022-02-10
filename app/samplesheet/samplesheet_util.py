@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-import os, json, re, tempfile
+import os, json, re, tempfile, typing
+from typing import Tuple, Any
 from datetime import datetime
 from jsonschema import Draft4Validator, ValidationError
 from collections import defaultdict, deque
@@ -17,7 +18,9 @@ class SampleSheet:
         :param data_header_name: name of the data section, default Data
     '''
 
-    def __init__(self, infile, data_header_name=('Data', 'BCLConvert_Data')):
+    def __init__(self,
+        infile: str,
+        data_header_name: tuple=('Data', 'BCLConvert_Data')):
         self.infile = infile
         self.data_header_name = data_header_name
         self._sample_data = self._read_samplesheet()                            # reading samplesheet data
@@ -30,7 +33,7 @@ class SampleSheet:
     def samplesheet_version(self):
         return self._samplesheet_version
 
-    def _read_samplesheet(self):
+    def _read_samplesheet(self) -> defaultdict:
         '''
             Function for reading SampleSheet.csv file
         '''
@@ -58,7 +61,7 @@ class SampleSheet:
                     "Failed to read samplesheet, error {0}".\
                         format(e))
 
-    def _load_data(self):
+    def _load_data(self) -> Tuple[list, list]:
         '''
             Function for loading SampleSheet data
         '''
@@ -88,7 +91,7 @@ class SampleSheet:
         except Exception as e:
             raise ValueError("Failed to load data, error: {0}".format(e))
 
-    def _load_header(self):
+    def _load_header(self) -> dict:
         '''
             Function for loading SampleSheet header
             Output: 2 lists , 1st list of column headers for data section,
@@ -107,7 +110,9 @@ class SampleSheet:
 
 
     @staticmethod
-    def _check_samplesheet_data_row(data_series, single_cell_flag='10X'):
+    def _check_samplesheet_data_row(
+        data_series: pd.Series,
+        single_cell_flag: str='10X') -> Any:
         '''
             An internal static method for additional validation of samplesheet data
 
@@ -162,7 +167,7 @@ class SampleSheet:
                         format(e))
 
 
-    def _validate_samplesheet_columns(self, schema_json):
+    def _validate_samplesheet_columns(self, schema_json: str) -> list:
         try:
             with open(schema_json, 'r') as jp:
                 json_data = json.load(jp)
@@ -183,8 +188,11 @@ class SampleSheet:
 
 
     def _get_duplicate_entries(
-        self, sample_id_col='Sample_ID', sample_name_col="Sample_Name",
-        lane_col='Lane', index_columns=("index", "index2")):
+        self,
+        sample_id_col: str='Sample_ID',
+        sample_name_col: str="Sample_Name",
+        lane_col: str='Lane',
+        index_columns: tuple=("index", "index2")) -> list:
         try:
             errors = list()
             df = pd.DataFrame(self._data)
@@ -261,7 +269,9 @@ class SampleSheet:
 
 
     def validate_samplesheet_data(
-        self, schema_json=os.path.join(os.path.dirname(__file__), 'samplesheet_validation.json')):
+        self,
+        schema_json: str=os.path.join(os.path.dirname(__file__), 'samplesheet_validation.json')) \
+            -> list:
         '''
             A method for validation of samplesheet data
 
@@ -328,7 +338,10 @@ class SampleSheet:
                         format(e))
 
 
-def update_samplesheet_validation_entry_in_db(samplesheet_tag, report, status=''):
+def update_samplesheet_validation_entry_in_db(
+    samplesheet_tag: str,
+    report: str,
+    status: str='') -> None:
     try:
         entry = \
             db.session.\
@@ -363,7 +376,9 @@ def update_samplesheet_validation_entry_in_db(samplesheet_tag, report, status=''
                     format(e))
 
 
-def validate_samplesheet_data_and_update_db(samplesheet_id, check_metadata=True):
+def validate_samplesheet_data_and_update_db(
+    samplesheet_id: str,
+    check_metadata: bool=True) -> Any:
     try:
         entry = \
             db.session.\
@@ -409,7 +424,9 @@ def validate_samplesheet_data_and_update_db(samplesheet_id, check_metadata=True)
 
 
 def compare_sample_with_metadata_db(
-    samplesheet_file, project_column='Sample_Project', sample_column='Sample_ID'):
+    samplesheet_file: str,
+    project_column: str='Sample_Project',
+    sample_column: str='Sample_ID') -> list:
     try:
         errors = list()
         sa = SampleSheet(infile=samplesheet_file)

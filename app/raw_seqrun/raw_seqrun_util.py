@@ -3,7 +3,9 @@ from typing import Tuple
 from .. import db
 from ..models import RawSeqrun, SampleSheetModel
 
-def check_and_filter_raw_seqruns_after_checking_samplesheet(raw_seqrun_igf_ids: list) -> Tuple[list, list]:
+def check_and_filter_raw_seqruns_after_checking_samplesheet(
+    raw_seqrun_igf_ids: list) -> \
+        Tuple[list, list]:
     try:
         id_list = list()
         run_list = list()
@@ -25,7 +27,9 @@ def check_and_filter_raw_seqruns_after_checking_samplesheet(raw_seqrun_igf_ids: 
     except Exception as e:
         raise ValueError("Failed to filter seqruns, error: {0}".format(e))
 
-def change_raw_run_status(run_list: list, status: str) -> None:
+def change_raw_run_status(
+    run_list: list,
+    status: str) -> None:
     try:
         db.session.\
             query(RawSeqrun).\
