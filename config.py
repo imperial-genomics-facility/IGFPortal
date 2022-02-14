@@ -34,6 +34,11 @@ APP_NAME = "IGFPortal"
 # Uncomment to setup Setup an App icon
 # APP_ICON = "static/img/logo.jpg"
 
+#-----------------------------------------------------
+# SSL conf
+#-----------------------------------------------------
+SSL_CERT_PREM = '/SSL/cert.pem'
+SSL_KEY_FILE = '/SSL/key.pem'
 # ----------------------------------------------------
 # AUTHENTICATION CONFIG
 # ----------------------------------------------------

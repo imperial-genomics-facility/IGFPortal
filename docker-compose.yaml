@@ -32,8 +32,9 @@ services:
           - redis_db
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
+          - /home/vmuser/github/ssl:/SSL:ro
         container_name: webserver
-        command: ["flask run -h 0.0.0.0 -p 8080 --reload --debugger --without-threads"]
+        command: ["flask run -h 0.0.0.0 -p 8080 --cert=/SSL/cert.pem --key=/SSL/key.pem --reload --debugger --without-threads"]
         networks:
           - portal_network
     celery_worker1:
