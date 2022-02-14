@@ -47,7 +47,7 @@ services:
           - redis_db
         restart: always
         volumes:
-          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:r
+          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:ro
         container_name: celery_worker1
         command: ["celery -A app.celery worker --loglevel=INFO"]
         networks:
@@ -65,7 +65,7 @@ services:
           - redis_db
           - portal_db
         volumes:
-          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:r
+          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:ro
         container_name: celery_flower
         command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
         networks:

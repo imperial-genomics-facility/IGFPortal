@@ -1,0 +1,1 @@
+docker-compose -f docker-compose-igf-lims.yaml -p igfportal up -d
