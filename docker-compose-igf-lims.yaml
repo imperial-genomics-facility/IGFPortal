@@ -1,0 +1,82 @@
+version: '3.9'
+networks:
+    portal_network:
+        driver: bridge
+services:
+    portal_db:
+        image: mysql:5.7
+        env_file: env
+        restart: always
+        volumes:
+          - /home/igf/igf_portal/mysqlappdb:/var/lib/mysql:rw
+        container_name: portal_db
+        networks:
+          - portal_network
+    redis_db:
+        image: redis:6.2
+        restart: always
+        container_name: redis_db
+        networks:
+          - portal_network
+    webserver:
+        image: imperialgenomicsfacility/igfportal:v1
+        env_file: env
+        ports:
+          - "8089:8080"
+        restart: always
+        links:
+          - portal_db
+          - redis_db
+        depends_on:
+          - portal_db
+          - redis_db
+        volumes:
+          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:ro
+        container_name: webserver
+        command: ["flask run -h 0.0.0.0 -p 8080 --reload --debugger --without-threads"]
+        networks:
+          - portal_network
+    celery_worker1:
+        image: imperialgenomicsfacility/igfportal:v1
+        env_file: env
+        links:
+          - portal_db
+          - redis_db
+        depends_on:
+          - portal_db
+          - redis_db
+        restart: always
+        volumes:
+          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:r
+        container_name: celery_worker1
+        command: ["celery -A app.celery worker --loglevel=INFO"]
+        networks:
+          - portal_network
+    celery_flower:
+        image: imperialgenomicsfacility/igfportal:v1
+        env_file: env
+        restart: always
+        ports:
+          - "5556:5555"
+        links:
+          - redis_db
+          - portal_db
+        depends_on:
+          - redis_db
+          - portal_db
+        volumes:
+          - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:r
+        container_name: celery_flower
+        command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
+        networks:
+          - portal_network
+    adminer:
+        image: adminer:latest
+        links:
+          - portal_db
+        ports:
+          - "8082:8080"
+        restart: always
+        container_name: adminer
+        networks:
+          - portal_network
