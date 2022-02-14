@@ -70,13 +70,13 @@ services:
         command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
         networks:
           - portal_network
-    adminer:
+    adminer2:
         image: adminer:latest
         links:
           - portal_db
         ports:
           - "8082:8080"
         restart: always
-        container_name: adminer
+        container_name: adminer2
         networks:
           - portal_network
