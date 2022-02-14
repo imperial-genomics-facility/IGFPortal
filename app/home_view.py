@@ -23,12 +23,12 @@ def fetch_admin_home_data():
             data1 = results[0].sequence_counts_plot
             data2 = results[0].storage_stat_plot
         else:
-            finished_seqrun = None
-            finished_analysis = None
-            ongoing_seqrun = None
-            ongoing_analysis = None
-            data1 = None
-            data2 = None
+            finished_seqrun = ""
+            finished_analysis = ""
+            ongoing_seqrun = ""
+            ongoing_analysis = ""
+            data1 = ""
+            data2 = ""
         return finished_seqrun, finished_analysis, ongoing_seqrun, ongoing_analysis, data1, data2
     except Exception as e:
         logging.error(e)
