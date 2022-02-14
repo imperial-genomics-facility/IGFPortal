@@ -15,12 +15,20 @@ def fetch_admin_home_data():
             query(AdminHomeData).\
             filter(AdminHomeData.admin_data_tag=="production_data").\
             all()
-        finished_seqrun = results[0].recent_finished_runs
-        finished_analysis = results[0].recent_finished_analysis
-        ongoing_seqrun = results[0].ongoing_runs
-        ongoing_analysis = results[0].ongoing_analysis
-        data1 = results[0].sequence_counts_plot
-        data2 = results[0].storage_stat_plot
+        if len(results) > 0:
+            finished_seqrun = results[0].recent_finished_runs
+            finished_analysis = results[0].recent_finished_analysis
+            ongoing_seqrun = results[0].ongoing_runs
+            ongoing_analysis = results[0].ongoing_analysis
+            data1 = results[0].sequence_counts_plot
+            data2 = results[0].storage_stat_plot
+        else:
+            finished_seqrun = None
+            finished_analysis = None
+            ongoing_seqrun = None
+            ongoing_analysis = None
+            data1 = None
+            data2 = None
         return finished_seqrun, finished_analysis, ongoing_seqrun, ongoing_analysis, data1, data2
     except Exception as e:
         logging.error(e)

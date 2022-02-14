@@ -5,22 +5,38 @@
 <div class="row">
   <div class="col-xl-1 col-lg-2">
     <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+      {% if finished_seqrun is not None or finished_seqrun != "" %}
       <div class="card-header">Sequencing (30 days): {{ finished_seqrun }}</div>
+      {% else %}
+      <div class="card-header">Sequencing (30 days): 0</div>
+      {% endif %}
     </div>
   </div>
   <div class="col-xl-1 col-lg-2">
     <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
+      {% if finished_analysis is not None or finished_analysis != "" %}
       <div class="card-header">Analysis (30 days): {{ finished_analysis }}</div>
+      {% else %}
+      <div class="card-header">Analysis (30 days): 0</div>
+      {% endif %}
     </div>
   </div>
   <div class="col-xl-1 col-lg-2">
     <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
+      {% if ongoing_seqrun is not None or ongoing_seqrun != "" %}
       <div class="card-header">Ongoing de-multiplexing: {{ ongoing_seqrun }}</div>
+      {% else %}
+      <div class="card-header">Ongoing de-multiplexing: 0</div>
+      {% endif %}
     </div>
   </div>
   <div class="col-xl-1 col-lg-2">
     <div class="card bg-info mb-3" style="max-width: 18rem;">
+      {% if ongoing_analysis is not None or ongoing_analysis != "" %}
       <div class="card-header">Ongoing analysis: {{ ongoing_analysis }}</div>
+      {% else %}
+      <div class="card-header">Ongoing analysis: 0</div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -53,6 +69,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+{% if data1 is not None or data1 != "" %}
 <script>
   const config1 = {
     type: 'bar',
@@ -80,7 +97,9 @@
     }
   };
 </script>
+{% endif %}
 
+{% if data2 is not None or data2 != "" %}
 <script>
   const config2 = {
     type: 'bar',
@@ -108,16 +127,19 @@
     }
   };
 </script>
-
+{% endif %}
 <script>
+{% if data1 is not None or data1 != "" %}
   const myChart1 = new Chart(
     document.getElementById('myChart1'),
     config1
   );
-
+{% endif %}
+{% if data2 is not None or data2 != "" %}
   const myChart2 = new Chart(
     document.getElementById('myChart2'),
     config2
   );
+{% endif %}
  </script>
 {% endblock %}
