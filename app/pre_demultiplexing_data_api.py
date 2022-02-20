@@ -27,21 +27,42 @@ def search_predemultiplexing_data(run_name, samplesheet_tag):
 
 def add_predemultiplexing_data(data):
     try:
-        if isinstance(data, str):
-            data = json.loads(data)
         if isinstance(data, bytes):
             data = json.loads(data.decode())
+        if isinstance(data, str):
+            data = json.loads(data)
+        flowcell_cluster_plot = data.get("flowcell_cluster_plot")
+        if isinstance(flowcell_cluster_plot, dict):
+            flowcell_cluster_plot = json.dumps(flowcell_cluster_plot)
+        project_summary_table = data.get("project_summary_table")
+        if isinstance(project_summary_table, dict):
+            project_summary_table = json.dumps(project_summary_table)
+        project_summary_plot = data.get("project_summary_plot")
+        if isinstance(project_summary_plot, dict):
+            project_summary_plot = json.dumps(project_summary_plot)
+        sample_table = data.get("sample_table")
+        if isinstance(sample_table, dict):
+            sample_table = json.dumps(sample_table)
+        sample_plot = data.get("sample_plot")
+        if isinstance(sample_plot, dict):
+            sample_plot = json.dumps(sample_plot)
+        undetermined_table = data.get("undetermined_table")
+        if isinstance(undetermined_table, dict):
+            undetermined_table = json.dumps(undetermined_table)
+        undetermined_plot = data.get("undetermined_plot")
+        if isinstance(undetermined_plot, dict):
+            undetermined_plot = json.dumps(undetermined_plot)
         predemult_data = \
             PreDeMultiplexingData(
                 run_name=data.get("run_name"),
                 samplesheet_tag=data.get("samplesheet_tag"),
-                flowcell_cluster_plot=data.get("flowcell_cluster_plot"),
-                project_summary_table=data.get("project_summary_table"),
-                project_summary_plot=data.get("project_summary_plot"),
-                sample_table=data.get("sample_table"),
-                sample_plot=data.get("sample_plot"),
-                undetermined_table=data.get("undetermined_table"),
-                undetermined_plot=data.get("undetermined_plot"))
+                flowcell_cluster_plot=flowcell_cluster_plot,
+                project_summary_table=project_summary_table,
+                project_summary_plot=project_summary_plot,
+                sample_table=sample_table,
+                sample_plot=sample_plot,
+                undetermined_table=undetermined_table,
+                undetermined_plot=undetermined_plot)
         try:
             db.session.add(predemult_data)
             db.session.flush()
@@ -56,14 +77,49 @@ def add_predemultiplexing_data(data):
 
 def edit_predemultiplexing_data(data):
     try:
-        if isinstance(data, str):
-            data = json.loads(data)
         if isinstance(data, bytes):
             data = json.loads(data.decode())
+        if isinstance(data, str):
+            data = json.loads(data)
         if "run_name" not in data:
             raise ValueError("Missing run name")
         if "samplesheet_tag" not in data:
             raise ValueError("Missing sampleshheet tag")
+        flowcell_cluster_plot = data.get("flowcell_cluster_plot")
+        if flowcell_cluster_plot is not None and \
+           isinstance(flowcell_cluster_plot, dict):
+            flowcell_cluster_plot = json.dumps(flowcell_cluster_plot)
+            data.update({"flowcell_cluster_plot": flowcell_cluster_plot})
+        project_summary_table = data.get("project_summary_table")
+        if project_summary_table is not None and \
+           isinstance(project_summary_table, dict):
+            project_summary_table = json.dumps(project_summary_table)
+            data.update({"project_summary_table": project_summary_table})
+        project_summary_plot = data.get("project_summary_plot")
+        if project_summary_plot is not None and \
+           isinstance(project_summary_plot, dict):
+            project_summary_plot = json.dumps(project_summary_plot)
+            data.update({"project_summary_plot": project_summary_plot})
+        sample_table = data.get("sample_table")
+        if sample_table is not None and \
+           isinstance(sample_table, dict):
+            sample_table = json.dumps(sample_table)
+            data.update({"sample_table": sample_table})
+        sample_plot = data.get("sample_plot")
+        if sample_plot is not None and \
+           isinstance(sample_plot, dict):
+            sample_plot = json.dumps(sample_plot)
+            data.update({"sample_plot": sample_plot})
+        undetermined_table = data.get("undetermined_table")
+        if undetermined_table is not None and \
+           isinstance(undetermined_table, dict):
+            undetermined_table = json.dumps(undetermined_table)
+            data.update({"undetermined_table": undetermined_table})
+        undetermined_plot = data.get("undetermined_plot")
+        if undetermined_plot is not None and \
+           isinstance(undetermined_plot, dict):
+            undetermined_plot = json.dumps(undetermined_plot)
+            data.update({"undetermined_plot": undetermined_plot})
         try:
             db.session.\
                 query(PreDeMultiplexingData).\
