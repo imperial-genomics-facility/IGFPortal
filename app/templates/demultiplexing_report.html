@@ -324,8 +324,8 @@ $('#lane{{ lane_id }}-plot a').on('click', function (e) {
                 {% for entry in sample_plot.get(lane_id).get("datasets") %}
                 {label: "{{ entry.get("label")|safe }}",
                 data: {{ entry.get("data")|safe }},
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: "{{ entry.get('backgroundColor') }}",
+                borderColor: "{{ entry.get('borderColor') }}",
                 borderWidth: 1},
                 {% endfor %}
             ]
