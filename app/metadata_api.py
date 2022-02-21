@@ -38,7 +38,7 @@ class MetadataLoadApi(BaseApi):
                 tempfile.mkstemp(
                     dir=app.config['CELERY_WORK_DIR'],
                     suffix='.json',
-                    dir=os.environ.get('/TMP_WORK_DIR', '/tmp')
+                    dir=os.environ.get('/TMP_WORK_DIR', '/tmp'),
                     prefix='metadata_',)
             with open(json_file, 'w') as fp:
                 json.dump(json_data, fp)
