@@ -138,10 +138,10 @@ def edit_predemultiplexing_data(data):
 
 def add_or_edit_predemultiplexing_data(data):
     try:
-        if isinstance(data, str):
-            data = json.loads(data)
         if isinstance(data, bytes):
             data = json.loads(data.decode())
+        if isinstance(data, str):
+            data = json.loads(data)
         if "run_name" not in data:
             raise ValueError("Missing run name")
         if "samplesheet_tag" not in data:
