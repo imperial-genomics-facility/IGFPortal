@@ -33,6 +33,7 @@ services:
         volumes:
           - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:ro
           - /home/igf/igf_portal/ssl_cert:/SSL:ro
+          - /tmp:/TMP_WORK_DIR:rw
         container_name: webserver
         command: ["flask run -h 0.0.0.0 -p 8080 --cert=/SSL/portal.cert --key=/SSL/portal.key --reload --debugger --without-threads"]
         networks:
@@ -49,6 +50,7 @@ services:
         restart: always
         volumes:
           - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:ro
+          - /tmp:/TMP_WORK_DIR:rw
         container_name: celery_worker1
         command: ["celery -A app.celery worker --loglevel=INFO"]
         networks:
