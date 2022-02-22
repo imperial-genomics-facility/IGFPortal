@@ -1,17 +1,18 @@
 import json, logging
 from flask_appbuilder import ModelRestApi
-from flask import request
-from flask_appbuilder.api import expose
+from flask import request, send_file
+from flask_appbuilder.api import expose, rison
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.security.decorators import protect
 from . import db
+from io import BytesIO
 from .models import RawMetadataModel
 from .raw_metadata.raw_metadata_util import search_metadata_table_and_get_new_projects
 from .raw_metadata.raw_metadata_util import parse_and_add_new_raw_metadata
 
 
 class RawMetadataDataApi(ModelRestApi):
-    resource_name = "rawmetadata"
+    resource_name = "raw_metadata"
     datamodel = SQLAInterface(RawMetadataModel)
 
     @expose('/search_new_metadata',  methods=['POST'])
@@ -42,5 +43,46 @@ class RawMetadataDataApi(ModelRestApi):
             json_data = file_obj.read()
             parse_and_add_new_raw_metadata(data=json_data)
             return self.response(200, message='loaded new metadata')
+        except Exception as e:
+            logging.error(e)
+
+    @expose('/download_ready_metadata',  methods=['GET'])
+    @protect()
+    def download_ready_metadata(self):
+        try:
+            results = \
+                db.session.\
+                    query(
+                        RawMetadataModel.metadata_tag,
+                        RawMetadataModel.formatted_csv_data).\
+                    filter(RawMetadataModel.status=='READY').\
+                    all()
+            if len(results)==0:
+                return self.response(200, message='no metadata found')
+            else:
+                data = dict()
+                for entry in results:
+                    data.update({entry[0]: entry[1]})
+                data = json.dumps(data)
+                output = BytesIO(data.encode())
+                output.seek(0)
+                return send_file(output, attachment_filename='metadata.csv', as_attachment=True)
+        except Exception as e:
+            logging.error(e)
+
+    @expose('/mark_ready_metadata_as_synced',  methods=['GET'])
+    @protect()
+    def mark_ready_metadata_as_synced(self):
+        try:
+            try:
+                db.session.\
+                    query(RawMetadataModel).\
+                    filter(RawMetadataModel.status=='READY').\
+                    update({'status':'SYNCHED'})
+                db.session.commit()
+                return self.response(200, message='all metadata synced')
+            except:
+                db.session.rollback()
+                raise
         except Exception as e:
             logging.error(e)
