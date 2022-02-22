@@ -6,6 +6,7 @@ from app.raw_metadata.raw_metadata_util import _validate_metadata_library_type
 from app.raw_metadata.raw_metadata_util import _set_metadata_validation_status
 from app.raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status
 from app.raw_metadata.raw_metadata_util import compare_metadata_sample_with_db
+from app.raw_metadata.raw_metadata_util import search_metadata_table_and_get_new_projects
 
 class TestMetaDataValidation1(unittest.TestCase):
     def setUp(self):
@@ -150,6 +151,41 @@ class TestMetaDataValidation2(unittest.TestCase):
                 metadata_file="data/metadata_file1.csv")
         self.assertTrue("Sample sample105799 is linked to project test1, not IGFQ000001_cs_23-5-2018_SC" in metadata_errors)
 
+
+class TestMetadataApiutil1(unittest.TestCase):
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.drop_all()
+
+    def test_search_metadata_table_and_get_new_projects(self):
+        metadata1 = \
+            RawMetadataModel(
+                metadata_tag='test1',
+                raw_csv_data='raw',
+                formatted_csv_data='formatted',
+                report='')
+        metadata2 = \
+            RawMetadataModel(
+                metadata_tag='test2',
+                raw_csv_data='raw',
+                formatted_csv_data='formatted',
+                report='')
+        try:
+            db.session.add(metadata1)
+            db.session.add(metadata2)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        new_projects = \
+            search_metadata_table_and_get_new_projects(
+                data={"project_list":["test1", "test3"]})
+        self.assertTrue(isinstance(new_projects, list))
+        self.assertEqual(len(new_projects), 1)
+        self.assertTrue("test3" in new_projects)
 
 if __name__ == '__main__':
   unittest.main()

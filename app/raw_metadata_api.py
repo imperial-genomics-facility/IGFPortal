@@ -6,31 +6,7 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.security.decorators import protect
 from . import db
 from .models import RawMetadataModel
-
-def search_metadata_table_and_get_new_projects(data):
-    try:
-        if isinstance(data, bytes):
-            data = json.loads(data.decode())
-        if isinstance(data, str):
-            data = json.loads(data)
-        if "project_list" not in data or \
-           not isinstance(data.get('project_list'), list):
-            raise ValueError("Missing project list")
-        project_list = data.get('project_list')
-        existing_projects = \
-            db.session.\
-                query(RawMetadataModel.metadata_tag).\
-                filter(RawMetadataModel.metadata_tag.in_(project_list)).\
-                all()
-        existing_projects = [i[0] for i in existing_projects]
-        new_projects = \
-            list(
-                set(project_list).\
-                    difference(set(existing_projects)))
-        return new_projects
-    except Exception as e:
-        raise ValueError(
-                "Failed to search for new metadata, error: {0}".format(e))
+from .raw_metadata.raw_metadata_util import search_metadata_table_and_get_new_projects
 
 
 class RawMetadataDataApi(ModelRestApi):
