@@ -7,6 +7,7 @@ from app.raw_metadata.raw_metadata_util import _set_metadata_validation_status
 from app.raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status
 from app.raw_metadata.raw_metadata_util import compare_metadata_sample_with_db
 from app.raw_metadata.raw_metadata_util import search_metadata_table_and_get_new_projects
+from app.raw_metadata.raw_metadata_util import parse_and_add_new_raw_metadata
 
 class TestMetaDataValidation1(unittest.TestCase):
     def setUp(self):
@@ -186,6 +187,27 @@ class TestMetadataApiutil1(unittest.TestCase):
         self.assertTrue(isinstance(new_projects, list))
         self.assertEqual(len(new_projects), 1)
         self.assertTrue("test3" in new_projects)
+
+class TestRawMetadataLoading(unittest.TestCase):
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.drop_all()
+
+    def test_parse_and_add_new_raw_metadata(self):
+        metadata_list = [{
+            'metadata_tag': 'test1',
+            'raw_csv_data': 'raw',
+            'formatted_csv_data': 'formatted'},{
+            'metadata_tag': 'test2',
+            'raw_csv_data': 'raw',
+            'formatted_csv_data': 'formatted'}]
+        parse_and_add_new_raw_metadata(data=metadata_list)
+        results = db.session.query(RawMetadataModel.metadata_tag).all()
+        results = [i[0] for i in results]
+        self.assertEqual(len(results), 2)
+        self.assertTrue('test1' in results)
 
 if __name__ == '__main__':
   unittest.main()

@@ -502,3 +502,37 @@ def search_metadata_table_and_get_new_projects(data):
     except Exception as e:
         raise ValueError(
                 "Failed to search for new metadata, error: {0}".format(e))
+
+def parse_and_add_new_raw_metadata(data):
+    try:
+        if isinstance(data, bytes):
+            data = json.loads(data.decode())
+        if isinstance(data, str):
+            data = json.loads(data)
+        if not isinstance(data, list):
+            raise TypeError(
+                    "Expecting a list of metadata dictionary, got: {0}".\
+                        format(type(data)))
+        try:
+            for entry in data:
+                metadata_tag = entry.get("metadata_tag")
+                raw_csv_data = entry.get("raw_csv_data")
+                formatted_csv_data = entry.get("formatted_csv_data")
+                if metadata_tag is None or \
+                   raw_csv_data is None or \
+                   formatted_csv_data is None:
+                    raise KeyError("Missing metadata info")
+                metadata = \
+                    RawMetadataModel(
+                        metadata_tag=metadata_tag,
+                        raw_csv_data=raw_csv_data,
+                        formatted_csv_data=formatted_csv_data)
+                db.session.add(metadata)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+    except Exception as e:
+        raise ValueError(
+                "Failed to add new metadata, error: {0}".format(e))
