@@ -58,7 +58,7 @@ class RawMetadataDataApi(ModelRestApi):
                     filter(RawMetadataModel.status=='READY').\
                     all()
             if len(results)==0:
-                return self.response(200, message='no metadata found')
+                return self.response(200)
             else:
                 data = dict()
                 for entry in results:
