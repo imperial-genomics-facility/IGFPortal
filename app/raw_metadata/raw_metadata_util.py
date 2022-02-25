@@ -522,12 +522,18 @@ def parse_and_add_new_raw_metadata(data):
                    raw_csv_data is None or \
                    formatted_csv_data is None:
                     raise KeyError("Missing metadata info")
-                metadata = \
-                    RawMetadataModel(
-                        metadata_tag=metadata_tag,
-                        raw_csv_data=raw_csv_data,
-                        formatted_csv_data=formatted_csv_data)
-                db.session.add(metadata)
+                exists = \
+                    db.session.\
+                        query(RawMetadataModel).\
+                        filter(RawMetadataModel.metadata_tag==metadata_tag).\
+                        one_or_none()
+                if exists is None:
+                    metadata = \
+                        RawMetadataModel(
+                            metadata_tag=metadata_tag,
+                            raw_csv_data=raw_csv_data,
+                            formatted_csv_data=formatted_csv_data)
+                    db.session.add(metadata)
             db.session.flush()
             db.session.commit()
         except:
