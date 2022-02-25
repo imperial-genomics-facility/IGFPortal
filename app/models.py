@@ -167,7 +167,7 @@ class RawSeqrun(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
   raw_seqrun_id =  Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   raw_seqrun_igf_id = Column(String(80), nullable=False)
-  status = Column(Enum("ACTIVE", "REJECTED", "FINISHED"), nullable=False, server_default='ACTIVE')
+  status = Column(Enum("ACTIVE", "REJECTED", "PREDEMULT", "READY", "FINISHED"), nullable=False, server_default='ACTIVE')
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   samplesheet_id = Column(INTEGER(unsigned=True), ForeignKey("samplesheet.samplesheet_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
   samplesheet = relationship('SampleSheetModel')
