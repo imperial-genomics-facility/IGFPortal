@@ -527,6 +527,10 @@ def parse_and_add_new_raw_metadata(data):
                         query(RawMetadataModel).\
                         filter(RawMetadataModel.metadata_tag==metadata_tag).\
                         one_or_none()
+                if not isinstance(raw_csv_data, str):
+                    raw_csv_data = json.dumps(raw_csv_data)
+                if not isinstance(formatted_csv_data, str):
+                    formatted_csv_data = json.dumps(formatted_csv_data)
                 if exists is None:
                     metadata = \
                         RawMetadataModel(
@@ -534,7 +538,7 @@ def parse_and_add_new_raw_metadata(data):
                             raw_csv_data=raw_csv_data,
                             formatted_csv_data=formatted_csv_data)
                     db.session.add(metadata)
-            db.session.flush()
+                    db.session.flush()
             db.session.commit()
         except:
             db.session.rollback()
