@@ -156,7 +156,7 @@ class RawMetadataValidationView(ModelView):
             logging.error(e)
         finally:
             self.update_redirect()
-            return redirect(url_for('RawMetadataValidationView'))
+            return redirect(url_for('RawMetadataValidationView.list'))
 
     @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket")
     def validate_metadata(self, item):
