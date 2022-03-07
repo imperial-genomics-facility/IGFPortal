@@ -277,12 +277,10 @@
               "type" : "string"
             },
             "expected_reads" : {
-              "type" : "string",
-              "pattern" : "^(\\d+)?$|^$"
+              "type" : "integer"
             },
             "expected_lanes" : {
-              "type" : "string",
-              "pattern" : "^(\\d+)?$|^$"
+              "type" : "integer"
             }
         },
         "required": ["project_igf_id",
