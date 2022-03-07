@@ -201,16 +201,13 @@
                         ""]
             },
             "fragment_length_distribution_mean" : {
-              "type" : "string",
-              "pattern" : "^(\\d+)?\\.?(\\d+)?$|^$"
+              "type" : "number"
             },
             "fragment_length_distribution_sd" : {
-              "type" : "string",
-              "pattern" : "^(\\d+)?\\.?(\\d+)?$|^$"
+              "type" : "number"
             },
             "insert_length" : {
-              "type" : "string",
-              "pattern" : "^(\\d+)?\\.?(\\d+)?$|^$"
+              "type" : "number"
             },
             "adapter_seq1" : {
               "type" : "string",
