@@ -11,6 +11,7 @@ from io import BytesIO
 from flask_appbuilder.actions import action
 from .models import RawMetadataModel
 from .raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status, mark_raw_metadata_as_ready
+from . import db
 
 @celery.task(bind=True)
 def async_validate_metadata(self, id_list):
@@ -71,6 +72,18 @@ class RawMetadataSubmitView(ModelView):
         output.seek(0)
         self.update_redirect()
         return send_file(output, attachment_filename='{0}_formatted.csv'.format(tag), as_attachment=True)
+
+    @action("mark_raw_metadata_as_rejected", "Reject raw metadata", confirmation="Mark metadata as rejected ?", icon="fa-exclamation", multiple=False, single=True)
+    def mark_raw_metadata_as_rejected(self, item):
+        try:
+            db.session.\
+                query(RawMetadataModel).\
+                filter(RawMetadataModel.raw_metadata_id==item.raw_metadata_id).\
+                update({'status': 'REJECTED'})
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logging.error(e)
 
     @action("upload_raw_metadata", "Mark for upload", confirmation="Change metadata status?", icon="fa-rocket")
     def upload_raw_metadata_csv(self, item):

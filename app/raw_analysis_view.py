@@ -1,5 +1,5 @@
 from io import BytesIO
-from .models import RawAnalysis
+from .models import RawAnalysis, RawMetadataModel
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.filters import FilterInFunction
 from flask import redirect, flash, send_file
@@ -30,8 +30,9 @@ class RawAnalysisView(ModelView):
         self.update_redirect()
         return redirect(self.get_redirect())
 
-    @action("download_raw_analysis_yamp", "Download analysis yaml", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
-    def download_raw_analysis_yamp(self, item):
+
+    @action("download_raw_analysis_damp", "Download analysis yaml", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def download_raw_analysis_damp(self, item):
         output = BytesIO(item.analysis_yaml.encode('utf-8'))
         analysis_tag = item.analysis_tag.encode('utf-8').decode()
         output.seek(0)
