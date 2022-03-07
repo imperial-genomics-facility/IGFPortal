@@ -198,11 +198,11 @@ class TestRawMetadataLoading(unittest.TestCase):
     def test_parse_and_add_new_raw_metadata(self):
         metadata_list = [{
             'metadata_tag': 'test1',
-            'raw_csv_data': 'raw',
-            'formatted_csv_data': 'formatted'},{
+            'raw_csv_data': [{'project_id','sample_id'},{'a', 'b'}],
+            'formatted_csv_data': [{'project_id','sample_id'},{'a', 'b'}]},{
             'metadata_tag': 'test2',
-            'raw_csv_data': 'raw',
-            'formatted_csv_data': 'formatted'}]
+            'raw_csv_data': [{'project_id','sample_id'},{'c', 'd'}],
+            'formatted_csv_data': [{'project_id','sample_id'},{'c', 'd'}]}]
         parse_and_add_new_raw_metadata(data=metadata_list)
         results = db.session.query(RawMetadataModel.metadata_tag).all()
         results = [i[0] for i in results]

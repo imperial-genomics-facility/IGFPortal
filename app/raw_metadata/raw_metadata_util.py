@@ -531,7 +531,8 @@ def parse_and_add_new_raw_metadata(data):
                     raw_csv_data = json.loads(raw_csv_data)
                 if isinstance(formatted_csv_data, str):
                     formatted_csv_data = json.loads(formatted_csv_data)
-                
+                raw_csv_data = pd.DataFrame(raw_csv_data).to_csv(index=False)
+                formatted_csv_data = pd.DataFrame(formatted_csv_data).to_csv(index=False)
                 if exists is None:
                     metadata = \
                         RawMetadataModel(
