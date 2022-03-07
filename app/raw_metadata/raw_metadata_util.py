@@ -338,8 +338,9 @@ def validate_raw_metadata_and_set_db_status(
         else:
             _set_metadata_validation_status(
                 raw_metadata_id=raw_metadata_id,
-                status='PASS')
-            return 'PASS'
+                report='',
+                status='VALIDATED')
+            return 'VALIDATED'
     except Exception as e:
         raise ValueError(
                 "Failed to get metadata for id {0}, error: {1}".\
