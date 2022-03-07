@@ -150,9 +150,13 @@ class RawMetadataValidationView(ModelView):
                 filter(RawMetadataModel.raw_metadata_id==item.raw_metadata_id).\
                 update({'status': 'REJECTED'})
             db.session.commit()
+            flash("Rejected metadata  {0}".format(item.metadata_tag), "info")
         except Exception as e:
             db.session.rollback()
             logging.error(e)
+        finally:
+            self.update_redirect()
+            return redirect(self.get_redirect())
 
     @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket")
     def validate_metadata(self, item):
