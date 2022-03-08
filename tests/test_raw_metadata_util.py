@@ -187,6 +187,11 @@ class TestMetadataApiutil1(unittest.TestCase):
         self.assertTrue(isinstance(new_projects, list))
         self.assertEqual(len(new_projects), 1)
         self.assertTrue("test3" in new_projects)
+        new_projects = \
+            search_metadata_table_and_get_new_projects(
+                data={"project_list":["test1", "test2"]})
+        self.assertTrue(isinstance(new_projects, list))
+        self.assertEqual(len(new_projects), 0)
 
 class TestRawMetadataLoading(unittest.TestCase):
     def setUp(self):
