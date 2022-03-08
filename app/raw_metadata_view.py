@@ -7,7 +7,7 @@ from flask import redirect, flash, url_for, send_file, abort
 from flask_appbuilder import ModelView
 from flask_appbuilder.baseviews import expose
 from . import celery
-from io import BytesIO
+from io import BytesIO, StringIO
 from flask_appbuilder.actions import action
 from .models import RawMetadataModel
 from .raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status, mark_raw_metadata_as_ready
@@ -59,11 +59,13 @@ class RawMetadataSubmitView(ModelView):
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
             data_list = item.formatted_csv_data.split("\n")
-            columns = data_list.pop(0)
-            df = pd.DataFrame([
-                    i.split(",")
-                        for i in data_list],
-                    columns=columns.split(","))
+            #columns = data_list.pop(0)
+            #df = pd.DataFrame([
+            #        i.split(",")
+            #            for i in data_list],
+            #        columns=columns.split(","))
+            cvsStringIO = StringIO(item.formatted_csv_data)
+            df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
             tag = item.metadata_tag
         else:
@@ -121,18 +123,20 @@ class RawMetadataValidationView(ModelView):
     base_filters = [
         ["status", FilterInFunction, lambda: ["UNKNOWN", "FAILED"]]]
 
-    @action("download_metadata_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
-    def download_metadata_csv(self, item):
+    @action("download_raw_metadata_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def download_raw_metadata_csv(self, item):
         output = BytesIO()
         tag = 'Empty'
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
-            data_list = item.formatted_csv_data.split("\n")
-            columns = data_list.pop(0)
-            df = pd.DataFrame([
-                    i.split(",")
-                        for i in data_list],
-                    columns=columns.split(","))
+            #data_list = item.formatted_csv_data.split("\n")
+            #columns = data_list.pop(0)
+            #df = pd.DataFrame([
+            #        i.split(",")
+            #            for i in data_list],
+            #        columns=columns.split(","))
+            cvsStringIO = StringIO(item.formatted_csv_data)
+            df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
             tag = item.metadata_tag
         else:
