@@ -41,8 +41,11 @@ class AdminHomeApi(ModelRestApi):
                     dir=app.config['CELERY_WORK_DIR'],
                     suffix='.json',
                     prefix='admin_view_',)
-            async_parse_and_add_new_admin_view_data.\
-                apply_async(args=[json_file])
+            with open(json_file, 'w') as fp:
+                json.dump(json_data, fp)
+            _ = \
+                async_parse_and_add_new_admin_view_data.\
+                    apply_async(args=[json_file])
             return self.response(200, message='loaded new data')
         except Exception as e:
             logging.error(e)
