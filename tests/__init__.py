@@ -10,6 +10,7 @@ def full_suite():
     from .test_samplesheet_util import TestSampleSheetUtil, TestSampleSheetDbUpdate
     from .test_raw_metadata_util import TestMetaDataValidation1, TestMetaDataValidation2, TestMetadataApiutil1
     from .test_metadata_util import TestMetadataUtil1, TestMetadataUtil2, TestMetadataUtil3
+    from .test_admin_home_utils import TestAdminHomeUtil1
     return unittest.TestSuite([
         unittest.TestLoader().loadTestsFromTestCase(t)
             for t in [
@@ -22,6 +23,7 @@ def full_suite():
                 TestMetadataApiutil1,
                 TestMetadataUtil1,
                 TestMetadataUtil2,
-                TestMetadataUtil3
+                TestMetadataUtil3,
+                TestAdminHomeUtil1
             ]
     ])
