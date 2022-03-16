@@ -52,7 +52,7 @@ class SampleSheetView(ModelView):
     def download_samplesheet(self, item):
         output = BytesIO(item.csv_data.encode())
         samplesheet_tag = item.samplesheet_tag.encode()
-        if isinstance(samplesheet_tag, byte):
+        if isinstance(samplesheet_tag, bytes):
             samplesheet_tag = samplesheet_tag.decode()
         output.seek(0)
         self.update_redirect()
