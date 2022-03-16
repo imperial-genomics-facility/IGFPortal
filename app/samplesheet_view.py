@@ -52,6 +52,8 @@ class SampleSheetView(ModelView):
     def download_samplesheet(self, item):
         output = BytesIO(item.csv_data.encode())
         samplesheet_tag = item.samplesheet_tag.encode()
+        if isinstance(samplesheet_tag, byte):
+            samplesheet_tag = samplesheet_tag.decode()
         output.seek(0)
         self.update_redirect()
         return send_file(output, attachment_filename='SampleSheet_{0}.csv'.format(samplesheet_tag), as_attachment=True)
