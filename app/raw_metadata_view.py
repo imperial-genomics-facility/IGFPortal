@@ -162,7 +162,7 @@ class RawMetadataValidationView(ModelView):
             self.update_redirect()
             return redirect(url_for('RawMetadataValidationView.list'))
 
-    @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket")
+    @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket", multiple=True, single=False)
     def validate_metadata(self, item):
         id_list = list()
         tag_list = list()

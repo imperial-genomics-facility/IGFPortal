@@ -59,7 +59,7 @@ class SampleSheetView(ModelView):
         return send_file(output, attachment_filename='SampleSheet_{0}.csv'.format(samplesheet_tag), as_attachment=True)
 
 
-    @action("validate_samplesheet", "Validate SampleSheets", confirmation="Run validation?", icon="fa-rocket")
+    @action("validate_samplesheet", "Validate SampleSheets", confirmation="Run validation?", icon="fa-rocket", multiple=True, single=False)
     def validate_samplesheet(self, item):
         id_list = list()
         tag_list = list()
