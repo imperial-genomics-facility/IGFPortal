@@ -44,7 +44,7 @@ def parse_and_add_new_admin_view_data(json_file):
                     filter(AdminHomeData.admin_data_tag==admin_data_tag).\
                     update(json_data)
                 db.session.commit()
-        except:
+        except Exception as e:
             db.session.rollback()
             raise ValueError("Failed to load data to db, error: {0}".format(e))
     except Exception as e:
