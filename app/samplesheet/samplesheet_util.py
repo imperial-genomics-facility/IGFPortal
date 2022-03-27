@@ -251,16 +251,16 @@ class SampleSheet:
                     df[df[sample_id_col].duplicated()][sample_id_col].\
                         values.tolist()
                 if len(duplicate_ids) > 0:
-                    errors.append({
+                    errors.append(
                         "Duplicate sample ids present: {0}".\
-                            format(', '.join(duplicate_ids)) })
+                            format(', '.join(duplicate_ids)) )
                 duplicate_names = \
                     df[df[sample_name_col].duplicated()][sample_name_col].\
                         values.tolist()
                 if len(duplicate_names) > 0:
-                    errors.append({
+                    errors.append(
                         "Duplicate sample names present: {0}".\
-                            format(', '.join(duplicate_names)) })
+                            format(', '.join(duplicate_names)) )
             return errors
         except Exception as e:
             raise ValueError(
@@ -323,10 +323,10 @@ class SampleSheet:
                 if len(other_errors) > 0:
                     error_list.extend([
                         value for value in other_errors.to_dict().values()])    # add other errors to the list
-                    duplicate_errors = \
-                        self._get_duplicate_entries()
-                    if len(duplicate_errors) > 0:
-                        error_list.extend(duplicate_errors)
+                duplicate_errors = \
+                    self._get_duplicate_entries()
+                if len(duplicate_errors) > 0:
+                    error_list.extend(duplicate_errors)
             #formatted_errors = list()
             #for index, entry in enumerate(error_list):
             #    formatted_errors.\
