@@ -45,7 +45,7 @@ class RawMetadataDataApi(ModelRestApi):
             if not json_data:
                 return self.response_400('No data')
             if file_name.endswith('.gz'):
-                json_data = gzip.decompress(json_data)
+                json_data = gzip.decompress(json_data).decode('utf-8')
             parse_and_add_new_raw_metadata(data=json_data)
             return self.response(200, message='loaded new metadata')
         except Exception as e:

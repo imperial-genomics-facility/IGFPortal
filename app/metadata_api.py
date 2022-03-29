@@ -1,5 +1,5 @@
 from multiprocessing.sharedctypes import Value
-import os, json, logging, tempfile, time, typing
+import os, json, logging, tempfile, time, typing, gzip
 from flask_appbuilder import ModelRestApi
 from flask import request
 from flask_appbuilder.api import BaseApi, expose, rison
@@ -30,10 +30,13 @@ class MetadataLoadApi(BaseApi):
                 return self.response_400('No files')
             file_objs = request.files.getlist('file')
             file_obj = file_objs[0]
+            file_name = file_obj.filename
             file_obj.seek(0)
             json_data = file_obj.read()
+            if file_name.ends_with('.gz'):
+                json_data = gzip.decompress(json_data).decode('utf-8')
             if isinstance(json_data, bytes):
-                json_data = json.loads(json_data.decode())
+                json_data = json.loads(json_data.decode('utf-8'))
             (_, json_file) = \
                 tempfile.mkstemp(
                     dir=app.config['CELERY_WORK_DIR'],
