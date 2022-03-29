@@ -46,6 +46,11 @@ class SampleSheetView(ModelView):
     edit_columns = [
         "samplesheet_tag",
         "csv_data"]
+    base_permissions = [
+        "can_list",
+        "can_show",
+        "can_add",
+        "can_edit"]
     base_order = ("samplesheet_id", "desc")
 
     @action("download_samplesheet", "Download samplesheet", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
