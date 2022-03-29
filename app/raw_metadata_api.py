@@ -1,4 +1,4 @@
-import json, logging
+import json, logging, gzip
 from flask_appbuilder import ModelRestApi
 from flask import request, send_file
 from flask_appbuilder.api import expose, rison
@@ -39,8 +39,13 @@ class RawMetadataDataApi(ModelRestApi):
                 return self.response_400('No files')
             file_objs = request.files.getlist('file')
             file_obj = file_objs[0]
+            file_name = file_obj.filename
             file_obj.seek(0)
             json_data = file_obj.read()
+            if not json_data:
+                return self.response_400('No data')
+            if file_name.endswith('.gz'):
+                json_data = gzip.decompress(json_data)
             parse_and_add_new_raw_metadata(data=json_data)
             return self.response(200, message='loaded new metadata')
         except Exception as e:
