@@ -33,7 +33,7 @@ class MetadataLoadApi(BaseApi):
             file_name = file_obj.filename
             file_obj.seek(0)
             json_data = file_obj.read()
-            if file_name.ends_with('.gz'):
+            if file_name.endswith('.gz'):
                 json_data = gzip.decompress(json_data).decode('utf-8')
             if isinstance(json_data, bytes):
                 json_data = json.loads(json_data.decode('utf-8'))
