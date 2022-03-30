@@ -130,7 +130,7 @@ class SampleSheetModel(Model):
 		{ 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 	samplesheet_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
 	samplesheet_tag = Column(String(50), nullable=False)
-	csv_data = Column(String(16777216), nullable=False)                           # 2 ^ 24
+	csv_data = Column(TEXT(), nullable=False)                           # 2 ^ 24
 	status = Column(Enum("PASS", "FAILED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
 	report = Column(TEXT())
 	validation_time = Column(TIMESTAMP())
