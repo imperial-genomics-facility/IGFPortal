@@ -1,7 +1,7 @@
 import datetime, json
 from flask import Markup, url_for
 from flask_appbuilder import Model
-from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT
+from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
@@ -130,7 +130,7 @@ class SampleSheetModel(Model):
 		{ 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 	samplesheet_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
 	samplesheet_tag = Column(String(50), nullable=False)
-	csv_data = Column(LONGTEXT(), nullable=False)
+	csv_data = Column(String(16777216), nullable=False)                           # 2 ^ 24
 	status = Column(Enum("PASS", "FAILED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
 	report = Column(TEXT())
 	validation_time = Column(TIMESTAMP())
@@ -149,8 +149,8 @@ class RawMetadataModel(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
   raw_metadata_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   metadata_tag = Column(String(80), nullable=False)
-  raw_csv_data = Column(LONGTEXT())
-  formatted_csv_data = Column(LONGTEXT(), nullable=False)
+  raw_csv_data = Column(String(16777216))                                       # 2 ^ 24
+  formatted_csv_data = Column(String(16777216), nullable=False)
   report = Column(TEXT())
   status = Column(Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"), nullable=False, server_default='UNKNOWN')
   update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
