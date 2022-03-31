@@ -120,6 +120,7 @@ class RawMetadataValidationView(ModelView):
         "status",
         "update_time"]
     base_order = ("raw_metadata_id", "desc")
+    base_permisions = ["can_list", "can_show", "can_edit", "can_add"]
     base_filters = [
         ["status", FilterInFunction, lambda: ["UNKNOWN", "FAILED"]]]
 
