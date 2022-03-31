@@ -45,6 +45,41 @@ class JSONType(TypeDecorator):
       value = json.loads(value)
       return value
 
+"""
+  Custom LONGTEXT type for BD
+"""
+class LONGTEXTType(TypeDecorator):
+  '''
+  LONGTEXT datatype class for assigning dialect specific datatype
+  It will assign LONGTEXT datatype for mysql tables and unicodetext for sqlite
+  '''
+  impl = UnicodeText
+
+  def load_dialect_impl(self, dialect):
+    if dialect.name == 'mysql':
+      from sqlalchemy.dialects.mysql import LONGTEXT
+      return dialect.type_descriptor(LONGTEXT())
+    elif dialect.name == 'postgresql':
+      from sqlalchemy.dialects.postgresql import LONGTEXT
+      return dialect.type_descriptor(LONGTEXT())
+    else:
+      return dialect.type_descriptor(String(16777216))
+
+  def process_bind_param(self, value, dialect):
+    if dialect.name == 'mysql' or \
+       dialect.name == 'postgresql':
+      return value
+    if value is not None:
+      # TO DO: Check if this is correct
+      return value
+
+  def process_result_value(self, value, dialect):
+    if dialect.name == 'mysql' or \
+       dialect.name == 'postgresql':
+      return value
+    if value is not None:
+      # TO DO: Check if this is correct
+      return value
 
 
 """
@@ -130,7 +165,7 @@ class SampleSheetModel(Model):
 		{ 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 	samplesheet_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
 	samplesheet_tag = Column(String(50), nullable=False)
-	csv_data = Column(TEXT(), nullable=False)                           # 2 ^ 24
+	csv_data = Column(LONGTEXTType(), nullable=False)                           # 2 ^ 24
 	status = Column(Enum("PASS", "FAILED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
 	report = Column(TEXT())
 	validation_time = Column(TIMESTAMP())
@@ -149,8 +184,8 @@ class RawMetadataModel(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
   raw_metadata_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   metadata_tag = Column(String(80), nullable=False)
-  raw_csv_data = Column(String(16777216))                                       # 2 ^ 24
-  formatted_csv_data = Column(String(16777216), nullable=False)
+  raw_csv_data = Column(LONGTEXTType())                                       # 2 ^ 24
+  formatted_csv_data = Column(LONGTEXTType(), nullable=False)
   report = Column(TEXT())
   status = Column(Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"), nullable=False, server_default='UNKNOWN')
   update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
