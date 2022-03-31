@@ -196,9 +196,10 @@ def _run_metadata_json_validation(
         metadata_json_fields = list(schema['items']['properties'].keys())
         metadata_df = pd.read_csv(metadata_file)
         metadata_df.fillna('', inplace=True)
-        metadata_df['taxon_id'] = \
-            metadata_df['taxon_id'].\
-                astype(str)
+        if 'taxon_id' in metadata_df.columns:
+            metadata_df['taxon_id'] = \
+                metadata_df['taxon_id'].\
+                    astype(str)
         for header_name in metadata_df.columns:
             if header_name not in metadata_json_fields:
                 error_list.append("Unexpected column {0} found")
