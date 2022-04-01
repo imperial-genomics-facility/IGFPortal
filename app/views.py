@@ -15,7 +15,7 @@ from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
-from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, SampleProjectView
+from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, SampleProjectView, SampleView
 from .raw_analysis_view import RawAnalysisView
 from .rds_project_backup_view import RDSProjectBackupView
 
@@ -148,6 +148,8 @@ appbuilder.\
         category_icon="fa-table",
         icon="fa-home",
         category="Metadata table")
+appbuilder.\
+    add_view_no_menu(SampleView())
 appbuilder.\
     add_view(
         SampleProjectView,
