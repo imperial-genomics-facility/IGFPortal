@@ -1,6 +1,5 @@
 from flask_appbuilder import ModelView
 from flask_appbuilder.views import MasterDetailView
-from flask_appbuilder.widgets import ListItem
 from .models import Project, IgfUser, Seqrun, Analysis, Sample
 from flask import redirect, flash
 from app import db
@@ -82,7 +81,6 @@ class SampleProjectView(MasterDetailView):
     datamodel = SQLAInterface(Project, db.session)
     related_views = [SampleView]
     master_div_width = 4
-    list_widget = ListItem
     list_columns = ["project_igf_id"]
     label_columns = {"project_igf_id": "Project"}
     base_permissions = ["can_list"]
