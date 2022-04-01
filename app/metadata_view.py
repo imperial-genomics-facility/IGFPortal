@@ -2,6 +2,7 @@ from flask_appbuilder import ModelView
 from flask_appbuilder.views import MasterDetailView
 from .models import Project, IgfUser, Seqrun, Analysis, Sample
 from flask import redirect, flash
+from app import db
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
@@ -57,7 +58,7 @@ class AnalysisView(ModelView):
         return redirect(self.get_redirect())
 
 class SampleView(ModelView):
-    datamodel = SQLAInterface(Sample)
+    datamodel = SQLAInterface(Sample, db.session)
     label_columns = {
         "sample_igf_id": "Sample_ID",
         "sample_submitter_id": "Sample_Name",
@@ -74,8 +75,9 @@ class SampleView(ModelView):
     base_order = ("sample_id", "desc")
 
 class SampleProjectView(MasterDetailView):
-    datamodel = SQLAInterface(Project)
+    datamodel = SQLAInterface(Project, db.session)
     related_views = [SampleView]
+    master_div_width = 10
     list_columns = ["project_igf_id"]
     label_columns = {"project_igf_id": "Project"}
     base_permissions = ["can_list"]
