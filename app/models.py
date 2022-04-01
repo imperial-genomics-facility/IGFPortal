@@ -167,7 +167,7 @@ class SampleSheetModel(Model):
 	samplesheet_tag = Column(String(50), nullable=False)
 	csv_data = Column(LONGTEXTType(), nullable=False)                           # 2 ^ 24
 	status = Column(Enum("PASS", "FAILED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
-	report = Column(TEXT())
+	report = Column(LONGTEXTType())
 	validation_time = Column(TIMESTAMP())
 	update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
 	def __repr__(self):
@@ -186,7 +186,7 @@ class RawMetadataModel(Model):
   metadata_tag = Column(String(80), nullable=False)
   raw_csv_data = Column(LONGTEXTType())                                       # 2 ^ 24
   formatted_csv_data = Column(LONGTEXTType(), nullable=False)
-  report = Column(TEXT())
+  report = Column(LONGTEXTType())
   status = Column(Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"), nullable=False, server_default='UNKNOWN')
   update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
