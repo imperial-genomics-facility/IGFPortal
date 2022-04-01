@@ -77,7 +77,7 @@ class SampleView(ModelView):
 class SampleProjectView(MasterDetailView):
     datamodel = SQLAInterface(Project, db.session)
     related_views = [SampleView]
-    master_div_width = 2
+    master_div_width = 3
     list_columns = ["project_igf_id"]
     label_columns = {"project_igf_id": "Project"}
     base_permissions = ["can_list"]
