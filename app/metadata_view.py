@@ -10,10 +10,11 @@ class ProjectView(ModelView):
     datamodel = SQLAInterface(Project)
     label_columns = {
         "project_igf_id": "Name",
+        "status": "Status",
         "start_timestamp": "Created on"
     }
-    list_columns = ["project_igf_id", "start_timestamp"]
-    search_columns = ["project_igf_id", "start_timestamp"]
+    list_columns = ["project_igf_id", "status", "start_timestamp"]
+    search_columns = ["project_igf_id", "status", "start_timestamp"]
     base_permissions = ["can_list"]
     base_order = ("project_id", "desc")
 
