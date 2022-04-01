@@ -60,12 +60,14 @@ class AnalysisView(ModelView):
 class SampleView(ModelView):
     datamodel = SQLAInterface(Sample, db.session)
     label_columns = {
+        "project.project_igf_id": "Project",
         "sample_igf_id": "Sample_ID",
         "sample_submitter_id": "Sample_Name",
         "species_name": "Species",
         "date_created": "Created on"
     }
     list_columns = [
+        "project.project_igf_id",
         "sample_igf_id",
         "sample_submitter_id",
         "species_name",
