@@ -1,5 +1,6 @@
 from flask_appbuilder import ModelView
-from .models import Project, IgfUser, Seqrun, Analysis
+from flask_appbuilder.views import MasterDetailView
+from .models import Project, IgfUser, Seqrun, Analysis, Sample
 from flask import redirect, flash
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -54,3 +55,28 @@ class AnalysisView(ModelView):
         flash("Submitted jobs for {0}".format(', '.join(analysis_list)), "info")
         self.update_redirect()
         return redirect(self.get_redirect())
+
+class SampleView(ModelView):
+    datamodel = SQLAInterface(Sample)
+    label_columns = {
+        "sample_igf_id": "Sample_ID",
+        "sample_submitter_id": "Sample_Name",
+        "species_name": "Species",
+        "date_created": "Created on"
+    }
+    list_columns = [
+        "sample_igf_id",
+        "sample_submitter_id",
+        "species_name",
+        "date_created"
+    ]
+    base_permissions = ["can_list"]
+    base_order = ("sample_id", "desc")
+
+class SampleProjectView(MasterDetailView):
+    datamodel = SQLAInterface(Project)
+    related_views = [SampleView]
+    list_columns = ["project_igf_id"]
+    label_columns = {"project_igf_id": "Project"}
+    base_permissions = ["can_list"]
+    base_order = ("project_id", "desc")
