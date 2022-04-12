@@ -139,7 +139,7 @@ class SampleSheet:
                     "Missing I_5 index sequences for {0}".\
                         format(data_series['Sample_ID']))
             single_cell_index_pattern = \
-                re.compile(r'^SI-[GNT][ATN]-[A-Z][0-9]+')
+                re.compile(r'^SI-[GNT][ATNS]-[A-Z][0-9]+')
             if re.search(single_cell_flag_pattern, data_series['Description']) and \
                not re.search(single_cell_index_pattern, data_series['index']):
                 err.append(
