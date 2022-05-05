@@ -461,17 +461,20 @@ class Platform(Model):
     * HISEQ4000
     * MISEQ
     * NEXTSEQ
+    * NEXTSEQ2000
     * NOVASEQ6000
     * NANOPORE_MINION
     * DNBSEQ-G400
     * DNBSEQ-G50
     * DNBSEQ-T7
+    * SEQUEL2
 
   :param vendor_name: A required enum list to specify vendor's name, allowed values are
 
     * ILLUMINA
     * NANOPORE
     * MGI
+    * PACBIO
 
   :param software_name: A required enum list for specifying platform software, allowed values are
 
@@ -488,8 +491,8 @@ class Platform(Model):
 
   platform_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   platform_igf_id = Column(String(10), nullable=False)
-  model_name = Column(Enum('HISEQ2500','HISEQ4000','MISEQ','NEXTSEQ','NOVASEQ6000','NANOPORE_MINION','DNBSEQ-G400', 'DNBSEQ-G50', 'DNBSEQ-T7'), nullable=False)
-  vendor_name = Column(Enum('ILLUMINA','NANOPORE', 'MGI'), nullable=False)
+  model_name = Column(Enum('HISEQ2500','HISEQ4000','MISEQ','NEXTSEQ','NEXTSEQ2000','NOVASEQ6000','NANOPORE_MINION','DNBSEQ-G400', 'DNBSEQ-G50', 'DNBSEQ-T7','SEQUEL2'), nullable=False)
+  vendor_name = Column(Enum('ILLUMINA','NANOPORE', 'MGI', 'PACBIO'), nullable=False)
   software_name = Column(Enum('RTA','UNKNOWN'), nullable=False)
   software_version = Column(String(20), nullable=False, server_default='UNKNOWN')
   date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
