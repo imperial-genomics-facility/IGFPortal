@@ -765,6 +765,8 @@ class Experiment(Model):
     * MISEQ
     * NEXTSEQ
     * NOVASEQ6000
+    * SEQUEL2
+    * NEXTSEQ2000
     * NANOPORE_MINION
     * DNBSEQ-G400
     * DNBSEQ-G50
@@ -807,7 +809,7 @@ class Experiment(Model):
   status = Column(Enum('ACTIVE', 'FAILED', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
   date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   platform_name = Column(Enum('HISEQ2500', 'HISEQ4000', 'MISEQ', 'NEXTSEQ', 'NANOPORE_MINION', 'NOVASEQ6000',
-                              'DNBSEQ-G400', 'DNBSEQ-G50', 'DNBSEQ-T7',
+                              'DNBSEQ-G400', 'DNBSEQ-G50', 'DNBSEQ-T7', 'NEXTSEQ2000', 'SEQUEL2',
                               'UNKNOWN'), nullable=False, server_default='UNKNOWN')
 
   def __repr__(self):
