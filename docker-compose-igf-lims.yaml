@@ -35,7 +35,7 @@ services:
           - /home/igf/igf_portal/ssl_cert:/SSL:ro
           - /tmp:/TMP_WORK_DIR:rw
         container_name: webserver
-        command: ["gunicorn -b 0.0.0.0:8080 --certfile=/SSL/portal.cert --keyfile=/SSL/portal.key --threads 2 server:app"]
+        command: ["gunicorn -b 0.0.0.0:8080 --certfile=/SSL/portal.cert --keyfile=/SSL/portal.key --threads 4 server:app"]
         networks:
           - portal_network
     celery_worker1:
