@@ -1,7 +1,24 @@
 import typing
-from typing import Tuple
+import logging
+from typing import Tuple, Any
 from .. import db
 from ..models import RawSeqrun, SampleSheetModel
+
+def fetch_samplesheet_for_seqrun(seqrun_id: str) -> Any:
+    try:
+        result = \
+            db.session.\
+                query(
+                    SampleSheetModel.samplesheet_tag,
+                    SampleSheetModel.csv_data).\
+                join(RawSeqrun, RawSeqrun.samplesheet_id==SampleSheetModel.samplesheet_id).\
+                filter(RawSeqrun.raw_seqrun_igf_id==seqrun_id).\
+                filter(SampleSheetModel.status=='PASS').\
+                filter(SampleSheetModel.validation_time >= SampleSheetModel.update_time).\
+                one_or_none()
+        return result
+    except Exception as e:
+        raise ValueError("Failed to fetch samplesheet for seqrun, error: {0}".format(e))
 
 def check_and_filter_raw_seqruns_after_checking_samplesheet(
     raw_seqrun_igf_ids: list) -> \

@@ -29,9 +29,9 @@ class RawSeqrunView(ModelView):
         "samplesheet": "SampleSheet tag",
         "date_stamp": "Updated on"
     }
-    list_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "date_stamp"]
-    show_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "date_stamp"]
-    edit_columns = ["raw_seqrun_igf_id", "samplesheet"]
+    list_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "override_cycles", "date_stamp"]
+    show_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "override_cycles", "date_stamp"]
+    edit_columns = ["raw_seqrun_igf_id", "samplesheet", "override_cycles"]
     base_permissions = ["can_list", "can_show", "can_edit"]
     base_order = ("raw_seqrun_igf_id", "desc")
     add_form_extra_fields = {
