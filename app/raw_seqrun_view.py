@@ -69,7 +69,15 @@ class RawSeqrunView(ModelView):
             widget=Select2Widget()
         )
     }
-    @action("mark_raw_run_rejected", "Mark run as rejected", confirmation="Reject run?", icon="fa-ban")
+
+    @action("get_new_seqrun", "Get new seqrun", confirmation="Are you sure?" , icon="fa-paper-plane-o", multiple=False)
+    def get_new_seqrun(self, ids):
+        flash("New seqrun(s) added to queue")
+        self.update_redirect()
+        return redirect(self.get_redirect())
+
+    """
+    @action("mark_raw_run_rejected", "Reject run", confirmation="Reject run?", icon="fa-ban", multiple=False)
     def mark_raw_run_rejected(self, item):
         run_list = list()
         if isinstance(item, list):
@@ -84,22 +92,33 @@ class RawSeqrunView(ModelView):
             logging.error(e)
         self.update_redirect()
         return redirect(self.get_redirect())
+    """
 
-    @action("rerun_demultiplexing", "Re-run demultiplexing pipeline", confirmation="All fastq files will be replaced. Confirm pipeline run?", multiple=False, icon="fa-plane")
+    @action("first_run_demultiplexing", "Run pipeline", confirmation="Confirm pipeline run?", multiple=False, icon="fa-space-shuttle")
+    def firts_run_demultiplexing(self, item):
+        run_list = list()
+        if isinstance(item, list):
+            run_list = [i.raw_seqrun_igf_id for i in item]
+        else:
+            run_list = [item.raw_seqrun_igf_id]
+        flash("Submitted jobs for {0}".format(', '.join(run_list)), "info")
+        self.update_redirect()
+        return redirect(self.get_redirect())
+
+
+    @action("rerun_demultiplexing", "Re-run pipeline", confirmation="All fastq files will be replaced. Confirm pipeline run?", multiple=False, icon="fa-plane")
     def rerun_demultiplexing(self, item):
         run_list = list()
         if isinstance(item, list):
             run_list = [i.raw_seqrun_igf_id for i in item]
         else:
             run_list = [item.raw_seqrun_igf_id]
-        id_list, run_list = \
-            check_and_filter_raw_seqruns_after_checking_samplesheet(
-                raw_seqrun_igf_ids=run_list)
         flash("Submitted jobs for {0}".format(', '.join(run_list)), "info")
         self.update_redirect()
         return redirect(self.get_redirect())
 
-    @action("trigger_pre_demultiplexing", "Trigger pre_demultiplexing pipeline", confirmation="confirm pipeline run", icon="fa-rocket")
+
+    @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="confirm pipeline run", icon="fa-rocket")
     def trigger_pre_demultiplexing(self, item):
         run_list = list()
         if isinstance(item, list):

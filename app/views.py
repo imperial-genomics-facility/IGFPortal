@@ -18,7 +18,7 @@ from .raw_seqrun_view import RawSeqrunView
 from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, SampleProjectView, SampleView
 from .raw_analysis_view import RawAnalysisView
 from .rds_project_backup_view import RDSProjectBackupView
-
+from .pipeline_trigger_view import PipelineTriggerView
 
 """
     Application wide 404 error handler
@@ -114,6 +114,14 @@ appbuilder.\
 """
     Raw analysis view
 """
+#appbuilder.\
+#    add_view(
+#        PipelineTriggerView(),
+#        "Trigger pipelines",
+#        href="/trigger_page",
+#        category_icon="fa-flask",
+#        icon="fa-rocket",
+#        category="Analysis")
 appbuilder.\
     add_view(
         RawAnalysisView,
