@@ -29,8 +29,29 @@ class RawSeqrunView(ModelView):
         "samplesheet": "SampleSheet tag",
         "date_stamp": "Updated on"
     }
-    list_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "override_cycles", "date_stamp"]
-    show_columns = ["raw_seqrun_igf_id", "status", "samplesheet", "override_cycles", "date_stamp"]
+    list_columns = [
+        "raw_seqrun_igf_id",
+        "status",
+        "samplesheet.samplesheet_tag",
+        "samplesheet.status",
+        "override_cycles",
+        "date_stamp"]
+    show_columns = [
+        "raw_seqrun_igf_id",
+        "status",
+        "override_cycles",
+        "date_stamp",
+        "samplesheet.samplesheet_tag",
+        "samplesheet.status",
+        "samplesheet.csv_data"]
+    label_columns = {
+        "raw_seqrun_igf_id": "Raw seqrun igf id",
+        "status": "Status",
+        "samplesheet.samplesheet_tag": "Samplesheet tag",
+        "samplesheet.status": "Samplesheet status",
+        "samplesheet.csv_data": "Samplesheet csv data",
+        "override_cycles": "Override cycles",
+        "date_stamp": "Run date"}
     edit_columns = ["raw_seqrun_igf_id", "samplesheet", "override_cycles"]
     base_permissions = ["can_list", "can_show", "can_edit"]
     base_order = ("raw_seqrun_igf_id", "desc")
