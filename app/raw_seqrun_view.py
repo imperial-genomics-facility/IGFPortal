@@ -65,10 +65,10 @@ class RawSeqrunView(ModelView):
         "raw_seqrun_igf_id": "Sequencing Id",
         "status": "Status",
         "samplesheet.samplesheet_tag": "Samplesheet tag",
-        "samplesheet.status": "Samplesheet status",
-        "samplesheet.csv_data": "Samplesheet csv data",
-        "samplesheet.validation_time": "Samplesheet validated on",
-        "samplesheet.update_time": "Samplesheet update on",
+        "samplesheet.status": "Status",
+        "samplesheet.csv_data": "Samplesheet csv",
+        "samplesheet.validation_time": "Validated on",
+        "samplesheet.update_time": "Updated on",
         "override_cycles": "Override cycles",
         "date_stamp": "Run date"}
     edit_columns = [
