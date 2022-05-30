@@ -49,6 +49,7 @@ services:
         restart: always
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
+          - /home/vmuser/secrets/airflow_conf.json:/secret/airflow_conf.json:ro
         container_name: celery_worker1
         command: ["celery -A app.celery worker --loglevel=INFO"]
         networks:

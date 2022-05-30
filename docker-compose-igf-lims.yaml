@@ -50,6 +50,7 @@ services:
         restart: always
         volumes:
           - /home/igf/igf_portal/github/IGFPortal:/github/IGFPortal:ro
+          - /home/igf/igf_portal/secret/airflow_conf.json:/secret/airflow_conf.json:ro
           - /tmp:/TMP_WORK_DIR:rw
         container_name: celery_worker1
         command: ["celery -A app.celery worker --loglevel=INFO"]
