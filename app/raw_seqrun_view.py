@@ -158,7 +158,7 @@ class RawSeqrunView(ModelView):
                         append(i.raw_seqrun_igf_id)
                     run_list.\
                         append({
-                            'raw_seqrun_igf_id': i.raw_seqrun_igf_id,
+                            'seqrun_id': i.raw_seqrun_igf_id,
                             'samplesheet_tag': i.samplesheet.samplesheet_tag,
                             'override_cycles': i.override_cycles})
         else:
@@ -168,7 +168,7 @@ class RawSeqrunView(ModelView):
                 flash(f"Invalide Samplesheet for {item.raw_seqrun_igf_id}", "error")
             else:
                 run_list = [{
-                    'raw_seqrun_igf_id': item.raw_seqrun_igf_id,
+                    'seqrun_id': item.raw_seqrun_igf_id,
                     'samplesheet_tag': item.samplesheet.samplesheet_tag,
                     'override_cycles': item.override_cycles}]
             run_id_list = [item.raw_seqrun_igf_id]
