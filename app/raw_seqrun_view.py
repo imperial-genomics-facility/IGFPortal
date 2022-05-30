@@ -1,14 +1,35 @@
+import os
+import time
+import logging
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_appbuilder import ModelView
 from .models import RawSeqrun, SampleSheetModel
-import logging
 from flask import redirect, flash
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from . import db
-from .raw_seqrun.raw_seqrun_util import check_and_filter_raw_seqruns_after_checking_samplesheet
-from .raw_seqrun.raw_seqrun_util import change_raw_run_status
+from . import celery
+from .airflow.airflow_api_utils import trigger_airflow_pipeline
+
+log = logging.getLogger(__name__)
+
+@celery.task(bind=True)
+def async_trigger_airflow_pipeline(self, dag_id, run_list):
+    try:
+        results = list()
+        for entry in run_list:
+            res = \
+                trigger_airflow_pipeline(
+                    dag_id=dag_id,
+                    conf_data=entry,
+                    airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'])
+            time.sleep(10)
+            results.append(res.status_code)
+        return dict(zip(run_list, results))
+    except Exception as e:
+        log.error(f"Failed to run celery job, error: {e}")
+
 
 def samplesheet_query():
     results = \
@@ -110,7 +131,7 @@ class RawSeqrunView(ModelView):
     """
 
 
-    @action("run_demultiplexing", "Run pipeline", confirmation="Clean up and generate fastqs for run?", multiple=False, icon="fa-plane")
+    @action("run_demultiplexing", "De-multiplex run", confirmation="De-multiplex run (and delete old fastqs) ?", multiple=False, icon="fa-plane")
     def run_demultiplexing(self, item):
         run_list = list()
         if isinstance(item, list):
@@ -122,16 +143,39 @@ class RawSeqrunView(ModelView):
         return redirect(self.get_redirect())
 
 
-    @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="confirm test pipeline run", icon="fa-rocket")
+    @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="Confirm test pipeline run ?", icon="fa-rocket")
     def trigger_pre_demultiplexing(self, item):
         run_list = list()
+        run_id_list = list()
         if isinstance(item, list):
-            run_list = [i.raw_seqrun_igf_id for i in item]
+            for i in item:
+                if i.samplesheet is None or \
+                   i.samplesheet.status != 'PASS' or \
+                   i.samplesheet.validation_time < i.samplesheet.update_time:
+                    flash(f"Invalide Samplesheet for {i.raw_seqrun_igf_id}", "error")
+                else:
+                    run_id_list.\
+                        append(i.raw_seqrun_igf_id)
+                    run_list.\
+                        append({
+                            'raw_seqrun_igf_id': i.raw_seqrun_igf_id,
+                            'samplesheet_tag': i.samplesheet.samplesheet_tag,
+                            'override_cycles': i.override_cycles})
         else:
-            run_list = [item.raw_seqrun_igf_id]
-        id_list, run_list = \
-            check_and_filter_raw_seqruns_after_checking_samplesheet(
-                raw_seqrun_igf_ids=run_list)
-        flash("Submitted jobs for {0}".format(', '.join(run_list)), "info")
+            if item.samplesheet is None or \
+               item.samplesheet.status != 'PASS' or \
+               item.samplesheet.validation_time < item.samplesheet.update_time:
+                flash(f"Invalide Samplesheet for {item.raw_seqrun_igf_id}", "error")
+            else:
+                run_list = [{
+                    'raw_seqrun_igf_id': item.raw_seqrun_igf_id,
+                    'samplesheet_tag': item.samplesheet.samplesheet_tag,
+                    'override_cycles': item.override_cycles}]
+            run_id_list = [item.raw_seqrun_igf_id]
+        if len(run_list) > 0:
+            _ = \
+            async_trigger_airflow_pipeline.\
+                apply_async(args=['dag23_test_bclconvert_demult', run_list])
+            flash("Running test for {0}".format(', '.join(run_id_list)), "info")
         self.update_redirect()
         return redirect(self.get_redirect())
