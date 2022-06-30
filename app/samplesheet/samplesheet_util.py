@@ -214,20 +214,36 @@ class SampleSheet:
                     duplicate_entries = \
                         l_data[l_data[index_lookup_columns].duplicated()]
                     for entry in duplicate_entries.to_dict(orient="records"):
+                        if 'index2' in index_lookup_columns:
+                            f_df = \
+                                l_data[
+                                    (l_data[index_lookup_columns[0]] == entry[index_lookup_columns[0]]) & \
+                                    (l_data[index_lookup_columns[1]] == entry[index_lookup_columns[1]])]
+                        else:
+                            f_df = \
+                                l_data[
+                                    (l_data[index_lookup_columns[0]] == entry[index_lookup_columns[0]])]
                         errors.append(
-                            "Duplicate index for lane {0} sample {1}: {2}".\
+                            "Duplicate index for lane {0} samples {1}: {2}".\
                                 format(
                                     lane,
-                                    entry.get(sample_id_col),
+                                    ','.join(f_df[sample_id_col].tolist()),
                                     ', '.join([entry.get(i) for i in index_lookup_columns])) )
             else:
                 duplicate_entries = \
                     df[df[index_lookup_columns].duplicated()]
                 for entry in duplicate_entries.to_dict(orient="records"):
+                    if 'index2' in index_lookup_columns:
+                        f_df = \
+                            df[(df[index_lookup_columns[0]] == entry[index_lookup_columns[0]]) & \
+                               (df[index_lookup_columns[1]] == entry[index_lookup_columns[1]])]
+                    else:
+                        f_df = \
+                            df[(df[index_lookup_columns[0]] == entry[index_lookup_columns[0]])]
                     errors.append(
                         "Duplicate index for sample {0}: {1}".\
                             format(
-                                entry.get(sample_id_col),
+                                ','.join(f_df[sample_id_col].tolist()),
                                 ', '.join([entry.get(i) for i in index_lookup_columns])) )
             # get duplicate samples ids and names
             if lane_col in df.columns:
