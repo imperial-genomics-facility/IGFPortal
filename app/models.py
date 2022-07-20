@@ -907,8 +907,8 @@ class Collection(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
   collection_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  name = Column(String(70), nullable=False)
-  type = Column(String(50), nullable=False)
+  name = Column(String(150), nullable=False)
+  type = Column(String(150), nullable=False)
   table = Column(Enum('sample', 'experiment', 'run', 'file', 'project', 'seqrun', 'analysis', 'unknown'), nullable=False, server_default='unknown')
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
 
@@ -951,7 +951,7 @@ class File(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
   file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  file_path = Column(String(500), nullable=False)
+  file_path = Column(String(1000), nullable=False)
   location = Column(Enum('ORWELL', 'HPC_PROJECT', 'ELIOT', 'IRODS', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
   status = Column(Enum('ACTIVE', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
   md5 = Column(String(33))
