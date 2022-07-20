@@ -28,7 +28,10 @@ def check_and_filter_raw_seqruns_after_checking_samplesheet(
         run_list = list()
         results = \
             db.session.\
-                query(RawSeqrun.raw_seqrun_id, RawSeqrun.raw_seqrun_igf_id).\
+                query(
+                    RawSeqrun.raw_seqrun_id,
+                    RawSeqrun.raw_seqrun_igf_id,
+                    RawSeqrun.override_cycles).\
                 join(SampleSheetModel, SampleSheetModel.samplesheet_id==RawSeqrun.samplesheet_id).\
                 filter(SampleSheetModel.status=='PASS').\
                 filter(SampleSheetModel.validation_time >= SampleSheetModel.update_time).\
