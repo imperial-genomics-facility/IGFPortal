@@ -9,6 +9,7 @@ from io import BytesIO
 from .models import RawSeqrun
 from .raw_seqrun.raw_seqrun_util import fetch_samplesheet_for_seqrun
 from .raw_seqrun.raw_seqrun_util import fetch_override_cycle_for_seqrun
+from .raw_seqrun.raw_seqrun_util import fetch_samplesheet_id_for_seqrun
 
 class RawSeqrunApi(ModelRestApi):
     resource_name = "raw_seqrun"
@@ -59,5 +60,18 @@ class RawSeqrunApi(ModelRestApi):
                 return self.response(200, override_cycle='')
             else:
                 return self.response(200, override_cycle=result)
+        except Exception as e:
+            logging.error(e)
+
+    @expose('/get_samplesheet_id/<seqrun_id>',  methods=['POST'])
+    @protect()
+    def get_samplesheet_id(self, seqrun_id):
+        try:
+            result = \
+                fetch_samplesheet_id_for_seqrun(seqrun_id=seqrun_id)
+            if result is None:
+                return self.response(200, samplesheet_id='')
+            else:
+                return self.response(200, samplesheet_id=result)
         except Exception as e:
             logging.error(e)

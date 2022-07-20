@@ -4,6 +4,24 @@ from typing import Tuple, Any
 from .. import db
 from ..models import RawSeqrun, SampleSheetModel
 
+def fetch_samplesheet_id_for_seqrun(seqrun_id: str) -> Any:
+    try:
+        result = \
+            db.session.\
+                query(
+                    RawSeqrun.samplesheet_id).\
+                filter(RawSeqrun.raw_seqrun_igf_id==seqrun_id).\
+                one_or_none()
+        if result is None:
+            return None
+        else:
+            (samplesheet_id, ) = result
+            return samplesheet_id
+    except Exception as e:
+        raise ValueError(
+            f"Failed to fetch samplesheet id for seqrun, error: {e}")
+
+
 def fetch_override_cycle_for_seqrun(seqrun_id: str) -> Any:
     try:
         records = \
