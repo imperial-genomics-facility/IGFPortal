@@ -4,6 +4,23 @@ from typing import Tuple, Any
 from .. import db
 from ..models import RawSeqrun, SampleSheetModel
 
+def fetch_override_cycle_for_seqrun(seqrun_id: str) -> Any:
+    try:
+        records = \
+            db.session.\
+                query(
+                    RawSeqrun.override_cycles).\
+                filter(RawSeqrun.raw_seqrun_igf_id==seqrun_id).\
+                one_or_none()
+        if records is None:
+            return None
+        else:
+            (override_cycle, ) = records
+            return override_cycle
+    except Exception as e:
+        raise ValueError(
+            f"Failed to fetch override cycle for seqrun, error: {e}")
+
 def fetch_samplesheet_for_seqrun(seqrun_id: str) -> Any:
     try:
         result = \
@@ -18,7 +35,8 @@ def fetch_samplesheet_for_seqrun(seqrun_id: str) -> Any:
                 one_or_none()
         return result
     except Exception as e:
-        raise ValueError("Failed to fetch samplesheet for seqrun, error: {0}".format(e))
+        raise ValueError(
+            f"Failed to fetch samplesheet for seqrun, error: {e}")
 
 def check_and_filter_raw_seqruns_after_checking_samplesheet(
     raw_seqrun_igf_ids: list) -> \
@@ -30,8 +48,7 @@ def check_and_filter_raw_seqruns_after_checking_samplesheet(
             db.session.\
                 query(
                     RawSeqrun.raw_seqrun_id,
-                    RawSeqrun.raw_seqrun_igf_id,
-                    RawSeqrun.override_cycles).\
+                    RawSeqrun.raw_seqrun_igf_id).\
                 join(SampleSheetModel, SampleSheetModel.samplesheet_id==RawSeqrun.samplesheet_id).\
                 filter(SampleSheetModel.status=='PASS').\
                 filter(SampleSheetModel.validation_time >= SampleSheetModel.update_time).\
@@ -45,7 +62,8 @@ def check_and_filter_raw_seqruns_after_checking_samplesheet(
                 for i in results]
         return id_list, run_list
     except Exception as e:
-        raise ValueError("Failed to filter seqruns, error: {0}".format(e))
+        raise ValueError(
+            f"Failed to filter seqruns, error: {e}")
 
 def change_raw_run_status(
     run_list: list,
@@ -58,5 +76,6 @@ def change_raw_run_status(
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        raise ValueError("Failed to change raw run status, error: {0}".format(e))
+        raise ValueError(
+            f"Failed to change raw run status, error: {e}")
 
