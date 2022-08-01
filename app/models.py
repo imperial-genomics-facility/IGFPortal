@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText
 from sqlalchemy.types import TypeDecorator
+from flask_appbuilder.models.mixins import AuditMixin
 
 
 """
@@ -227,6 +228,47 @@ class RawAnalysis(Model):
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
     return self.analysis_tag
+
+"""
+Index tables
+"""
+
+class ProjectIndex(AuditMixin, Model):
+  __tablename__ = 'project_index'
+  __table_args__ = (
+    UniqueConstraint('project_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  project_index_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_tag = Column(String(80), nullable=False)
+  project_csv_data = Column(LONGTEXTType())
+  update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.project_tag
+  def sample_table(self):
+        return Markup('<a href="'+url_for('ProjectIndexView.get_index_for_project', id=self.project_index_id)+'">samples</a>')
+
+class SampleIndex(AuditMixin, Model):
+  __tablename__ = 'sample_index'
+  __table_args__ = (
+    UniqueConstraint('project_index_id', 'sample_name'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  sample_index_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  sample_name = Column(String(80), nullable=False)
+  igf_id = Column(String(80), nullable=True)
+  container_id = Column(String(80), nullable=True)
+  rin_score = Column(String(10), nullable=True)
+  well_position = Column(String(10), nullable=True)
+  pool_id = Column(String(10), nullable=True)
+  i7_index_name = Column(String(20), nullable=False)
+  i7_index = Column(String(20), nullable=False)
+  i5_index_name = Column(String(20), nullable=True)
+  i5_index = Column(String(20), nullable=True)
+  avg_region_molarity = Column(String(10), nullable=True)
+  project_index_id = Column(INTEGER(unsigned=True), ForeignKey("project_index.project_index_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
+  project_index = relationship('ProjectIndex')
+  def __repr__(self):
+    return self.sample_name
+
 """
   RDS project backup
 """

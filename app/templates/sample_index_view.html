@@ -1,0 +1,26 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<h1>Project tag: {{ project_name }}</h1>
+<p/>
+<h3>Sample table</h3>
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-sm">
+        <thead class="thead">
+            <tr>
+                {% for colname in columns %}
+                <th scope="col">{{ colname }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            {% for row in table_data %}
+            <tr>
+                {% for rowcol in row %}
+                <td>{{ rowcol }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

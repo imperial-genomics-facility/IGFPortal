@@ -19,6 +19,7 @@ from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, Samp
 from .raw_analysis_view import RawAnalysisView
 from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
+from .index_table_view import ProjectIndexView, SampleIndexView
 
 """
     Application wide 404 error handler
@@ -103,14 +104,14 @@ appbuilder.\
         "Create metadata and validate",
         category_icon="fa-folder-open-o",
         icon="fa-th",
-        category="Metadata submission")
+        category="Metadata")
 appbuilder.\
     add_view(
         RawMetadataSubmitView,
         "Upload metadata to pipeline",
         category_icon="fa-folder-open-o",
         icon="fa-upload",
-        category="Metadata submission")
+        category="Metadata")
 """
     Raw analysis view
 """
@@ -179,3 +180,21 @@ appbuilder.\
         category_icon="fa-table",
         icon="fa-paper-plane-o",
         category="Metadata table")
+
+"""
+    Index table view
+"""
+appbuilder.\
+    add_view(
+        ProjectIndexView,
+        "Project index",
+        category_icon="fa-folder-open-o",
+        icon="fa-table",
+        category="Metadata")
+appbuilder.\
+    add_view(
+        SampleIndexView,
+        "Sample index",
+        category_icon="fa-folder-open-o",
+        icon="fa-table",
+        category="Metadata")
