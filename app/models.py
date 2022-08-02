@@ -264,6 +264,7 @@ class SampleIndex(AuditMixin, Model):
   i5_index_name = Column(String(20), nullable=True)
   i5_index = Column(String(20), nullable=True)
   avg_region_molarity = Column(String(10), nullable=True)
+  avg_fragment_size = Column(INTEGER, nullable=True)
   project_index_id = Column(INTEGER(unsigned=True), ForeignKey("project_index.project_index_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
   project_index = relationship('ProjectIndex')
   def __repr__(self):

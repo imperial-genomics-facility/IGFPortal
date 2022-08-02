@@ -3,6 +3,7 @@ import time
 import logging
 import pandas as pd
 from flask import g
+from typing import Tuple
 from datetime import datetime
 from io import BytesIO, StringIO
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
@@ -50,6 +51,7 @@ class ProjectIndexView(ModelView):
             flash(e, 'danger')
             return redirect('/project_index')
 
+
     @action("download_sample_index_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def download_sample_index_csv(self, item):
         try:
@@ -58,10 +60,7 @@ class ProjectIndexView(ModelView):
                 get_sample_index_for_project(
                     project_index_id=item.project_index_id,
                     get_original_col_names=True)
-            log.warn(sample_records)
             file_name = f'{project_name}.csv'
-
-
             if len(sample_records) > 0:
                 df = \
                     pd.DataFrame(sample_records, columns=columns)
@@ -87,10 +86,18 @@ class ProjectIndexView(ModelView):
                 sample_list = \
                     df.to_dict(orient='records')
                 try:
+                    ## load csv data to sample_index table
                     create_or_update_sample_index_data(
                         sample_list=sample_list,
                         project_index_id=item.project_index_id,
                         user_id=g.user.id)
+                    ## reset project_csv_data to empty
+                    db.session.\
+                        query(ProjectIndex).\
+                        filter(ProjectIndex.project_index_id == item.project_index_id).\
+                        update({'project_csv_data': ''})
+                    db.session.commit()
+                    flash(f'Loaded indices for {item.project_tag}', 'success')
                 except Exception as e:
                     flash(f'Failed to load csv for {item.project_tag}', 'danger')
                     log.error(e)
@@ -135,7 +142,7 @@ def create_or_update_sample_index_data(
                 if 'created_on' not in sample_entry:
                     sample_entry['created_on'] = datetime.now()
                 sample_index = \
-                    SampleIndex(sample_entry)
+                    SampleIndex(**sample_entry)
                 db.session.add(sample_index)
                 db.session.flush()
             else:
@@ -158,7 +165,10 @@ def create_or_update_sample_index_data(
         log.error(e)
         raise
 
-def get_sample_index_for_project(project_index_id, get_original_col_names=False):
+def get_sample_index_for_project(
+      project_index_id: int,
+      get_original_col_names: bool = False) \
+        -> Tuple[list, str, list]:
     try:
         columns = [
             "Sample name",
@@ -171,7 +181,8 @@ def get_sample_index_for_project(project_index_id, get_original_col_names=False)
             "I7 index",
             "I5 index name",
             "I5 index",
-            "Avg region molarity"
+            "Avg region molarity",
+            "Avg fragment size"
         ]
         original_columns = [
             "sample_name",
@@ -184,7 +195,8 @@ def get_sample_index_for_project(project_index_id, get_original_col_names=False)
             "i7_index",
             "i5_index_name",
             "i5_index",
-            "avg_region_molarity"
+            "avg_region_molarity",
+            "avg_fragment_size"
         ]
         project_name = \
             db.session.\
@@ -208,6 +220,7 @@ def get_sample_index_for_project(project_index_id, get_original_col_names=False)
                     SampleIndex.i5_index_name,
                     SampleIndex.i5_index,
                     SampleIndex.avg_region_molarity,
+                    SampleIndex.avg_fragment_size
                     ).\
                 filter(SampleIndex.project_index_id == project_index_id).\
                 order_by(SampleIndex.sample_index_id.desc()).\
@@ -236,7 +249,10 @@ class SampleIndexView(ModelView):
     list_columns = [
         "project_index.project_tag",
         "sample_name",
-        "igf_id"
+        "igf_id",
+        "container_id",
+        "well_position",
+        "pool_id"
         ]
     base_permissions = ['can_list', 'can_show', 'can_edit']
     show_columns = [
@@ -251,7 +267,8 @@ class SampleIndexView(ModelView):
         "i7_index",
         "i5_index_name",
         "i5_index",
-        "avg_region_molarity"
+        "avg_region_molarity",
+        "avg_fragment_size"
         ]
     edit_columns = [
         "project_index",
@@ -265,7 +282,8 @@ class SampleIndexView(ModelView):
         "i7_index",
         "i5_index_name",
         "i5_index",
-        "avg_region_molarity"
+        "avg_region_molarity",
+        "avg_fragment_size"
         ]
     add_form_extra_fields = {
         "project_index": QuerySelectField(
