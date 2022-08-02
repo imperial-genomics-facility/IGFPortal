@@ -4,6 +4,7 @@ from flask import abort
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, SimpleFormView
 from flask_appbuilder.baseviews import  expose
+from flask_appbuilder.security.decorators import protect, has_access
 from . import db
 from .models import IlluminaInteropData
 from .forms import SeqrunInteropForm
@@ -43,10 +44,11 @@ class IlluminaInteropDataView(ModelView):
     datamodel = SQLAInterface(IlluminaInteropData)
     label_columns = {'seqrun':'Sequencing run', 'date_stamp': 'Updated on'}
     list_columns = ['seqrun', 'date_stamp']
-    base_permissions = ['can_list']
+    base_permissions = ['can_list', 'can_get_seqrun']
     base_order = ("date_stamp" , "desc")
 
     @expose('/interop/<int:id>')
+    @has_access
     def get_seqrun(self, id):
         (run_name, intensity_data, table_data, flowcell_data,
          cluster_count_data, density_data, qscore_bins_data,

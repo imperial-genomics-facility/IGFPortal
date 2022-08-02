@@ -3,6 +3,7 @@ import logging
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView
 from flask_appbuilder.baseviews import expose
+from flask_appbuilder.security.decorators import protect, has_access
 from . import db
 from .models import PreDeMultiplexingData
 
@@ -23,10 +24,11 @@ class PreDeMultiplexingDataView(ModelView):
         'samplesheet_tag',
         'date_stamp',
         'report']
-    base_permissions = ['can_list']
+    base_permissions = ['can_list', 'can_get_report']
     base_order = ("date_stamp", "desc")
 
     @expose('/predemult_report/<int:id>')
+    @has_access
     def get_report(self, id):
         try:
             (run_name, samplesheet_tag, flowcell_cluster_plot, project_summary_table, project_summary_plot,
