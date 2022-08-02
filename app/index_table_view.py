@@ -6,6 +6,7 @@ from flask import g
 from typing import Tuple
 from datetime import datetime
 from io import BytesIO, StringIO
+from flask_appbuilder.security.decorators import protect, has_access
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.fields import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
@@ -23,7 +24,7 @@ log = logging.getLogger(__name__)
 
 class ProjectIndexView(ModelView):
     datamodel = SQLAInterface(ProjectIndex)
-    base_permissions = ['can_list', 'can_show', 'can_add', 'can_edit']
+    base_permissions = ['can_list', 'can_show', 'can_add', 'can_edit', 'can_get_index_for_project']
     list_columns = ['project_tag', 'sample_table', 'update_time']
     show_columns = ['project_tag', 'project_csv_data']
     add_columns = ['project_tag', 'project_csv_data']
@@ -34,6 +35,7 @@ class ProjectIndexView(ModelView):
         "update_time": "Updated on"}
 
     @expose('/project_sample_index/<int:id>')
+    @has_access
     def get_index_for_project(self, id):
         try:
             columns, project_name, sample_records = \

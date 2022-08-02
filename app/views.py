@@ -38,6 +38,22 @@ def page_not_found(e):
     )
 
 """
+    Application wide 401 error handler
+"""
+
+
+@appbuilder.app.errorhandler(401)
+def page_not_found(e):
+    return (
+        render_template(
+            "401.html",
+            base_template=appbuilder.base_template,
+            appbuilder=appbuilder
+        ),
+        401,
+    )
+
+"""
     Application wide 500 error handler
 """
 
