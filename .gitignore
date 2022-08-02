@@ -18,3 +18,4 @@ dump.rdb
 .tox/dist/UNKNOWN-0.0.0.zip
 celery_flower.sh
 .env
+backup.sql
