@@ -293,20 +293,25 @@ class SampleSheet:
         try:
             final_v2_samplesheet = list()
             for key, val in self._header_data.items():
-                if key == 'Settings':
-                    key = 'BCLConvert_Settings'
-                    val = [
-                        "CreateFastqForIndexReads,1",
-                        "MinimumTrimmedReadLength,8",
-                        "FastqCompressionFormat,gzip",
-                        "MaskShortReads,8",
-                        "OverrideCycles,Y_READ1_;I_INDEX1_;I_INDEX2_;Y_READ2_"
-                    ]
-                if key not in self.data_header_name:
+                if key != 'Settings' and \
+                   key not in self.data_header_name:
                     final_v2_samplesheet.\
                         append(f'[{key}]')
                     final_v2_samplesheet.\
                         extend(val)
+            key = 'BCLConvert_Settings'
+            val = [
+                "CreateFastqForIndexReads,1",
+                "MinimumTrimmedReadLength,8",
+                "FastqCompressionFormat,gzip",
+                "MaskShortReads,8",
+                "OverrideCycles,Y_READ1_;I_INDEX1_;I_INDEX2_;Y_READ2_",
+                ""
+            ]
+            final_v2_samplesheet.\
+                append(f'[{key}]')
+            final_v2_samplesheet.\
+                extend(val)
             final_v2_samplesheet.\
                 append('[BCLConvert_Data]')
             samplesheet_df = \

@@ -1,4 +1,5 @@
-import logging
+import logging, tempfile, os
+from app.samplesheet.samplesheet_util import SampleSheet
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import redirect, flash, url_for, send_file, abort
 from flask_appbuilder import ModelView
@@ -55,28 +56,61 @@ class SampleSheetView(ModelView):
 
     @action("download_samplesheet", "Download samplesheet", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def download_samplesheet(self, item):
-        output = BytesIO(item.csv_data.encode())
-        samplesheet_tag = item.samplesheet_tag.encode()
-        if isinstance(samplesheet_tag, bytes):
-            samplesheet_tag = samplesheet_tag.decode()
-        output.seek(0)
-        self.update_redirect()
-        return send_file(output, attachment_filename='SampleSheet_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+        try:
+            output = BytesIO(item.csv_data.encode())
+            samplesheet_tag = item.samplesheet_tag.encode()
+            if isinstance(samplesheet_tag, bytes):
+                samplesheet_tag = samplesheet_tag.decode()
+            output.seek(0)
+            self.update_redirect()
+            return send_file(output, attachment_filename='SampleSheet_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+        except:
+            flash('Failed to download samplesheet', 'danger')
+            return redirect(url_for('SampleSheetView.list'))
 
+    @action("download_v2_samplesheet", "Download v2 samplesheet", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def download_v2_samplesheet(self, item):
+        try:
+            if item.status != 'PASS':
+                flash('Samplesheet is not validated', 'warning')
+                raise
+            csv_data = item.csv_data
+            if isinstance(csv_data, bytes):
+                csv_data = csv_data.decode()
+            with tempfile.TemporaryDirectory() as temp_dir:
+                csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+                with open(csv_file, 'w') as fp:
+                    fp.write(csv_data)
+                sa = SampleSheet(infile=csv_file)
+                v2_csv_data = sa.get_v2_samplesheet_data()
+            output = BytesIO(v2_csv_data.encode())
+            samplesheet_tag = item.samplesheet_tag.encode()
+            if isinstance(samplesheet_tag, bytes):
+                samplesheet_tag = samplesheet_tag.decode()
+            output.seek(0)
+            self.update_redirect()
+            return send_file(output, attachment_filename='SampleSheet-V2_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+        except:
+            flash('Failed to download v2 samplesheet', 'danger')
+            return redirect(url_for('SampleSheetView.list'))
 
     @action("validate_samplesheet", "Validate SampleSheets", confirmation="Run validation?", icon="fa-rocket", multiple=True, single=False)
     def validate_samplesheet(self, item):
-        id_list = list()
-        tag_list = list()
-        if isinstance(item, list):
-            id_list = [i.samplesheet_id for i in item]
-            tag_list = [i.samplesheet_tag for i in item]
-        else:
-            id_list = [item.samplesheet_id]
-            tag_list = [item.samplesheet_tag]
-        _ = \
-            async_validate_samplesheet.\
-                apply_async(args=[id_list])
-        flash("Submitted jobs for {0}".format(', '.join(tag_list)), "info")
-        self.update_redirect()
-        return redirect(self.get_redirect())
+        try:
+            id_list = list()
+            tag_list = list()
+            if isinstance(item, list):
+                id_list = [i.samplesheet_id for i in item]
+                tag_list = [i.samplesheet_tag for i in item]
+            else:
+                id_list = [item.samplesheet_id]
+                tag_list = [item.samplesheet_tag]
+            _ = \
+                async_validate_samplesheet.\
+                    apply_async(args=[id_list])
+            flash("Submitted jobs for {0}".format(', '.join(tag_list)), "info")
+            self.update_redirect()
+            return redirect(self.get_redirect())
+        except:
+            flash('Failed to validate samplesheet', 'danger')
+            return redirect(url_for('SampleSheetView.list'))
