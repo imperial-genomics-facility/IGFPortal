@@ -284,6 +284,49 @@ class SampleSheet:
                         format(e))
 
 
+    def get_v2_samplesheet_data(
+        self,
+        allowed_columns: list = ['Sample_ID', 'index', 'index2', 'Sample_Project']) -> str:
+        '''
+        Convert V1 to V2 samplesheet
+        '''
+        try:
+            final_v2_samplesheet = list()
+            for key, val in self._header_data.items():
+                if key == 'Settings':
+                    key = 'BCLConvert_Settings'
+                    val = [
+                        "CreateFastqForIndexReads,1",
+                        "MinimumTrimmedReadLength,8",
+                        "FastqCompressionFormat,gzip",
+                        "MaskShortReads,8",
+                        "OverrideCycles,Y_READ1_;I_INDEX1_;I_INDEX2_;Y_READ2_"
+                    ]
+                if key not in self.data_header_name:
+                    final_v2_samplesheet.\
+                        append(f'[{key}]')
+                    final_v2_samplesheet.\
+                        extend(val)
+            final_v2_samplesheet.\
+                append('[BCLConvert_Data]')
+            samplesheet_df = \
+                pd.DataFrame(self._data, columns=self._data_header)
+            target_columns = [
+                c for c in self._data_header
+                    if c in allowed_columns]
+            samplesheet_df = \
+                samplesheet_df[target_columns]
+            final_v2_samplesheet.\
+                append(','.join(target_columns))
+            for row in samplesheet_df.values.tolist():
+                final_v2_samplesheet.\
+                    append(','.join(row))
+            return '\n'.join(final_v2_samplesheet)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to convert V1 to V2 samplesheet, error: {e}")
+
+
     def validate_samplesheet_data(
         self,
         schema_json: str=os.path.join(os.path.dirname(__file__), 'samplesheet_validation.json')) \

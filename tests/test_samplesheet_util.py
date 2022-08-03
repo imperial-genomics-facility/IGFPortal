@@ -85,6 +85,26 @@ class TestSampleSheetDbUpdate(unittest.TestCase):
         self.assertEqual(entry.status, 'PASS')
         self.assertEqual(entry.report, 'PASS')
 
+    def test_samplesheet_v2(self):
+        sa = SampleSheet(infile="data/SampleSheet_v1.csv")
+        self.assertEqual(sa._samplesheet_version, 'v1')
+        v2_data = sa.get_v2_samplesheet_data()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+            with open(csv_file, 'w') as fp:
+                fp.write(v2_data)
+            sa = SampleSheet(infile=csv_file)
+            self.assertEqual(sa._samplesheet_version, 'v2')
+        sa = SampleSheet(infile="data/SampleSheet_v2.csv")
+        self.assertEqual(sa._samplesheet_version, 'v2')
+        v2_data = sa.get_v2_samplesheet_data()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+            with open(csv_file, 'w') as fp:
+                fp.write(v2_data)
+            sa = SampleSheet(infile=csv_file)
+            self.assertEqual(sa._samplesheet_version, 'v2')
+
 
     def test_validate_samplesheet_data_and_update_db(self):
         with open("data/SampleSheet_v1.csv", 'r') as fp:
