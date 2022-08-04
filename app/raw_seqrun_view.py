@@ -36,7 +36,7 @@ def samplesheet_query():
         db.session.\
             query(SampleSheetModel).\
             order_by(SampleSheetModel.samplesheet_id.desc()).\
-            limit(20).\
+            limit(40).\
             all()
     return results
 
@@ -56,6 +56,7 @@ class RawSeqrunView(ModelView):
         "status",
         "override_cycles",
         "date_stamp",
+        "samplesheet.samplesheet_id",
         "samplesheet.samplesheet_tag",
         "samplesheet.status",
         "samplesheet.validation_time",
@@ -64,6 +65,7 @@ class RawSeqrunView(ModelView):
     label_columns = {
         "raw_seqrun_igf_id": "Sequencing Id",
         "status": "Status",
+        "samplesheet.samplesheet_tag": "Samplesheet ID",
         "samplesheet.samplesheet_tag": "Samplesheet tag",
         "samplesheet.status": "Status",
         "samplesheet.csv_data": "Samplesheet csv",
