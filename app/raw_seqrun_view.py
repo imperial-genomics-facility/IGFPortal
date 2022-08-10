@@ -65,7 +65,7 @@ class RawSeqrunView(ModelView):
     label_columns = {
         "raw_seqrun_igf_id": "Sequencing Id",
         "status": "Status",
-        "samplesheet.samplesheet_tag": "Samplesheet ID",
+        "samplesheet.samplesheet_id": "Samplesheet ID",
         "samplesheet.samplesheet_tag": "Samplesheet tag",
         "samplesheet.status": "Status",
         "samplesheet.csv_data": "Samplesheet csv",
@@ -97,64 +97,15 @@ class RawSeqrunView(ModelView):
         )
     }
 
-    @action("get_new_seqrun", "Get new seqrun", confirmation="Are you sure?" , icon="fa-paper-plane-o", multiple=False)
-    def get_new_seqrun(self, ids):
-        flash("New seqrun(s) added to queue")
-        self.update_redirect()
-        return redirect(self.get_redirect())
 
-    """
-    @action("mark_raw_run_rejected", "Reject run", confirmation="Reject run?", icon="fa-ban", multiple=False)
-    def mark_raw_run_rejected(self, item):
-        run_list = list()
-        if isinstance(item, list):
-            run_list = [i.raw_seqrun_igf_id for i in item]
-        else:
-            run_list = [item.raw_seqrun_igf_id]
-        try:
-            change_raw_run_status(
-                run_list=run_list,
-                status='REJECTED')
-        except Exception as e:
-            logging.error(e)
-        self.update_redirect()
-        return redirect(self.get_redirect())
-
-    @action("first_run_demultiplexing", "Run pipeline", confirmation="Confirm pipeline run?", multiple=False, icon="fa-space-shuttle")
-    def firts_run_demultiplexing(self, item):
-        run_list = list()
-        if isinstance(item, list):
-            run_list = [i.raw_seqrun_igf_id for i in item]
-        else:
-            run_list = [item.raw_seqrun_igf_id]
-        flash("Submitted jobs for {0}".format(', '.join(run_list)), "info")
-        self.update_redirect()
-        return redirect(self.get_redirect())
-    """
-
-
-    @action("run_demultiplexing", "De-multiplex run", confirmation="De-multiplex run (and delete old fastqs) ?", multiple=False, icon="fa-plane")
+    @action("run_demultiplexing", "Run De-multiplexing", confirmation="Run de-multiplexing pipeline ?", multiple=False, icon="fa-plane")
     def run_demultiplexing(self, item):
-        run_list = list()
-        if isinstance(item, list):
-            run_list = [i.raw_seqrun_igf_id for i in item]
-        else:
-            run_list = [item.raw_seqrun_igf_id]
-        flash("Submitted jobs for {0}".format(', '.join(run_list)), "info")
-        self.update_redirect()
-        return redirect(self.get_redirect())
-
-
-    @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="Confirm test pipeline run ?", icon="fa-rocket")
-    def trigger_pre_demultiplexing(self, item):
-        run_list = list()
-        run_id_list = list()
         if isinstance(item, list):
             for i in item:
                 if i.samplesheet is None or \
                    i.samplesheet.status != 'PASS' or \
                    i.samplesheet.validation_time < i.samplesheet.update_time:
-                    flash(f"Invalide Samplesheet for {i.raw_seqrun_igf_id}", "error")
+                    flash(f"Invalide Samplesheet for {i.raw_seqrun_igf_id}", "danger")
                 else:
                     run_id_list.\
                         append(i.raw_seqrun_igf_id)
@@ -167,7 +118,45 @@ class RawSeqrunView(ModelView):
             if item.samplesheet is None or \
                item.samplesheet.status != 'PASS' or \
                item.samplesheet.validation_time < item.samplesheet.update_time:
-                flash(f"Invalide Samplesheet for {item.raw_seqrun_igf_id}", "error")
+                flash(f"Invalide Samplesheet for {item.raw_seqrun_igf_id}", "danger")
+            else:
+                run_list = [{
+                    'seqrun_id': item.raw_seqrun_igf_id,
+                    'samplesheet_tag': item.samplesheet.samplesheet_tag,
+                    'override_cycles': item.override_cycles}]
+            run_id_list = [item.raw_seqrun_igf_id]
+        if len(run_list) > 0:
+            _ = \
+            async_trigger_airflow_pipeline.\
+                apply_async(args=['dag24_build_bclconvert_dynamic_dags', run_list])
+            flash("Running de-multiplexing for {0}".format(', '.join(run_id_list)), "info")
+        self.update_redirect()
+        return redirect(self.get_redirect())
+
+
+    @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="Confirm test pipeline run ?", multiple=True, single=False, icon="fa-rocket")
+    def trigger_pre_demultiplexing(self, item):
+        run_list = list()
+        run_id_list = list()
+        if isinstance(item, list):
+            for i in item:
+                if i.samplesheet is None or \
+                   i.samplesheet.status != 'PASS' or \
+                   i.samplesheet.validation_time < i.samplesheet.update_time:
+                    flash(f"Invalide Samplesheet for {i.raw_seqrun_igf_id}", "danger")
+                else:
+                    run_id_list.\
+                        append(i.raw_seqrun_igf_id)
+                    run_list.\
+                        append({
+                            'seqrun_id': i.raw_seqrun_igf_id,
+                            'samplesheet_tag': i.samplesheet.samplesheet_tag,
+                            'override_cycles': i.override_cycles})
+        else:
+            if item.samplesheet is None or \
+               item.samplesheet.status != 'PASS' or \
+               item.samplesheet.validation_time < item.samplesheet.update_time:
+                flash(f"Invalide Samplesheet for {item.raw_seqrun_igf_id}", "danger")
             else:
                 run_list = [{
                     'seqrun_id': item.raw_seqrun_igf_id,
@@ -179,5 +168,41 @@ class RawSeqrunView(ModelView):
             async_trigger_airflow_pipeline.\
                 apply_async(args=['dag23_test_bclconvert_demult', run_list])
             flash("Running test for {0}".format(', '.join(run_id_list)), "info")
+        self.update_redirect()
+        return redirect(self.get_redirect())
+
+
+    @action("cleanup_demultiplexing", "Remove fastqs for re-run", confirmation="Delete fastqs for all projects before re-run  ?", multiple=False, icon="fa-plane")
+    def cleanup_demultiplexing(self, item):
+        if isinstance(item, list):
+            for i in item:
+                if i.samplesheet is None or \
+                   i.samplesheet.status != 'PASS' or \
+                   i.samplesheet.validation_time < i.samplesheet.update_time:
+                    flash(f"Invalide Samplesheet for {i.raw_seqrun_igf_id}", "danger")
+                else:
+                    run_id_list.\
+                        append(i.raw_seqrun_igf_id)
+                    run_list.\
+                        append({
+                            'seqrun_id': i.raw_seqrun_igf_id,
+                            'samplesheet_tag': i.samplesheet.samplesheet_tag,
+                            'override_cycles': i.override_cycles})
+        else:
+            if item.samplesheet is None or \
+               item.samplesheet.status != 'PASS' or \
+               item.samplesheet.validation_time < item.samplesheet.update_time:
+                flash(f"Invalide Samplesheet for {item.raw_seqrun_igf_id}", "danger")
+            else:
+                run_list = [{
+                    'seqrun_id': item.raw_seqrun_igf_id,
+                    'samplesheet_tag': item.samplesheet.samplesheet_tag,
+                    'override_cycles': item.override_cycles}]
+            run_id_list = [item.raw_seqrun_igf_id]
+        #if len(run_list) > 0:
+        #    _ = \
+        #    async_trigger_airflow_pipeline.\
+        #        apply_async(args=['TODO', run_list])
+            flash("Removing fastqs for {0}".format(', '.join(run_id_list)), "info")
         self.update_redirect()
         return redirect(self.get_redirect())
