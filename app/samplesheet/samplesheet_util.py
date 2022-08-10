@@ -293,7 +293,8 @@ class SampleSheet:
         try:
             final_v2_samplesheet = list()
             for key, val in self._header_data.items():
-                if key != 'Settings' and \
+                if key != 'Settings' and  \
+                   key != 'Reads' and  \
                    key not in self.data_header_name:
                     final_v2_samplesheet.\
                         append(f'[{key}]')
