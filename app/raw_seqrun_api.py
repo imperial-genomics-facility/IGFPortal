@@ -10,10 +10,36 @@ from .models import RawSeqrun
 from .raw_seqrun.raw_seqrun_util import fetch_samplesheet_for_seqrun
 from .raw_seqrun.raw_seqrun_util import fetch_override_cycle_for_seqrun
 from .raw_seqrun.raw_seqrun_util import fetch_samplesheet_id_for_seqrun
+from .raw_seqrun.raw_seqrun_util import check_and_add_new_raw_seqrun
 
 class RawSeqrunApi(ModelRestApi):
     resource_name = "raw_seqrun"
     datamodel = SQLAInterface(RawSeqrun)
+
+    @expose('/add_new_seqrun',  methods=['POST'])
+    @protect()
+    def add_new_seqrun(self):
+        try:
+            if not request.files:
+                return self.response_400('No files found')
+            file_objs = request.files.getlist('file')
+            file_obj = file_objs[0]
+            logging.warn(file_obj.filename)
+            file_obj.seek(0)
+            json_data = file_obj.read()
+            if isinstance(json_data, bytes):
+                json_data = json_data.decode('utf-8')
+            json_data = json.loads(json_data)
+            seqrun_id_list = json_data.get("seqrun_id_list")
+            if seqrun_id_list is None:
+                return self.response_400('No seqrun_id_list')
+            if isinstance(seqrun_id_list, list) and \
+               len(seqrun_id_list) > 0:
+                check_and_add_new_raw_seqrun(
+                    seqrun_id_list=seqrun_id_list)
+        except Exception as e:
+            logging.error(e)
+
 
     @expose('/search_run_samplesheet',  methods=['POST'])
     @protect()

@@ -7,6 +7,7 @@ from app.raw_seqrun.raw_seqrun_util import fetch_override_cycle_for_seqrun
 from app.raw_seqrun.raw_seqrun_util import fetch_samplesheet_for_seqrun
 from app.raw_seqrun.raw_seqrun_util import change_raw_run_status
 from app.raw_seqrun.raw_seqrun_util import check_and_filter_raw_seqruns_after_checking_samplesheet
+from app.raw_seqrun.raw_seqrun_util import check_and_add_new_raw_seqrun
 
 class TestRawSeqrunA(unittest.TestCase):
     def setUp(self):
@@ -75,6 +76,19 @@ class TestRawSeqrunA(unittest.TestCase):
         result = \
             fetch_samplesheet_for_seqrun('run2')
         self.assertIsNone(result)
+
+    def test_check_and_add_new_raw_seqrun(self):
+        seqrun_id_list = ['run1', 'run2', 'run 3']
+        check_and_add_new_raw_seqrun(
+            seqrun_id_list=seqrun_id_list)
+        results = \
+            db.session.\
+                query(RawSeqrun.raw_seqrun_igf_id).\
+                all()
+        self.assertEqual(len(results), 3)
+        results = [s[0] for s in results]
+        self.assertIn('run1', results)
+        self.assertIn('run_3', results)
 
 if __name__ == '__main__':
   unittest.main()

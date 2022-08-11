@@ -4,6 +4,30 @@ from typing import Tuple, Any
 from .. import db
 from ..models import RawSeqrun, SampleSheetModel
 
+def check_and_add_new_raw_seqrun(
+      seqrun_id_list: list) \
+        -> bool:
+    try:
+        for seqrun_id in seqrun_id_list:
+            seqrun_id = \
+                seqrun_id.\
+                    strip().\
+                    replace(' ', '_')
+            result = \
+                db.session.\
+                    query(RawSeqrun).\
+                    filter(RawSeqrun.raw_seqrun_igf_id==seqrun_id).\
+                    one_or_none()
+            if result is None:
+                db.session.add(RawSeqrun(raw_seqrun_igf_id=seqrun_id))
+                db.session.flush()
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise ValueError(
+            f"Failed to check and add new raw seqrun, error: {e}")
+
+
 def fetch_samplesheet_id_for_seqrun(seqrun_id: str) -> Any:
     try:
         result = \
