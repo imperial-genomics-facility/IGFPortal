@@ -100,6 +100,8 @@ class RawSeqrunView(ModelView):
 
     @action("run_demultiplexing", "Run De-multiplexing", confirmation="Run de-multiplexing pipeline ?", multiple=False, icon="fa-plane")
     def run_demultiplexing(self, item):
+        run_list = list()
+        run_id_list = list()
         if isinstance(item, list):
             for i in item:
                 if i.samplesheet is None or \
@@ -174,6 +176,8 @@ class RawSeqrunView(ModelView):
 
     @action("cleanup_demultiplexing", "Remove fastqs for re-run", confirmation="Delete fastqs for all projects before re-run  ?", multiple=False, icon="fa-plane")
     def cleanup_demultiplexing(self, item):
+        run_list = list()
+        run_id_list = list()
         if isinstance(item, list):
             for i in item:
                 if i.samplesheet is None or \
