@@ -36,9 +36,13 @@ class RawSeqrunApi(ModelRestApi):
             if isinstance(seqrun_id_list, list) and \
                len(seqrun_id_list) > 0:
                 check_and_add_new_raw_seqrun(
-                    seqrun_id_list=seqrun_id_list)
+                    seqrun_id_list)
+                return self.response(200, message='OK')
+            else:
+                return self.response_400('Empty seqrun_id_list')
         except Exception as e:
             logging.error(e)
+            return self.response_400('Failed to add new seqrun')
 
 
     @expose('/search_run_samplesheet',  methods=['POST'])
