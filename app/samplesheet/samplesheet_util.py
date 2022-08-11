@@ -294,12 +294,17 @@ class SampleSheet:
             final_v2_samplesheet = list()
             for key, val in self._header_data.items():
                 if key != 'Settings' and  \
+                   key != 'Header' and  \
                    key != 'Reads' and  \
                    key not in self.data_header_name:
                     final_v2_samplesheet.\
                         append(f'[{key}]')
                     final_v2_samplesheet.\
                         extend(val)
+            final_v2_samplesheet.\
+                append('[Header]')
+            final_v2_samplesheet.\
+                append('FileFormatVersion,2')
             key = 'BCLConvert_Settings'
             val = [
                 "CreateFastqForIndexReads,1",
