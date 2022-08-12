@@ -18,7 +18,10 @@ log = logging.getLogger(__name__)
 def async_trigger_airflow_pipeline(self, dag_id, run_list):
     try:
         results = list()
+        run_id_list = list()
         for entry in run_list:
+            run_id_list.\
+                append(entry.get('seqrun_id'))
             res = \
                 trigger_airflow_pipeline(
                     dag_id=dag_id,
@@ -26,7 +29,7 @@ def async_trigger_airflow_pipeline(self, dag_id, run_list):
                     airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'])
             time.sleep(10)
             results.append(res.status_code)
-        return dict(zip(run_list, results))
+        return dict(zip(run_id_list, results))
     except Exception as e:
         log.error(f"Failed to run celery job, error: {e}")
 
