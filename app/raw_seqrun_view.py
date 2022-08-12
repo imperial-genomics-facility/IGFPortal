@@ -174,7 +174,7 @@ class RawSeqrunView(ModelView):
         return redirect(self.get_redirect())
 
 
-    @action("cleanup_demultiplexing", "Remove fastqs for re-run", confirmation="Delete fastqs for all projects before re-run  ?", multiple=False, icon="fa-plane")
+    @action("cleanup_demultiplexing", "Remove fastqs for re-run", confirmation="Delete fastqs for all projects before re-run  ?", multiple=False, icon="fa-exclamation")
     def cleanup_demultiplexing(self, item):
         run_list = list()
         run_id_list = list()
