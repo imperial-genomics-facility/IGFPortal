@@ -17,8 +17,9 @@
             },
             "analysis_type": {
                 "type" : "string",
-                "pattern": "[a-zA-Z0-9-_]+$",
-                "maxLength": 120
+                "enum": [
+                    "dag9_tenx_single_cell_immune_profiling"
+                ]
             },
             "project_igf_id" : {
                 "type" : "string",
