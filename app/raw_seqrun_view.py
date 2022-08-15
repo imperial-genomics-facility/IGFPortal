@@ -39,7 +39,7 @@ def samplesheet_query():
         db.session.\
             query(SampleSheetModel).\
             order_by(SampleSheetModel.samplesheet_id.desc()).\
-            limit(40).\
+            limit(100).\
             all()
     return results
 
