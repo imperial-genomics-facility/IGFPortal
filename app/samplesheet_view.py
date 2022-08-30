@@ -68,11 +68,40 @@ class SampleSheetView(ModelView):
             flash('Failed to download samplesheet', 'danger')
             return redirect(url_for('SampleSheetView.list'))
 
+    @action("download_samplesheet_with_I5_rc", "Download samplesheet with I5 RC", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def download_samplesheet_with_I5_rc(self, item):
+        try:
+            if item.status != 'PASS':
+                flash('Samplesheet is not validated', 'danger')
+                raise
+            csv_data = item.csv_data
+            if isinstance(csv_data, bytes):
+                csv_data = csv_data.decode()
+            i5_rc_csv_data = ''
+            with tempfile.TemporaryDirectory() as temp_dir:
+                csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+                with open(csv_file, 'w') as fp:
+                    fp.write(csv_data)
+                sa = SampleSheet(infile=csv_file)
+                i5_rc_csv_data = \
+                    sa.get_samplesheet_with_reverse_complement_index(index_field='index2')
+            output = BytesIO(i5_rc_csv_data.encode())
+            samplesheet_tag = item.samplesheet_tag.encode()
+            if isinstance(samplesheet_tag, bytes):
+                samplesheet_tag = samplesheet_tag.decode()
+            output.seek(0)
+            #self.update_redirect()
+            return send_file(output, attachment_filename='SampleSheet-I5_RC_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+        except:
+            flash('Failed to download I5 RC samplesheet', 'danger')
+            return redirect(url_for('SampleSheetView.list'))
+
+
     @action("download_v2_samplesheet", "Download v2 samplesheet", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def download_v2_samplesheet(self, item):
         try:
             if item.status != 'PASS':
-                flash('Samplesheet is not validated', 'warning')
+                flash('Samplesheet is not validated', 'danger')
                 raise
             csv_data = item.csv_data
             if isinstance(csv_data, bytes):

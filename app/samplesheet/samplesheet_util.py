@@ -280,8 +280,47 @@ class SampleSheet:
             return errors
         except Exception as e:
             raise ValueError(
-                    "Failed to get duplicate entries, error: {0}".\
-                        format(e))
+                    f"Failed to get duplicate entries, error: {e}")
+
+
+    def get_samplesheet_with_reverse_complement_index(
+            self,
+            index_field: str = 'index2') \
+                -> str:
+        try:
+            df = pd.DataFrame(self._data)
+            df.fillna('', inplace=True)
+            # Only run the reverse complement function if index_field exists
+            if index_field in df.columns:
+                df[index_field] = \
+                    df[index_field].map(
+                        lambda x: \
+                            x.upper().\
+                            translate(
+                                str.maketrans('ACGT','TGCA'))[::-1])
+            ## get samplesheet data
+            final_samplesheet = list()
+            ## get headers
+            for key, val in self._header_data.items():
+                if key not in self.data_header_name:
+                    final_samplesheet.\
+                        append(f'[{key}]')
+                    final_samplesheet.\
+                        extend(val)
+            ## get data
+            final_samplesheet.\
+                append('[Data]')
+            ## get data column
+            final_samplesheet.\
+                append(','.join(self._data_header))
+            ## get data
+            for row in df[self._data_header].values.tolist():
+                final_samplesheet.\
+                    append(','.join(row))
+            return '\n'.join(final_samplesheet)
+        except Exception as e:
+            raise ValueError(
+                    f"Failed to reverse complement index, error: {e}")
 
 
     def get_v2_samplesheet_data(
@@ -312,7 +351,7 @@ class SampleSheet:
                 "FastqCompressionFormat,gzip",
                 "MaskShortReads,8",
                 "OverrideCycles,Y_READ1_;I_INDEX1_;I_INDEX2_;Y_READ2_",
-                ""
+                ","
             ]
             final_v2_samplesheet.\
                 append(f'[{key}]')

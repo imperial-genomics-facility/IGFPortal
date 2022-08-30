@@ -1,5 +1,6 @@
 import os, unittest, tempfile
 from app import db
+import pandas as pd
 from app.models import SampleSheetModel, Project, Sample
 from app.samplesheet.samplesheet_util import SampleSheet
 from app.samplesheet.samplesheet_util import update_samplesheet_validation_entry_in_db
@@ -84,6 +85,77 @@ class TestSampleSheetDbUpdate(unittest.TestCase):
         self.assertTrue(entry is not None)
         self.assertEqual(entry.status, 'PASS')
         self.assertEqual(entry.report, 'PASS')
+
+    def test_get_samplesheet_with_reverse_complement_index(self):
+        sa = SampleSheet(infile="data/SampleSheet_v1.csv")
+        sa._data_header = [
+            "Sample_ID",
+            "Sample_Name",
+            "Sample_Plate",
+            "Sample_Well",
+            "I7_Index_ID",
+            "index",
+            "I5_Index_ID",
+            "index2",
+            "Sample_Project",
+            "Description"]
+        sa._data = [{
+            "Sample_ID": "IGF0001",
+            "Sample_Name": "IGF0001",
+            "Sample_Plate": "",
+            "Sample_Well": "",
+            "I7_Index_ID": "",
+            "index": "AAAAAA",
+            "I5_Index_ID": "",
+            "index2": "TTTTTA",
+            "Sample_Project": "IGFQ_project_1",
+            "Description": ""
+        },{
+            "Sample_ID": "IGF0002",
+            "Sample_Name": "IGF0002",
+            "Sample_Plate": "",
+            "Sample_Well": "",
+            "I7_Index_ID": "",
+            "index": "AAAAAAAA",
+            "I5_Index_ID": "",
+            "index2": "",
+            "Sample_Project": "IGFQ_project_1",
+            "Description": ""
+        },{
+            "Sample_ID": "IGF0003",
+            "Sample_Name": "IGF0003",
+            "Sample_Plate": "",
+            "Sample_Well": "",
+            "I7_Index_ID": "",
+            "index": "SI-NN-A10",
+            "I5_Index_ID": "",
+            "index2": "",
+            "Sample_Project": "IGFQ_project_1",
+            "Description": "10X"
+        }]
+        i5_rc_data = \
+            sa.get_samplesheet_with_reverse_complement_index()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_file = os.path.join(temp_dir, 'SampleSheet.csv')
+            with open(csv_file, 'w') as fp:
+                fp.write(i5_rc_data)
+            sa = SampleSheet(infile=csv_file)
+            df = pd.DataFrame(sa._data)
+            self.assertEqual(
+                df[df['Sample_ID']=="IGF0001"]['index'].values.tolist()[0],
+                'AAAAAA')
+            self.assertEqual(
+                df[df['Sample_ID']=="IGF0001"]['index2'].values.tolist()[0],
+                'TAAAAA')
+            self.assertEqual(
+                df[df['Sample_ID']=="IGF0002"]['index'].values.tolist()[0],
+                'AAAAAAAA')
+            self.assertEqual(
+                df[df['Sample_ID']=="IGF0002"]['index2'].values.tolist()[0],
+                '')
+            self.assertEqual(
+                df[df['Sample_ID']=="IGF0003"]['index'].values.tolist()[0],
+                'SI-NN-A10')
 
     def test_samplesheet_v2(self):
         sa = SampleSheet(infile="data/SampleSheet_v1.csv")
