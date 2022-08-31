@@ -12,27 +12,31 @@
         "properties" : {
             "analysis_name": {
                 "type" : "string",
-                "pattern": "[a-zA-Z0-9-_]+$",
+                "pattern": "^[a-zA-Z0-9-_]+$",
                 "maxLength": 120
             },
             "analysis_type": {
                 "type" : "string",
                 "enum": [
-                    "dag9_tenx_single_cell_immune_profiling"
+                    "dag_1",
+                    "dag_2",
+                    "dag_3",
+                    "dag_4"
                 ]
             },
             "project_igf_id" : {
                 "type" : "string",
-                "pattern": "^IGF[a-zA-Z0-9-_]+$",
+                "pattern": "^[a-zA-Z0-9-_]+$",
                 "maxLength": 70
             },
             "analysis_description": {
-                "type" : "array",
+                "type" : "object",
                 "minItems": 1,
                 "uniqueItems": true
             }
         },
-        "required": ["project_igf_id",
+        "required": [
+            "project_igf_id",
             "analysis_name",
             "analysis_type",
             "analysis_description"]
