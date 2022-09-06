@@ -4,6 +4,7 @@ from flask_appbuilder.security.decorators import protect, has_access
 from . import db
 from .models import AdminHomeData
 
+log = logging.getLogger(__name__)
 
 """
     Home view
@@ -32,7 +33,7 @@ def fetch_admin_home_data():
             data2 = ""
         return finished_seqrun, finished_analysis, ongoing_seqrun, ongoing_analysis, data1, data2
     except Exception as e:
-        logging.error(e)
+        log.error(e)
 
 
 class HomeView(BaseView):
@@ -46,11 +47,12 @@ class HomeView(BaseView):
     @expose('/admin_home')
     @has_access
     def admin_home(self):
-        (finished_seqrun, finished_analysis,
-         ongoing_seqrun, ongoing_analysis,
-         data1, data2) = \
-            fetch_admin_home_data()
-        return self.render_template(
+        try:
+            (finished_seqrun, finished_analysis,
+             ongoing_seqrun, ongoing_analysis,
+            data1, data2) = \
+                fetch_admin_home_data()
+            return self.render_template(
                 'admin_index.html',
                 data1=data1,
                 data2=data2,
@@ -58,3 +60,5 @@ class HomeView(BaseView):
                 finished_analysis=finished_analysis,
                 ongoing_seqrun=ongoing_seqrun,
                 ongoing_analysis=ongoing_analysis)
+        except Exception as e:
+            log.error(e)
