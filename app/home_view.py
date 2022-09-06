@@ -1,5 +1,6 @@
 import logging
 from flask_appbuilder.baseviews import BaseView, expose
+from flask_appbuilder.security.decorators import protect, has_access
 from . import db
 from .models import AdminHomeData
 
@@ -36,11 +37,14 @@ def fetch_admin_home_data():
 
 class HomeView(BaseView):
     route_base = "/"
+
     @expose('/user_home')
+    @has_access
     def general(self):
         return self.render_template('user_index.html')
 
     @expose('/admin_home')
+    @has_access
     def admin_home(self):
         (finished_seqrun, finished_analysis,
          ongoing_seqrun, ongoing_analysis,
