@@ -298,6 +298,15 @@ def validate_raw_metadata_and_set_db_status(
             metadata_file = os.path.join(temp_dir, 'metadata.csv')
             with open(metadata_file, 'w') as fp:
                 fp.write(csv_data)
+            try:
+                _ = pd.read_csv(metadata_file)
+            except:
+                error_list.append('Not CSV input file')
+                _set_metadata_validation_status(
+                    raw_metadata_id=raw_metadata_id,
+                    status='FAILED',
+                    report='\n'.join(error_list))
+                return 'FAILED'
             validation_errors = \
                 _run_metadata_json_validation(
                     metadata_file=metadata_file,
@@ -306,6 +315,13 @@ def validate_raw_metadata_and_set_db_status(
                 error_list.\
                     extend(validation_errors)
             metadata_df = pd.read_csv(metadata_file)
+            ## check for duplicate metadat
+            metadata_df_dup = metadata_df.copy()
+            metadata_df_dup.drop_duplicates(inplace=True)
+            for sample_igf_id, s_data in metadata_df_dup.groupby('sample_igf_id'):
+                if len(s_data.index) > 1:
+                    error_list.append(
+                        f'Sample {sample_igf_id} is present more than once and not duplicate')
             for entry in metadata_df.to_dict(orient="records"):
                 sample_id = entry.get('sample_igf_id'),
                 library_source = entry.get('library_source'),
