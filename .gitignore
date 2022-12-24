@@ -19,3 +19,8 @@ dump.rdb
 celery_flower.sh
 .env
 backup.sql
+nginx.conf
+./static/*
+app/static/bclconvert_report_v0.02.html
+app/static/MultiQC_lane1.html
+app/static/MultiQC_lane1.html:Zone.Identifier

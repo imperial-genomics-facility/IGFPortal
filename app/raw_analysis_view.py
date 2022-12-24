@@ -1,3 +1,4 @@
+import logging, tempfile, os
 from io import BytesIO
 from .models import RawAnalysis, RawMetadataModel
 from flask_appbuilder import ModelView
@@ -6,6 +7,17 @@ from flask import redirect, flash, send_file
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from . import db
+from . import celery
+from .raw_analysis.raw_analysis_util import validate_analysis_json
+
+@celery.task(bind=True)
+def async_validate_analysis_yaml(self, id_list):
+    try:
+        pass
+    except Exception as e:
+        logging.error(
+            "Failed to run celery job, error: {0}".\
+                    format(e))
 
 class RawAnalysisView(ModelView):
     datamodel = SQLAInterface(RawAnalysis)
@@ -16,6 +28,7 @@ class RawAnalysisView(ModelView):
     base_filters = [
         ["status", FilterInFunction, lambda: ["UNKNOWN", "FAILED"]]]
     base_order = ("raw_analysis_id", "desc")
+
     @action("validate_and_submit_analysis", "Validate and upload analysis", confirmation="Validate analysis design?", icon="fa-rocket")
     def validate_and_submit_analysis(self, item):
         analysis_list = list()
