@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_appbuilder import ModelView
 from .models import RawSeqrun, SampleSheetModel

@@ -7,7 +7,7 @@ from typing import Tuple
 from datetime import datetime
 from io import BytesIO, StringIO
 from flask_appbuilder.security.decorators import protect, has_access
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms.fields import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_appbuilder import ModelView

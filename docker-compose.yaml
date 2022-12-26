@@ -21,7 +21,7 @@ services:
         networks:
           - portal_network
     webserver:
-        image: igfportal:v0.0.1
+        image: igfportal:v0.0.2
         env_file: env
         ports:
           - 8080:8080
@@ -58,7 +58,7 @@ services:
         networks:
           - portal_network
     celery_worker1:
-        image: igfportal:v0.0.1
+        image: igfportal:v0.0.2
         env_file: env
         links:
           - portal_db
@@ -75,7 +75,7 @@ services:
         networks:
           - portal_network
     celery_flower:
-        image: igfportal:v0.0.1
+        image: igfportal:v0.0.2
         env_file: env
         restart: always
         ports:
