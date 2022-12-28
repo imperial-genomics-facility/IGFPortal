@@ -265,14 +265,118 @@ class SampleIndex(AuditMixin, Model):
   i5_index = Column(String(20), nullable=True)
   avg_region_molarity = Column(String(10), nullable=True)
   avg_fragment_size = Column(INTEGER, nullable=True)
-  project_index_id = Column(INTEGER(unsigned=True), ForeignKey("project_index.project_index_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
+  project_index_id = Column(INTEGER(unsigned=True), ForeignKey("project_index.project_index_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
   project_index = relationship('ProjectIndex')
   def __repr__(self):
     return self.sample_name
 
 """
+  Project info
+"""
+
+class Project_info_data(Model):
+  __tablename__ = 'project_info_data'
+  __table_args__ = (
+    UniqueConstraint('project_info_data_id',),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  project_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  sample_read_count_data = Column(LONGTEXTType())
+  project_history_data = Column(LONGTEXTType())
+  project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project = relationship('Project')
+  def __repr__(self):
+    return self.project_info_data.project_info_data_id
+
+
+"""
+  Project seqrun info
+"""
+
+class Project_seqrun_info_data(Model):
+  __tablename__ = 'project_seqrun_info_data'
+  __table_args__ = (
+    UniqueConstraint('project_id', 'seqrun_id', 'lane_number', 'index_group_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  project_seqrun_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project = relationship('Project')
+  seqrun_id = Column(INTEGER(unsigned=True), ForeignKey("seqrun.seqrun_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  seqrun = relationship('Seqrun')
+  project_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_info_data.project_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project_info_data = relationship("Project_info_data")
+  lane_number = Column(Enum('1', '2', '3', '4', '5', '6', '7', '8'), nullable=False)
+  index_group_tag = Column(String(120), nullable=False)
+  def __repr__(self):
+    return self.project_seqrun_info_data.project_seqrun_info_data_id
+
+"""
+  Project seqrun file
+"""
+
+class Project_seqrun_info_file(Model):
+  __tablename__ = 'project_seqrun_info_file'
+  __table_args__ = (
+    UniqueConstraint('file_path',),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  project_seqrun_info_file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_seqrun_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_seqrun_info_data.project_seqrun_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project_seqrun_info_data = relationship("Project_seqrun_info_data")
+  file_tag = Column(String(120),)
+  file_path = Column(String(1000), nullable=False)
+  md5 = Column(String(65))
+  size = Column(String(52))
+  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+  date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+  def __repr__(self):
+    return self.project_seqrun_info_file.project_seqrun_info_file_id
+
+"""
+  Project analysis info
+"""
+
+class Project_analysis_info_data(Model):
+  __tablename__ = 'project_analysis_info_data'
+  __table_args__ = (
+    UniqueConstraint('project_id', 'analysis_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  project_analysis_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project = relationship('Project')
+  analysis_id = Column(INTEGER(unsigned=True), ForeignKey("analysis.analysis_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  analysis = relationship('Analysis')
+  project_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_info_data.project_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project_info_data = relationship("Project_info_data")
+  analysis_tag = Column(String(120), nullable=False)
+  def __repr__(self):
+    return self.project_analysis_info_data.project_analysis_info_data_id
+
+"""
+  Project analysis file
+"""
+
+class Project_analysis_info_file(Model):
+  __tablename__ = 'project_analysis_info_file'
+  __table_args__ = (
+    UniqueConstraint('file_path',),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  project_analysis_info_file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_analysis_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_analysis_info_data.project_analysis_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  project_analysis_info_data = relationship("Project_analysis_info_data")
+  file_tag = Column(String(120))
+  file_path = Column(String(1000), nullable=False)
+  md5 = Column(String(65))
+  size = Column(String(52))
+  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+  date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+  def __repr__(self):
+    return self.project_analysis_info_file.project_analysis_info_file_id
+
+
+
+"""
   RDS project backup
 """
+
 class RDSProject_backup(Model):
   __tablename__ = 'rds_project_backup'
   __table_args__ = (
@@ -331,6 +435,10 @@ class Project(Model):
     Display Project entry
     '''
     return  self.project_igf_id
+
+  def project_info(self):
+        return Markup('<a href="'+url_for('ProjectView.get_project_data',id=self.project_id)+'">'+self.project_igf_id+'</a>')
+
 
 class IgfUser(Model):
 

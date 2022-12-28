@@ -20,6 +20,7 @@ from .raw_analysis_view import RawAnalysisView
 from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
 from .index_table_view import ProjectIndexView, SampleIndexView
+from .iframe_view import IFrameView
 
 """
     Application wide 404 error handler
@@ -79,6 +80,13 @@ db.create_all()
 """
 appbuilder.\
     add_view_no_menu(HomeView())
+
+"""
+IFrame view
+"""
+
+appbuilder.\
+    add_view_no_menu(IFrameView())
 
 """
     Seqrun view
