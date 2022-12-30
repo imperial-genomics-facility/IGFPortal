@@ -1,5 +1,6 @@
 import json
 import logging
+from app import cache
 from flask import abort
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, SimpleFormView
@@ -8,6 +9,8 @@ from flask_appbuilder.security.decorators import protect, has_access
 from . import db
 from .models import IlluminaInteropData
 from .forms import SeqrunInteropForm
+
+log = logging.getLogger(__name__)
 
 """
     InterOp data view
@@ -36,8 +39,8 @@ def fetch_interop_data_by_id(run_id):
         return run_name, intensity_data, table_data, flowcell_data, \
                cluster_count_data, density_data, qscore_bins_data, \
                qscore_cycles_data, occupied_pass_filter, date_stamp
-    except Exception as e:
-        logging.error(e)
+    except:
+        raise
 
 
 class IlluminaInteropDataView(ModelView):
@@ -49,6 +52,7 @@ class IlluminaInteropDataView(ModelView):
 
     @expose('/interop/<int:id>')
     @has_access
+    @cache.cached(timeout=600)
     def get_seqrun(self, id):
         (run_name, intensity_data, table_data, flowcell_data,
          cluster_count_data, density_data, qscore_bins_data,

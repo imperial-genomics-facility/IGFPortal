@@ -3,6 +3,7 @@ import json
 import logging
 import gviz_api
 from app import db
+from app import cache
 import pandas as pd
 from flask import abort, render_template, url_for, Markup
 from flask_appbuilder import ModelView
@@ -176,6 +177,7 @@ class ProjectView(ModelView):
 
     @expose('/project_data/<int:id>')
     @has_access
+    @cache.cached(timeout=600)
     def get_project_data(self, id):
         (project_igf_id, sample_read_count_data,
          project_history_data, seqrun_results_gviz,

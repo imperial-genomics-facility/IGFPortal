@@ -1,5 +1,6 @@
 import json
 import logging
+from app import cache
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView
 from flask_appbuilder.baseviews import expose
@@ -7,6 +8,7 @@ from flask_appbuilder.security.decorators import protect, has_access
 from . import db
 from .models import PreDeMultiplexingData
 
+log = logging.getLogger(__name__)
 
 """
     Pre de-multiplexing view
@@ -29,6 +31,7 @@ class PreDeMultiplexingDataView(ModelView):
 
     @expose('/predemult_report/<int:id>')
     @has_access
+    @cache.cached(timeout=600)
     def get_report(self, id):
         try:
             (run_name, samplesheet_tag, flowcell_cluster_plot, project_summary_table, project_summary_plot,
@@ -56,7 +59,7 @@ class PreDeMultiplexingDataView(ModelView):
                 undetermined_plot=undetermined_plot,
                 lanes=lanes)
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
 
 def get_pre_demultiplexing_data(demult_id):
@@ -99,5 +102,5 @@ def get_pre_demultiplexing_data(demult_id):
             date_stamp = result.date_stamp
         return run_name, samplesheet_tag, flowcell_cluster_plot, project_summary_table, project_summary_plot,\
                sample_table, sample_plot, undetermined_table, undetermined_plot, date_stamp
-    except Exception as e:
-        logging.error(e)
+    except:
+        raise

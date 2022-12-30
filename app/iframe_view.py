@@ -44,7 +44,7 @@ def get_path_for_project_analysis_info_file(id):
 class IFrameView(BaseView):
     route_base = "/"
 
-    @expose("/static/<int:id>")
+    @expose("/static/rawdata/<int:id>")
     @has_access
     def view_seqrun_report(self, id):
         file_path, project_id = \
@@ -53,7 +53,7 @@ class IFrameView(BaseView):
             url_for('ProjectView.get_project_data', id=project_id)
         return self.render_template("iframe.html", url=file_path, project_url=project_url)
 
-    @expose("/static/<int:id>")
+    @expose("/static/analysis/<int:id>")
     @has_access
     def view_analysis_report(self, id):
         file_path, project_id = \

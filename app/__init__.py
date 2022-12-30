@@ -4,6 +4,7 @@ from flask import Flask, request
 from flask_appbuilder import AppBuilder, SQLA
 from .index import CustomIndexView
 from celery import Celery
+from flask_caching import Cache
 
 """
  Logging configuration
@@ -37,6 +38,15 @@ celery = \
         broker_url=app.config['CELERY_BROKER_URL'],
         result_backend=app.config['CELERY_RESULT_BACKEND'])
 celery.conf.update(app.config)
+
+## CACHING
+cache_config = {
+    "CACHE_TYPE": "RedisCache",
+    "CACHE_DEFAULT_TIMEOUT": 300,
+    "CACHE_REDIS_URL": app.config['CACHE_REDIS_URL']
+}
+app.config.from_mapping(cache_config)
+cache = Cache(app)
 
 ## GDPR
 @app.context_processor
