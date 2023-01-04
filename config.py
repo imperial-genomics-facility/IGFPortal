@@ -7,8 +7,8 @@ from flask_appbuilder.security.manager import (
     AUTH_OAUTH,
 )
 
-#basedir = os.path.abspath(os.path.dirname(__file__))
-basedir = '/tmp'
+basedir = os.path.abspath(os.path.dirname(__file__))
+#basedir = '/tmp'
 
 # Celery
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", 'memory://')

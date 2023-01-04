@@ -1,12 +1,12 @@
-import os, unittest
+import os, unittest, time
 from app import app, db, appbuilder
 from flask import Flask, g, url_for
 
 
 class TestCase1(unittest.TestCase):
     def setUp(self):
-        if os.path.exists('/tmp/app.db'):
-            os.remove('/tmp/app.db')
+        # if os.path.exists('app.db'):
+        #     os.remove('app.db')
         self.app_context = app.app_context()
         self.app_context.push()
         app.config.update({
@@ -28,11 +28,11 @@ class TestCase1(unittest.TestCase):
 
 
     def tearDown(self):
-        self.app_context.pop()
         db.session.remove()
+        self.app_context.pop()
         db.drop_all()
-        #if os.path.exists('app.db'):
-        #    os.remove('app.db')
+        if os.path.exists('app.db'):
+           os.remove('app.db')
 
     def test_access_server(self):
         uri = "/login"
