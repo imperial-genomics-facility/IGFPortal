@@ -1,5 +1,5 @@
+import os
 import logging
-
 from flask import Flask, request
 from flask_appbuilder import AppBuilder, SQLA
 from .index import CustomIndexView
@@ -45,8 +45,19 @@ cache_config = {
     "CACHE_DEFAULT_TIMEOUT": 300,
     "CACHE_REDIS_URL": app.config['CACHE_REDIS_URL']
 }
-app.config.from_mapping(cache_config)
-cache = Cache(app)
+
+test_cache_config = {
+    "CACHE_TYPE": "SimpleCache",
+    "CACHE_DEFAULT_TIMEOUT": 300,
+}
+
+env_name = os.environ.get('ENV_NAME')
+if app.config.get('TESTING') is not None:
+  app.config.from_mapping(test_cache_config)
+  cache = Cache(app)
+else:
+  app.config.from_mapping(cache_config)
+  cache = Cache(app)
 
 ## GDPR
 @app.context_processor

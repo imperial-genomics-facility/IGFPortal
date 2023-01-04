@@ -16,6 +16,7 @@ class TestApiCase(unittest.TestCase):
         self.demult_file = "data/demultiplexing_example.json"
 
     def tearDown(self):
+        db.session.remove()
         db.drop_all()
 
     def test_search_interop_for_run(self):

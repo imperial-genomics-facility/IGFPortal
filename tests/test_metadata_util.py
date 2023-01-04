@@ -8,9 +8,13 @@ from app.metadata.metadata_util import check_user_name_and_email_in_metadata_db
 
 class TestMetadataUtil1(unittest.TestCase):
     def setUp(self):
+        # db.drop_all()
+        # if os.path.exists('/tmp/app.db'):
+        #     os.remove('/tmp/app.db')
         db.create_all()
 
     def tearDown(self):
+        db.session.remove()
         db.drop_all()
 
     def test_cleanup_and_load_new_data_to_metadata_tables(self):
@@ -63,7 +67,7 @@ class TestMetadataUtil2(unittest.TestCase):
         project = \
             Project(
                 project_id=1,
-                project_igf_id="test1")
+                project_igf_id="test11")
         try:
             db.session.add(project)
             db.session.flush()
@@ -74,18 +78,19 @@ class TestMetadataUtil2(unittest.TestCase):
         result = \
             db.session.\
                 query(Project).\
-                filter(Project.project_igf_id=="test1").\
+                filter(Project.project_igf_id=="test11").\
                 one_or_none()
         self.assertTrue(result is not None)
         self.assertEqual(result.project_id, 1)
         output, errors = \
-            check_for_projects_in_metadata_db(project_list=["test1", "test2"])
-        self.assertTrue(output.get('test1'))
-        self.assertFalse(output.get('test2'))
+            check_for_projects_in_metadata_db(project_list=["test11", "test12"])
+        self.assertTrue(output.get('test11'))
+        self.assertFalse(output.get('test12'))
         self.assertEqual(len(errors), 1)
 
 class TestMetadataUtil3(unittest.TestCase):
     def setUp(self):
+        db.drop_all()
         db.create_all()
 
     def tearDown(self):

@@ -123,9 +123,7 @@ def check_for_projects_in_metadata_db(
                 query(Project.project_igf_id).\
                 filter(Project.project_igf_id.in_(project_list)).\
                 all()
-        results = [
-            i[0] if isinstance(i, tuple) else i
-                for i in results]
+        results = [i[0] for i in results]
         output = dict()
         for i in project_list:
             if i in results:
