@@ -1,18 +1,21 @@
-import os, unittest
-from app import app, db
+import os, unittest, time
+from app import app, db, appbuilder
 from flask import Flask, g, url_for
 
 
 class TestCase1(unittest.TestCase):
     def setUp(self):
-        # if os.path.exists('app.db'):
-        #     os.remove('app.db')
         self.app_context = app.app_context()
         self.app_context.push()
         app.config.update({
             "TESTING": True,
+            "CSRF_ENABLED": False,
+            "SQLALCHEMY_DATABASE_URI": "/tmp/app2.db"
         })
         app.config.from_object("flask_appbuilder.tests.config_api")
+        # db.drop_all()
+        # if os.path.exists('/tmp/app2.db'):
+        #     os.remove('/tmp/app2.db')
         db.create_all()
         self.client = app.test_client(use_cookies=True)
         role_admin = \
@@ -31,8 +34,8 @@ class TestCase1(unittest.TestCase):
         db.session.remove()
         self.app_context.pop()
         db.drop_all()
-        if os.path.exists('app.db'):
-           os.remove('app.db')
+        # if os.path.exists('/tmp/app2.db'):
+        #    os.remove('/tmp/app2.db')
 
     def test_server_access_without_login(self):
         rv2 = self.client.get('/admin_home')
