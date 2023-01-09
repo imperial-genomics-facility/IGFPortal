@@ -1,13 +1,24 @@
 import os, unittest, json, tempfile
-from app import appbuilder, db
+from app import db, app
 from app.models import AdminHomeData
 from app.admin_home.admin_home_utils import parse_and_add_new_admin_view_data
 
 class TestAdminHomeUtil1(unittest.TestCase):
     def setUp(self):
+        # os.environ['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/app_admin_home.db"
+        app.config.update({
+            "TESTING": True,
+            "CSRF_ENABLED": False,
+            # "SQLALCHEMY_DATABASE_URI": "sqlite:////tmp/app_admin_home.db",
+        })
         db.create_all()
+        self.app_context = app.app_context()
+        self.app_context.push()
+        print(db.get_engine().url)
 
     def tearDown(self):
+        db.session.remove()
+        self.app_context.pop()
         db.drop_all()
 
     def test_parse_and_add_new_admin_view_data(self):

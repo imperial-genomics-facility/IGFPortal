@@ -19,6 +19,7 @@ class JSONType(TypeDecorator):
   It will assign JSON datatype for mysql tables and unicodetext for sqlite
   '''
   impl = UnicodeText
+  cache_ok = True
 
   def load_dialect_impl(self, dialect):
     if dialect.name == 'mysql':
@@ -55,6 +56,7 @@ class LONGTEXTType(TypeDecorator):
   It will assign LONGTEXT datatype for mysql tables and unicodetext for sqlite
   '''
   impl = UnicodeText
+  cache_ok = True
 
   def load_dialect_impl(self, dialect):
     if dialect.name == 'mysql':
