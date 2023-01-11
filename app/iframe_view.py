@@ -1,6 +1,8 @@
 import json
+import base64
 import logging
 from flask import url_for
+from app import cache
 from flask_appbuilder.baseviews import BaseView, expose
 from flask_appbuilder.security.decorators import protect, has_access
 from app import db
@@ -46,18 +48,26 @@ class IFrameView(BaseView):
 
     @expose("/static/rawdata/<int:id>")
     @has_access
+    @cache.cached(timeout=600)
     def view_seqrun_report(self, id):
         file_path, project_id = \
             get_path_for_project_seqrun_info_file(id=id)
         project_url = \
             url_for('ProjectView.get_project_data', id=project_id)
-        return self.render_template("iframe.html", url=file_path, project_url=project_url)
+        # return self.render_template("iframe.html", url=file_path, project_url=project_url)
+        with open(file_path, 'r') as fp:
+            html_data = fp.read()
+        return self.render_template("iframe.html", html_data=html_data, project_url=project_url)
 
     @expose("/static/analysis/<int:id>")
     @has_access
+    @cache.cached(timeout=600)
     def view_analysis_report(self, id):
         file_path, project_id = \
             get_path_for_project_analysis_info_file(id=id)
         project_url = \
             url_for('ProjectView.get_project_data', id=project_id)
-        return self.render_template("iframe.html", url=file_path, project_url=project_url)
+        # return self.render_template("iframe.html", url=file_path, project_url=project_url)
+        with open(file_path, 'r') as fp:
+            html_data = fp.read()
+        return self.render_template("iframe.html", html_data=html_data, project_url=project_url)
