@@ -5,8 +5,34 @@ def test_admin_view(test_client):
     assert rv.status_code == 302
     rv = test_client.get('/predemultiplexingdataview/list/')
     assert rv.status_code == 302
-    rv = test_client.post("/login", data=dict(
-            username='admin1',
+    rv = test_client.get('/samplesheetview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/rawseqrunview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/rawmetadatavalidationview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/rawmetadatasubmitview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/projectindexview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/sampleindexview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/rawanalysisview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/analysisview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/rdsprojectbackupview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/projectview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/sampleprojectview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/userview/list/')
+    assert rv.status_code == 302
+    rv = test_client.get('/seqrunview/list/')
+    assert rv.status_code == 302
+    rv = test_client.post("/login/", data=dict(
+            username='admin',
             password='password'
             ), follow_redirects=True)
     assert rv.status_code == 200
@@ -15,10 +41,36 @@ def test_admin_view(test_client):
         session['_fresh'] = True
     rv = test_client.get('/admin_home')
     assert rv.status_code == 200
-    # rv = test_client.get('/illuminainteropdataview/list/')
-    # assert rv.status_code == 200
-    # rv = test_client.get('/predemultiplexingdataview/list/')
-    # assert rv.status_code == 200
+    rv = test_client.get('/illuminainteropdataview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/predemultiplexingdataview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/samplesheetview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/rawseqrunview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/rawmetadatavalidationview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/rawmetadatasubmitview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/projectindexview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/sampleindexview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/rawanalysisview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/analysisview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/rdsprojectbackupview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/projectview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/sampleprojectview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/userview/list/')
+    assert rv.status_code == 200
+    rv = test_client.get('/seqrunview/list/')
+    assert rv.status_code == 200
 
 # def test_view(test_client):
 #     rv = test_client.get('/admin_home')

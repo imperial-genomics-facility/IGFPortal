@@ -26,3 +26,4 @@ app/static/MultiQC_lane1.html
 app/static/MultiQC_lane1.html:Zone.Identifier
 app/static/*
 .coverage
+tests/1__init__.py
