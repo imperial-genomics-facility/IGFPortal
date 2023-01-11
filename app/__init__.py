@@ -52,7 +52,9 @@ test_cache_config = {
 }
 
 env_name = os.environ.get('ENV_NAME')
-if app.config.get('TESTING') is not None:
+if 'TESTING' in app.config and \
+   app.config.get('TESTING') is not None and \
+   app.config.get('TESTING'):
   app.config.from_mapping(test_cache_config)
   cache = Cache(app)
 else:
