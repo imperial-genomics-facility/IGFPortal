@@ -74,7 +74,7 @@ services:
           - /home/igf/dev/IGFPortal:/github/IGFPortal:ro
           - /home/igf/dev/secret/airflow_conf.json:/secret/airflow_conf.json:ro
         container_name: celery_worker1
-        command: ["celery -A app.celery worker --loglevel=WARN"]
+        command: ["celery -A app.celery worker --loglevel=WARNING"]
         networks:
           - portal_network
     celery_flower:
