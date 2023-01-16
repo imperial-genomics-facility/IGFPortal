@@ -1,0 +1,107 @@
+version: '3.9'
+networks:
+    portal_network:
+        driver: bridge
+services:
+    portal_db:
+        image: mysql:5.7
+        env_file: env
+        restart: always
+        ports:
+          - "3306:3306"
+        volumes:
+          - /home/igf/dev/mysqlappdb:/var/lib/mysql:rw
+        container_name: portal_db
+        networks:
+          - portal_network
+    redis_db:
+        image: redis:6.2
+        restart: always
+        container_name: redis_db
+        ports:
+          - 6379:6379
+        networks:
+          - portal_network
+    webserver:
+        image: imperialgenomicsfacility/igfportal:v0.0.2
+        env_file: env
+        ports:
+          - 8080:8080
+        restart: always
+        links:
+          - portal_db
+          - redis_db
+        depends_on:
+          - portal_db
+          - redis_db
+        volumes:
+          - /home/igf/dev/IGFPortal:/github/IGFPortal:ro
+          - /home/igf/dev/ssl_cert:/SSL:ro
+          - /home/igf/dev/static:/data/static:rw
+          - /tmp:/TMP_WORK_DIR:rw
+        container_name: webserver
+        command: ["gunicorn -b 0.0.0.0:8080 --threads 4 server:app"]
+        networks:
+          - portal_network
+    nginx:
+        image: nginx:1.23.3
+        ports:
+          - "80:80"
+          - "443:443"
+        links:
+          - webserver
+        depends_on:
+          - webserver
+        volumes:
+          - /home/igf/dev/ssl_cert:/SSL:ro
+          - /home/igf/dev/nginx.conf:/etc/nginx/nginx.conf:ro
+          - /tmp/nginx:/var/nginx/:rw
+          - /home/igf/dev/static:/data/static:rw
+        container_name: nginx
+        networks:
+          - portal_network
+    celery_worker1:
+        image: imperialgenomicsfacility/igfportal:v0.0.2
+        env_file: env
+        links:
+          - portal_db
+          - redis_db
+        depends_on:
+          - portal_db
+          - redis_db
+        restart: always
+        volumes:
+          - /home/igf/dev/IGFPortal:/github/IGFPortal:ro
+          - /home/igf/dev/secret/airflow_conf.json:/secret/airflow_conf.json:ro
+        container_name: celery_worker1
+        command: ["celery -A app.celery worker --loglevel=WARN"]
+        networks:
+          - portal_network
+    celery_flower:
+        image: imperialgenomicsfacility/igfportal:v0.0.2
+        env_file: env
+        restart: always
+        ports:
+          - "5555:5555"
+        links:
+          - redis_db
+          - portal_db
+        depends_on:
+          - redis_db
+          - portal_db
+        volumes:
+          - /home/igf/dev/IGFPortal:/github/IGFPortal:ro
+        container_name: celery_flower
+        command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
+        networks:
+          - portal_network
+    adminer:
+        image: adminer:latest
+        links:
+          - portal_db
+        ports:
+          - "8081:8080"
+        restart: always
+        container_name: adminer
+        networks:
+          - portal_network
