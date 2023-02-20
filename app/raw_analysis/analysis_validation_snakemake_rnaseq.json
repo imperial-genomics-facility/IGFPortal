@@ -1,0 +1,116 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF Snakemake RNA-Seq analysis validation schema",
+    "description": "Schema for validation of Snakemake RNA-Seq analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+    	"sample_metadata": {
+    		"type": "object",
+    		"uniqueItems": true,
+    		"minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": "object",
+                    "properties": {
+                        "condition": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9-_]+$"
+                        },
+                        "strandedness": {
+                            "type": "string",
+                            "enum": ["reverse", "forward", "unstranded"]
+                        }
+                    }
+                }
+            }
+    	},
+    	"analysis_metadata": {
+            "type": "object",
+    		"properties": {
+    			"ref": {
+    				"type": "object",
+    				"properties": {
+    					"species": {
+    						"type" : "string",
+    						"pattern": "^[a-zA-Z0-9-_]+$"
+    					},
+    					"release": {
+    						"type" : "number"
+    					},
+    					"build": {
+    						"type": "string",
+    						"pattern": "^[a-zA-Z0-9-_]+$"
+    					}
+    				},
+    				"required": ["species", "release", "build"]
+    			},
+    			"trimming": {
+    				"type": "object",
+    				"properties": {
+    					"activate": {
+                            "type": "boolean"
+                        }
+    				}
+    			},
+    			"mergeReads": {
+    				"type": "object",
+    				"properties": {
+    					"activate": {
+                            "type": "boolean"
+                        }
+    				}
+    			},
+    			"pca": {
+    				"type": "object",
+    				"properties": {
+    					"activate": {
+                            "type": "boolean"
+                        },
+    					"labels": {
+    						"type": "array",
+    						"uniqueItems": true,
+    						"minItems": 1,
+                            "items": {
+                                "type": "string",
+                                "pattern": "^[a-zA-Z0-9-_]+$"
+                            }
+    					}
+    				}
+    			},
+    			"diffexp": {
+    				"type": "object",
+    				"properties": {
+    					"contrasts": {
+    						"type": "object",
+    						"uniqueItems": true,
+    						"minItems": 1,
+                            "patternProperties": {
+                                "^[a-zA-Z0-9-_]+": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string",
+                                        "pattern": "^[A-Z0-9-_]+$"
+                                    }
+                                }
+                            }
+    					},
+    					"model": {
+    						"type": "string"
+    					}
+    				},
+    				"required": ["contrasts", "model"]
+    			},
+    			"params": {
+    				"type": "object",
+    				"uniqueItems": true,
+    				"minItems": 1
+    			}
+    		},
+    		"required": ["ref", "pca"]
+    	}
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}
