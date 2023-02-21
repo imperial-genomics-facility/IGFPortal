@@ -47,6 +47,7 @@ def validate_json_schema(id):
     except:
         raise
 
+
 @celery.task(bind=True)
 def async_validate_analysis_yaml(self, id_list):
     try:
@@ -54,6 +55,7 @@ def async_validate_analysis_yaml(self, id_list):
     except Exception as e:
         log.error(
             f"Failed to run celery job, error: {e}")
+
 
 @celery.task(bind=True)
 def async_validate_analysis_schema(self, id_list):
@@ -91,6 +93,7 @@ def pipeline_query():
             all()
     return results
 
+
 class RawAnalysisSchemaView(ModelView):
     datamodel = SQLAInterface(RawAnalysisValidationSchema)
     label_columns = {
@@ -106,6 +109,7 @@ class RawAnalysisSchemaView(ModelView):
         "can_show",
         "can_add",
         "can_delete"]
+    base_order = ("raw_analysis_schema_id", "desc")
 
     add_form_extra_fields = {
         "pipeline": QuerySelectField(
