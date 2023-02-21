@@ -110,6 +110,21 @@ class IlluminaInteropData(Model):
     def seqrun(self):
         return Markup('<a href="'+url_for('IlluminaInteropDataView.get_seqrun',id=self.run_id)+'">'+self.run_name+'</a>')
 
+class IlluminaInteropFile(Model):
+    __tablename__ = 'illumina_interop_file'
+    __table_args__ = (
+        UniqueConstraint('file_path'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+    file_path = Column(String(500), nullable=False)
+    file_tag = Column(String(50))
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+    date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+    run_id = Column(INTEGER(unsigned=True), ForeignKey("illumina_interop_data.run_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+    illumina_interop_data = relationship('IlluminaInteropData')
+    def __repr__(self):
+        return self.file_tag
+
 """
   Pre de-multiplexing data
 """
@@ -129,6 +144,8 @@ class PreDeMultiplexingData(Model):
     sample_plot= Column(TEXT())
     undetermined_table = Column(TEXT())
     undetermined_plot = Column(TEXT())
+    file_path = Column(String(500), nullable=True)
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
     date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
     def __repr__(self):
         return self.run_name
@@ -220,16 +237,40 @@ class RawSeqrun(Model):
 class RawAnalysis(Model):
   __tablename__ = 'raw_analysis'
   __table_args__ = (
-    UniqueConstraint('analysis_tag'),
+    UniqueConstraint('analysis_name', 'project_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
   raw_analysis_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  analysis_tag = Column(String(50), nullable=False)
-  analysis_yaml = Column(LONGTEXTType(), nullable=False)
-  status = Column(Enum("VALIDATED", "FAILED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+  project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="SET NULL"))
+  project = relationship('Project')
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"))
+  pipeline = relationship('Pipeline')
+  analysis_name = Column(String(120), nullable=False)
+  analysis_yaml = Column(LONGTEXTType(), nullable=True)
+  status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
   report = Column(TEXT())
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
-    return self.analysis_tag
+    return self.analysis_name
+
+
+"""
+  Raw analysis validation schema
+"""
+
+class RawAnalysisValidationSchema(Model):
+  __tablename__ = 'raw_analysis_validation_schema'
+  __table_args__ = (
+    UniqueConstraint('pipeline_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  raw_analysis_schema_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('pipeline.pipeline_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  pipeline = relationship('Pipeline')
+  json_schema = Column(JSONType)
+  status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.pipeline.pipeline_name
+
 
 """
 Index tables
