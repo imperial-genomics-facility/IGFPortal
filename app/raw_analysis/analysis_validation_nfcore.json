@@ -32,6 +32,9 @@
                 "NXF_VER": {
                     "type": "string"
                 },
+                "nfcore_pipeline": {
+                    "type": "string"
+                },
                 "nextflow_params": {
                     "type": "array",
                     "uniqueItems": true,
@@ -40,7 +43,8 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "required": ["NXF_VER", "nfcore_pipeline", "nextflow_params"]
         }
     },
     "required": ["sample_metadata", "analysis_metadata"]
