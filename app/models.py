@@ -247,7 +247,7 @@ class RawAnalysis(Model):
   analysis_name = Column(String(120), nullable=False)
   analysis_yaml = Column(LONGTEXTType(), nullable=True)
   status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
-  report = Column(TEXT())
+  report = Column(LONGTEXTType())
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
     return self.analysis_name
