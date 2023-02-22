@@ -229,7 +229,7 @@ def _get_file_collection_for_samples(
         filter(Sample.sample_igf_id.in_(sample_igf_id_list)).\
         all()
     sample_with_files = \
-        list(results)
+        list([s.sample_igf_id for s in results])
     return sample_with_files
   except Exception as e:
     raise ValueError(
@@ -254,10 +254,13 @@ def _get_sample_metadata_checks_for_analsis(
                     _get_file_collection_for_samples(
                         sample_igf_id_list=sample_ids)
                 if len(sample_ids) != len(sample_with_files):
-                    missing_samples = \
-                        list(set(sample_with_files).difference(set(sample_ids)))
-                    error_list.append(
-                        f"Missing fastq for samples: {', '.join(missing_samples)}")
+                    if len(sample_with_files) == 0:
+                        error_list.append('No sample has fastq')
+                    else:
+                        missing_samples = \
+                            list(set(sample_with_files).difference(set(sample_ids)))
+                        error_list.append(
+                            f"Missing fastq for samples: {', '.join(missing_samples)}")
                 project_list = \
                     _get_project_id_for_samples(sample_igf_id_list=sample_ids)
                 if len(project_list) == 0 :
