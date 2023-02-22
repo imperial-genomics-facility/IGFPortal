@@ -227,6 +227,7 @@ class RawSeqrun(Model):
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   samplesheet_id = Column(INTEGER(unsigned=True), ForeignKey("samplesheet.samplesheet_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
   samplesheet = relationship('SampleSheetModel')
+  mismatches = Column(Enum("0", "1", "2"), nullable=True, server_default='1')
   def __repr__(self):
     return self.raw_seqrun_igf_id
 

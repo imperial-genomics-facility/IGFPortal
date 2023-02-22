@@ -53,11 +53,13 @@ class RawSeqrunView(ModelView):
         "samplesheet.validation_time",
         "samplesheet.update_time",
         "override_cycles",
+        "mismatches",
         "date_stamp"]
     show_columns = [
         "raw_seqrun_igf_id",
         "status",
         "override_cycles",
+        "mismatches",
         "date_stamp",
         "samplesheet.samplesheet_id",
         "samplesheet.samplesheet_tag",
@@ -75,11 +77,13 @@ class RawSeqrunView(ModelView):
         "samplesheet.validation_time": "Validated on",
         "samplesheet.update_time": "Updated on",
         "override_cycles": "Override cycles",
+        "mismatches": "Barcode mismatch",
         "date_stamp": "Run date"}
     edit_columns = [
         "raw_seqrun_igf_id",
         "samplesheet",
-        "override_cycles"]
+        "override_cycles",
+        "mismatches"]
     base_permissions = [
         "can_list",
         "can_show",
