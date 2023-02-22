@@ -264,14 +264,15 @@ def _get_sample_metadata_checks_for_analsis(
                     error_list.append('No project info found')
                 if len(project_list) > 1:
                     error_list.append(
-                        f"samples are linked to multiple projects: {', '.join(project_list)}")
+                        f"samples are linked to multiple projects: {', '.join([p.project_igf_id for p in project_list])}")
                 if len(project_list) == 1 and \
                    project_list[0].project_igf_id != project_igf_id:
                     error_list.append(
                         f'Analysis is linked to project {project_igf_id} but samples are linked to project {project_list[0].project_igf_id}')
         return error_list
-    except:
-        raise
+    except Exception as e:
+        raise ValueError(
+            f"Failed to check sample metadata, error: {e}")
 
 def validate_analysis_design(
         raw_analysis_id: int) -> str:
