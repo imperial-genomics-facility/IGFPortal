@@ -16,7 +16,7 @@ from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
 from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, SampleProjectView, SampleView
-from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView
+from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView
 from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
 from .index_table_view import ProjectIndexView, SampleIndexView
@@ -150,21 +150,28 @@ appbuilder.\
 appbuilder.\
     add_view(
         RawAnalysisSchemaView,
-        "Analysis validation schema",
+        "Create validation schema",
         category_icon="fa-flask",
         icon="fa-file-text-o",
         category="Analysis")
 appbuilder.\
     add_view(
         RawAnalysisView,
-        "Add and submit analysis design",
+        "Upload analysis design",
+        category_icon="fa-flask",
+        icon="fa-file-text-o",
+        category="Analysis")
+appbuilder.\
+    add_view(
+        RawAnalysisQueueView,
+        "Validated analysis queue",
         category_icon="fa-flask",
         icon="fa-file-text-o",
         category="Analysis")
 appbuilder.\
     add_view(
         AnalysisView,
-        "Trigger analysis pipelines",
+        "Trigger analysis",
         category_icon="fa-flask",
         icon="fa-space-shuttle",
         category="Analysis")
