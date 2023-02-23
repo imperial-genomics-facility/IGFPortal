@@ -45,7 +45,8 @@
                         "nf-core/atacseq",
                         "nf-core/chipseq",
                         "nf-core/cutandrun",
-                        "nf-core/bactmap"
+                        "nf-core/bactmap",
+                        "nf-core/hic"
                     ]
                 },
                 "nextflow_params": {
