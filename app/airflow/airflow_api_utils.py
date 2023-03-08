@@ -1,6 +1,18 @@
 import json
 import requests
 from urllib.parse import urljoin
+from typing import Union
+
+def get_airflow_dag_id(airflow_conf_file: str, dag_tag: str) -> Union[str, None]:
+    try:
+        with open(airflow_conf_file, "r") as fp:
+            airflow_conf = json.load(fp)
+        dag_id = airflow_conf.get(dag_tag)
+        return dag_id
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get dag id for tag {dag_tag} in config file {airflow_conf_file}, error: {e}")
+
 
 def post_to_airflow_api(
       airflow_conf_file: str,

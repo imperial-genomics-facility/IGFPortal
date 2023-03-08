@@ -228,6 +228,7 @@ class RawSeqrun(Model):
   samplesheet_id = Column(INTEGER(unsigned=True), ForeignKey("samplesheet.samplesheet_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
   samplesheet = relationship('SampleSheetModel')
   mismatches = Column(Enum("0", "1", "2"), nullable=True, server_default='1')
+  trigger_time = Column(TIMESTAMP(), nullable=True)
   def __repr__(self):
     return self.raw_seqrun_igf_id
 
@@ -271,6 +272,21 @@ class RawAnalysisValidationSchema(Model):
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
     return self.pipeline.pipeline_name
+
+
+"""
+  Raw analysis template
+"""
+class RawAnalysisTemplate(Model):
+  __tablename__ = 'raw_analysis_template'
+  __table_args__ = (
+    UniqueConstraint('template_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  template_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  template_tag = Column(String(80), nullable=False)
+  template_data = Column(LONGTEXTType())
+  def __repr__(self):
+    return self.template_tag
 
 
 """

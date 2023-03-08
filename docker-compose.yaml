@@ -38,6 +38,7 @@ services:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
           - /home/vmuser/github/ssl:/SSL:ro
           - ./static:/data/static:rw
+          - /home/vmuser/secrets/airflow_conf.json:/secret/airflow_conf.json:ro
         container_name: webserver
         command: ["flask run -h 0.0.0.0 -p 8080 --reload --debugger --without-threads"]
         networks:
