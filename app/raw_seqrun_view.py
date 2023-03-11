@@ -95,6 +95,7 @@ class RawSeqrunView(ModelView):
         "mismatches",
         "date_stamp",
         "trigger_time",
+        "run_config",
         "samplesheet.samplesheet_id",
         "samplesheet.samplesheet_tag",
         "samplesheet.status",
@@ -113,6 +114,7 @@ class RawSeqrunView(ModelView):
         "override_cycles": "Override cycles",
         "mismatches": "Barcode mismatch",
         "date_stamp": "Run date",
+        "run_config": "Run setting",
         "trigger_time": "Trigger date"}
     edit_columns = [
         "raw_seqrun_igf_id",

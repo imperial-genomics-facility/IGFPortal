@@ -229,6 +229,7 @@ class RawSeqrun(Model):
   samplesheet = relationship('SampleSheetModel')
   mismatches = Column(Enum("0", "1", "2"), nullable=True, server_default='1')
   trigger_time = Column(TIMESTAMP(), nullable=True)
+  run_config = Column(String(200), nullable=True)
   def __repr__(self):
     return self.raw_seqrun_igf_id
 
