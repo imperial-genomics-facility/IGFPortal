@@ -34,7 +34,7 @@ def test_samplesheet_query(db):
 def test_update_trigger_date_for_seqrun(db):
         try:
             seqrun = \
-                RawSeqrun(raw_seqrun_igf_id='seqrun1')
+                RawSeqrun(raw_seqrun_igf_id='seqrun2')
             db.session.add(seqrun)
             db.session.flush()
             db.session.commit()
@@ -44,21 +44,21 @@ def test_update_trigger_date_for_seqrun(db):
         seqrun = \
             db.session.\
                 query(RawSeqrun).\
-                filter(RawSeqrun.raw_seqrun_igf_id=='seqrun1').\
+                filter(RawSeqrun.raw_seqrun_igf_id=='seqrun2').\
                 one_or_none()
-        assert seqrun.raw_seqrun_igf_id == 'seqrun1'
+        assert seqrun.raw_seqrun_igf_id == 'seqrun2'
         assert seqrun.trigger_time is None
-        update_trigger_date_for_seqrun(seqrun_id='seqrun1')
+        update_trigger_date_for_seqrun(seqrun_id='seqrun2')
         seqrun = \
             db.session.\
                 query(RawSeqrun).\
-                filter(RawSeqrun.raw_seqrun_igf_id=='seqrun1').\
+                filter(RawSeqrun.raw_seqrun_igf_id=='seqrun2').\
                 one_or_none()
-        assert seqrun.raw_seqrun_igf_id == 'seqrun1'
+        assert seqrun.raw_seqrun_igf_id == 'seqrun2'
         assert seqrun.trigger_time is not None
 
 @patch('app.raw_seqrun_view.trigger_airflow_pipeline', return_value=requests.patch('https://httpbin.org/patch', data ={'key': 'value'}, headers={'Content-Type': 'application/json'}))
-def test_async_trigger_airflow_pipeline(db):
+def test_async_trigger_airflow_pipeline(mock_object, db):
         try:
             seqrun = \
                 RawSeqrun(raw_seqrun_igf_id='seqrun1')
