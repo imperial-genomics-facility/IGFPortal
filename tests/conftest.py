@@ -12,7 +12,7 @@ def db():
 
 @pytest.fixture(scope="module")
 def test_client(db):
-    db.drop_all()
+    # db.drop_all()
     app.config.update({
         "TESTING": True,
         "CSRF_ENABLED": False,
