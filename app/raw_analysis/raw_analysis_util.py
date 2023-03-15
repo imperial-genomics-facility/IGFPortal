@@ -1,4 +1,5 @@
 import json
+import logging
 from yaml import load
 from yaml import Loader
 from ..models import RawAnalysis
@@ -14,6 +15,7 @@ from ..models import RawAnalysisValidationSchema
 from .. import db
 from jsonschema import Draft202012Validator
 
+log = logging.getLogger(__name__)
 
 def prepare_temple_for_analysis(template_tag: str) -> str:
     try:
@@ -73,10 +75,12 @@ def validate_json_schema(
         if json_schema is not None:
             json_schema = \
                 json_schema.encode('utf-8')
+        status = 'FAILED'
         try:
             _ = json.loads(json_schema)
             status = 'VALIDATED'
-        except:
+        except Exception as e:
+            log.error(f"Failed to run json validation, error: {e}")
             status = 'FAILED'
         try:
             db.session.\
