@@ -3,16 +3,15 @@ from app import app, appbuilder
 
 # pytest_plugins = ("celery.contrib.pytest", )
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def db():
     from app import db
     db.drop_all()
     db.create_all()
     yield db
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_client(db):
-    # db.drop_all()
     app.config.update({
         "TESTING": True,
         "CSRF_ENABLED": False,

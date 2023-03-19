@@ -108,12 +108,14 @@ def _get_validation_status_for_analysis_design(
         except:
             error_list.append(
                 'Failed to load yaml data')
+            return error_list
         try:
             schema = \
                 json.loads(validation_schema)
         except:
             error_list.append(
                 'Failed to load validation schema')
+            return error_list
         try:
             # validation can fail if inputs are not correct
             schema_validator = \
