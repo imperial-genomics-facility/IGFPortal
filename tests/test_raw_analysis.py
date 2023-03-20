@@ -21,6 +21,8 @@ from app.raw_analysis.raw_analysis_util import _get_validation_status_for_analys
 from app.raw_analysis.raw_analysis_util import _get_project_id_for_samples
 from app.raw_analysis.raw_analysis_util import _get_file_collection_for_samples
 from app.raw_analysis.raw_analysis_util import _get_sample_metadata_checks_for_analysis
+from app.raw_analysis.raw_analysis_util import _get_validation_errors_for_analysis_design
+from app.raw_analysis_view import async_validate_analysis_yaml
 
 def test_project_query(db):
     project1 = \
@@ -483,3 +485,587 @@ def test_get_sample_metadata_checks_for_analysis(db):
             project_igf_id='project1')
     assert len(error_list) == 2
     assert "samples are linked to multiple projects: project1, project2" in error_list
+
+
+def test_get_validation_errors_for_analysis_design(db):
+    ## setup metadata
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    sample3 = \
+        Sample(
+            sample_igf_id='IGF113',
+            project=project2)
+    experiment1 = \
+        Experiment(
+            experiment_igf_id='experiment1',
+            platform_name="NEXTSEQ2000",
+            status='ACTIVE',
+            library_name="sample1",
+            project=project1,
+            sample=sample1)
+    platform1 = \
+        Platform(
+            platform_igf_id="platform1",
+            model_name="NEXTSEQ2000",
+            vendor_name='ILLUMINA',
+            software_name="RTA",
+            software_version="x.y.z")
+    seqrun1 = \
+        Seqrun(
+            seqrun_igf_id="seqrun1",
+            flowcell_id="XXX",
+            platform=platform1)
+    run1 = \
+        Run(
+            run_igf_id="run1",
+            experiment=experiment1,
+            seqrun=seqrun1,
+            status='ACTIVE',
+            lane_number='1')
+    collection1 = \
+        Collection(
+            name="run1",
+            type="demultiplexed_fastq")
+    file1 = \
+        File(
+            file_path="/path/file1",
+            status='ACTIVE')
+    collection_group1 = \
+        Collection_group(
+            collection=collection1,
+            file=file1)
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.add(sample3)
+        db.session.add(experiment1)
+        db.session.add(platform1)
+        db.session.add(seqrun1)
+        db.session.add(run1)
+        db.session.add(collection1)
+        db.session.add(file1)
+        db.session.add(collection_group1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## setup design schema
+    schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
+    with open(schema_file, 'r') as fp:
+        schema_data = fp.read()
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    analysis_schema1 = \
+        RawAnalysisValidationSchema(
+        json_schema=schema_data,
+        pipeline=pipeline1,
+        status="VALIDATED")
+    try:
+        db.session.add(pipeline1)
+        db.session.add(analysis_schema1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## setup analysis design
+    ## valid design
+    design_1 = """
+    sample_metadata:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis1 = \
+        RawAnalysis(
+            analysis_name='analysis1',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_1)
+    try:
+        db.session.add(raw_analysis1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## valid design errors
+    error_list = \
+        _get_validation_errors_for_analysis_design(
+            raw_analysis_id=raw_analysis1.raw_analysis_id)
+    assert len(error_list) == 0
+    ## invalid design
+    error_list = \
+        _get_validation_errors_for_analysis_design(
+            raw_analysis_id=100)
+    assert len(error_list) == 1
+    assert "No metadata entry found for id 100" in error_list
+    ## invalid design
+    design_2 = None
+    raw_analysis2 = \
+        RawAnalysis(
+            analysis_name='analysis2',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_2)
+    try:
+        db.session.add(raw_analysis2)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid design errors
+    error_list = \
+        _get_validation_errors_for_analysis_design(
+            raw_analysis_id=raw_analysis2.raw_analysis_id)
+    assert len(error_list) == 1
+    assert "No analysis design found" in error_list
+    ## invalid analysis
+    raw_analysis3 = \
+        RawAnalysis(
+            analysis_name='analysis3',
+            analysis_yaml=design_1)
+    try:
+        db.session.add(raw_analysis3)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid analysis design errors
+    error_list = \
+        _get_validation_errors_for_analysis_design(
+            raw_analysis_id=raw_analysis3.raw_analysis_id)
+    assert len(error_list) == 3
+    assert "No pipeline info found" in error_list
+    assert "No project id found" in error_list
+    assert "No analysis schema found" in error_list
+    ## invalid design
+    design_4 = """
+    sample_metadata1:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis4 = \
+        RawAnalysis(
+            analysis_name='analysis4',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_4)
+    try:
+        db.session.add(raw_analysis4)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid analysis design errors
+    error_list = \
+        _get_validation_errors_for_analysis_design(
+            raw_analysis_id=raw_analysis4.raw_analysis_id)
+    assert len(error_list) == 1
+    check_error = False
+    for e in error_list:
+        if 'sample_metadata' in e:
+            check_error = True
+    assert check_error
+    ## invalid design
+    design_5 = """
+    sample_metadata:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+        IGF112:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis5 = \
+        RawAnalysis(
+            analysis_name='analysis5',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_5)
+    try:
+        db.session.add(raw_analysis5)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid analysis design errors
+    error_list = \
+        _get_validation_errors_for_analysis_design(
+            raw_analysis_id=raw_analysis5.raw_analysis_id)
+    assert len(error_list) == 1
+    assert "Missing fastq for samples: IGF112" in error_list
+
+
+def test_validate_analysis_design(db):
+    ## setup metadata
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    sample3 = \
+        Sample(
+            sample_igf_id='IGF113',
+            project=project2)
+    experiment1 = \
+        Experiment(
+            experiment_igf_id='experiment1',
+            platform_name="NEXTSEQ2000",
+            status='ACTIVE',
+            library_name="sample1",
+            project=project1,
+            sample=sample1)
+    platform1 = \
+        Platform(
+            platform_igf_id="platform1",
+            model_name="NEXTSEQ2000",
+            vendor_name='ILLUMINA',
+            software_name="RTA",
+            software_version="x.y.z")
+    seqrun1 = \
+        Seqrun(
+            seqrun_igf_id="seqrun1",
+            flowcell_id="XXX",
+            platform=platform1)
+    run1 = \
+        Run(
+            run_igf_id="run1",
+            experiment=experiment1,
+            seqrun=seqrun1,
+            status='ACTIVE',
+            lane_number='1')
+    collection1 = \
+        Collection(
+            name="run1",
+            type="demultiplexed_fastq")
+    file1 = \
+        File(
+            file_path="/path/file1",
+            status='ACTIVE')
+    collection_group1 = \
+        Collection_group(
+            collection=collection1,
+            file=file1)
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.add(sample3)
+        db.session.add(experiment1)
+        db.session.add(platform1)
+        db.session.add(seqrun1)
+        db.session.add(run1)
+        db.session.add(collection1)
+        db.session.add(file1)
+        db.session.add(collection_group1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## setup design schema
+    schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
+    with open(schema_file, 'r') as fp:
+        schema_data = fp.read()
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    analysis_schema1 = \
+        RawAnalysisValidationSchema(
+        json_schema=schema_data,
+        pipeline=pipeline1,
+        status="VALIDATED")
+    try:
+        db.session.add(pipeline1)
+        db.session.add(analysis_schema1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## setup analysis design
+    ## valid design
+    design_1 = """
+    sample_metadata:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis1 = \
+        RawAnalysis(
+            analysis_name='analysis1',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_1)
+    try:
+        db.session.add(raw_analysis1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## valid design status
+    status = \
+        validate_analysis_design(
+            raw_analysis_id=raw_analysis1.raw_analysis_id)
+    assert status == 'VALIDATED'
+    ## invalid design
+    design_5 = """
+    sample_metadata:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+        IGF112:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis5 = \
+        RawAnalysis(
+            analysis_name='analysis5',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_5)
+    try:
+        db.session.add(raw_analysis5)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid analysis design errors
+    status = \
+        validate_analysis_design(
+            raw_analysis_id=raw_analysis5.raw_analysis_id)
+    assert status == 'FAILED'
+
+
+def test_async_validate_analysis_schema(db):
+    ## setup metadata
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    sample3 = \
+        Sample(
+            sample_igf_id='IGF113',
+            project=project2)
+    experiment1 = \
+        Experiment(
+            experiment_igf_id='experiment1',
+            platform_name="NEXTSEQ2000",
+            status='ACTIVE',
+            library_name="sample1",
+            project=project1,
+            sample=sample1)
+    platform1 = \
+        Platform(
+            platform_igf_id="platform1",
+            model_name="NEXTSEQ2000",
+            vendor_name='ILLUMINA',
+            software_name="RTA",
+            software_version="x.y.z")
+    seqrun1 = \
+        Seqrun(
+            seqrun_igf_id="seqrun1",
+            flowcell_id="XXX",
+            platform=platform1)
+    run1 = \
+        Run(
+            run_igf_id="run1",
+            experiment=experiment1,
+            seqrun=seqrun1,
+            status='ACTIVE',
+            lane_number='1')
+    collection1 = \
+        Collection(
+            name="run1",
+            type="demultiplexed_fastq")
+    file1 = \
+        File(
+            file_path="/path/file1",
+            status='ACTIVE')
+    collection_group1 = \
+        Collection_group(
+            collection=collection1,
+            file=file1)
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.add(sample3)
+        db.session.add(experiment1)
+        db.session.add(platform1)
+        db.session.add(seqrun1)
+        db.session.add(run1)
+        db.session.add(collection1)
+        db.session.add(file1)
+        db.session.add(collection_group1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## setup design schema
+    schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
+    with open(schema_file, 'r') as fp:
+        schema_data = fp.read()
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    analysis_schema1 = \
+        RawAnalysisValidationSchema(
+        json_schema=schema_data,
+        pipeline=pipeline1,
+        status="VALIDATED")
+    try:
+        db.session.add(pipeline1)
+        db.session.add(analysis_schema1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## setup analysis design
+    ## valid design
+    design_1 = """
+    sample_metadata:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis1 = \
+        RawAnalysis(
+            analysis_name='analysis1',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_1)
+    try:
+        db.session.add(raw_analysis1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## valid design status
+    status_dict = \
+        async_validate_analysis_yaml(
+            id_list=[raw_analysis1.raw_analysis_id])
+    assert len(status_dict) == 1
+    assert raw_analysis1.raw_analysis_id in status_dict
+    assert status_dict.get(raw_analysis1.raw_analysis_id) == 'VALIDATED'
+    ## invalid design
+    design_5 = """
+    sample_metadata:
+        IGF111:
+            condition: AAA
+            strandedness: reverse
+        IGF112:
+            condition: AAA
+            strandedness: reverse
+    analysis_metadata:
+        NXF_VER: x.y.z
+        nfcore_pipeline: nf-core/methylseq
+        nextflow_params:
+            - "-profile singularity"
+            - "-r a.b.c"
+            - "--genome GRCh38"
+    """
+    raw_analysis5 = \
+        RawAnalysis(
+            analysis_name='analysis5',
+            project=project1,
+            pipeline=pipeline1,
+            analysis_yaml=design_5)
+    try:
+        db.session.add(raw_analysis5)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid analysis design errors
+    status_dict = \
+        async_validate_analysis_yaml(
+            id_list=[raw_analysis5.raw_analysis_id])
+    assert len(status_dict) == 1
+    assert raw_analysis5.raw_analysis_id in status_dict
+    assert status_dict.get(raw_analysis5.raw_analysis_id) == 'FAILED'
