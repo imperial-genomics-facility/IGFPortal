@@ -107,21 +107,21 @@ def _get_validation_status_for_analysis_design(
                 load(analysis_yaml, Loader=Loader)
         except:
             error_list.append(
-                'Failed to load yaml data')
+                'Failed to load yaml data. Invalid format.')
             return error_list
         try:
             schema = \
                 json.loads(validation_schema)
         except:
             error_list.append(
-                'Failed to load validation schema')
+                'Failed to load validation schema. Invalid format.')
             return error_list
         try:
             # validation can fail if inputs are not correct
             schema_validator = \
                 Draft202012Validator(schema)
             for error in sorted(schema_validator.iter_errors(json_data), key=str):
-                error_list.append(error)
+                error_list.append(error.message)
         except:
             error_list.append(
                 'Failed to check validation schema')
@@ -187,7 +187,7 @@ def _get_file_collection_for_samples(
         f'Failed to fetch fastq dir for sample id {sample_igf_id_list}, error: {e}')
 
 
-def _get_sample_metadata_checks_for_analsis(
+def _get_sample_metadata_checks_for_analysis(
         sample_metadata: dict,
         project_igf_id: str) -> list:
     try:
@@ -195,11 +195,14 @@ def _get_sample_metadata_checks_for_analsis(
         if not isinstance(sample_metadata, dict):
             error_list.append(
                 f'sample_metadata has type {type(sample_metadata)}')
+            return error_list
         else:
             sample_ids = \
                 list(sample_metadata.keys())
             if len(sample_ids) == 0:
-                error_list.append('No sample ids found in sample_metadata')
+                error_list.append(
+                    'No sample ids found in sample_metadata')
+                return error_list
             if len(sample_ids) > 0:
                 sample_with_files = \
                     _get_file_collection_for_samples(
@@ -209,7 +212,7 @@ def _get_sample_metadata_checks_for_analsis(
                         error_list.append('No sample has fastq')
                     else:
                         missing_samples = \
-                            list(set(sample_with_files).difference(set(sample_ids)))
+                            list(set(sample_ids).difference(set(sample_with_files)))
                         error_list.append(
                             f"Missing fastq for samples: {', '.join(missing_samples)}")
                 project_list = \
@@ -289,7 +292,7 @@ def validate_analysis_design(
                     'sample_metadata missing after validation checks ??')
             else:
                 sample_metadata_errors = \
-                    _get_sample_metadata_checks_for_analsis(
+                    _get_sample_metadata_checks_for_analysis(
                         sample_metadata=sample_metadata,
                         project_igf_id=project_igf_id)
                 if len(sample_metadata_errors) > 0:
