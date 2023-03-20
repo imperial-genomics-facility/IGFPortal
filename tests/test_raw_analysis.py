@@ -13,6 +13,7 @@ from app.models import Platform
 from app.models import Project
 from app.models import Pipeline
 from app.models import RawAnalysisValidationSchema
+from app.models import RawAnalysisTemplate
 from app.raw_analysis.raw_analysis_util import pipeline_query
 from app.raw_analysis.raw_analysis_util import project_query
 from app.raw_analysis.raw_analysis_util import validate_json_schema
@@ -22,6 +23,9 @@ from app.raw_analysis.raw_analysis_util import _get_project_id_for_samples
 from app.raw_analysis.raw_analysis_util import _get_file_collection_for_samples
 from app.raw_analysis.raw_analysis_util import _get_sample_metadata_checks_for_analysis
 from app.raw_analysis.raw_analysis_util import _get_validation_errors_for_analysis_design
+from app.raw_analysis.raw_analysis_util import _fetch_all_samples_for_project
+from app.raw_analysis.raw_analysis_util import _get_analysis_template
+from app.raw_analysis.raw_analysis_util import generate_analysis_template
 from app.raw_analysis_view import async_validate_analysis_yaml
 from app.raw_analysis_view import async_validate_analysis_schema
 
@@ -1216,3 +1220,137 @@ def test_async_validate_analysis_schema(db):
     assert len(status_dict) == 1
     assert schema2.raw_analysis_schema_id in status_dict
     assert status_dict.get(schema2.raw_analysis_schema_id) == 'FAILED'
+
+
+def test_fetch_all_samples_for_project(db):
+    ## setup metadata
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    sample_ids = \
+        _fetch_all_samples_for_project(
+            project_igf_id='project1')
+    assert len(sample_ids) == 2
+    assert 'IGF111' in sample_ids
+    assert 'IGF112' in sample_ids
+    sample_ids = \
+        _fetch_all_samples_for_project(
+            project_igf_id='project2')
+    assert len(sample_ids) == 0
+
+def test_get_analysis_template(db):
+    template_data = \
+        _get_analysis_template(template_tag='xyz')
+    assert template_data is not None
+    assert 'condition: CONDITION_NAME' not in [t.strip() for t in template_data.split('\n')]
+    template = \
+        """sample_metadata:
+        {% for SAMPLE_ID in SAMPLE_ID_LIST %}
+        {{ SAMPLE_ID }}:
+            condition: CONDITION_NAME
+            strandedness: reverse
+        {% endfor %}analysis_metadata:
+            pipeline_name: xyz
+        """
+    template1 = \
+        RawAnalysisTemplate(
+            template_tag="template1",
+            template_data=template)
+    try:
+        db.session.add(template1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    template_data = \
+        _get_analysis_template(template_tag='template1')
+    assert template_data is not None
+    assert 'condition: CONDITION_NAME' in [t.strip() for t in template_data.split('\n')]
+
+def test_generate_analysis_template(db):
+    ## setup metadata
+    template = \
+        """sample_metadata:
+        {% for SAMPLE_ID in SAMPLE_ID_LIST %}
+        {{ SAMPLE_ID }}:
+            condition: CONDITION_NAME
+            strandedness: reverse
+        {% endfor %}analysis_metadata:
+            pipeline_name: xyz"""
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    template1 = \
+        RawAnalysisTemplate(
+            template_tag="template1",
+            template_data=template)
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.add(template1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## valid project and template
+    formatted_template = \
+        generate_analysis_template(
+            project_igf_id="project1",
+            template_tag="template1")
+    assert 'IGF111:' in [line.strip() for line in formatted_template.split('\n')]
+    assert 'condition: CONDITION_NAME' in [line.strip() for line in formatted_template.split('\n')]
+    ## invalid project valid template
+    formatted_template = \
+        generate_analysis_template(
+            project_igf_id="project2",
+            template_tag="template1")
+    assert len([line.strip() for line in formatted_template.split('\n')]) == 3
+    ## valid project invalid template
+    formatted_template = \
+        generate_analysis_template(
+            project_igf_id="project1",
+            template_tag="xxx")
+    assert "IGF111: ''" in [line.strip() for line in formatted_template.split('\n')]
+    assert 'condition: CONDITION_NAME' not in [line.strip() for line in formatted_template.split('\n')]
+    ## invalid project invalid template
+    formatted_template = \
+        generate_analysis_template(
+            project_igf_id="project2",
+            template_tag="xyz")
+    assert len([line.strip() for line in formatted_template.split('\n')]) == 2

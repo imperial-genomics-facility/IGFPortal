@@ -12,8 +12,10 @@ from ..models import Collection_group
 from ..models import Project
 from ..models import Pipeline
 from ..models import RawAnalysisValidationSchema
+from ..models import RawAnalysisTemplate
 from .. import db
 from jsonschema import Draft202012Validator
+from jinja2 import Template
 
 log = logging.getLogger(__name__)
 
@@ -401,3 +403,58 @@ def validate_analysis_design(
     except Exception as e:
         raise ValueError(
             f"Failed to validate analysis design, error; {e}")
+
+def _fetch_all_samples_for_project(project_igf_id: str) -> list:
+    try:
+        sample_ids = list()
+        samples = \
+            db.session.\
+                query(Sample.sample_igf_id).\
+                join(Project, Project.project_id==Sample.project_id).\
+                filter(Project.project_igf_id==project_igf_id).\
+                all()
+        sample_ids = [
+            sample_id for (sample_id,) in samples]
+        return sample_ids
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get sample list for project {project_igf_id}, error; {e}")
+
+def generate_analysis_template(project_igf_id: str, template_tag: str) -> str:
+    try:
+        sample_id_list = \
+            _fetch_all_samples_for_project(
+                project_igf_id=project_igf_id)
+        template_data = \
+            _get_analysis_template(
+                template_tag=template_tag)
+        template = \
+            Template(template_data, keep_trailing_newline=True)
+        formatted_template = \
+            template.render(SAMPLE_ID_LIST=sample_id_list)
+        return formatted_template
+    except Exception as e:
+        raise ValueError(
+            f"Failed to generate template project {project_igf_id}, error; {e}")
+
+
+def _get_analysis_template(template_tag: str) -> str:
+    try:
+        default_template =  \
+            """sample_metadata:
+    {% for SAMPLE_ID in SAMPLE_ID_LIST -%}
+        {{ SAMPLE_ID }}: ''
+    {% endfor -%}\nanalysis_metadata:''"""
+        template_data = \
+            db.session.\
+                query(RawAnalysisTemplate.template_data).\
+                filter(RawAnalysisTemplate.template_tag==template_tag).\
+                one_or_none()
+        if template_data is None:
+            return default_template
+        else:
+            (template_data,) = template_data
+            return template_data
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get template for tag {template_tag}, error; {e}")

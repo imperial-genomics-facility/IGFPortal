@@ -14,6 +14,7 @@ from .raw_analysis.raw_analysis_util import project_query
 from .raw_analysis.raw_analysis_util import validate_json_schema
 from .raw_analysis.raw_analysis_util import validate_analysis_design
 from .raw_analysis.raw_analysis_util import prepare_temple_for_analysis
+from .raw_analysis.raw_analysis_util import generate_analysis_template
 
 log = logging.getLogger(__name__)
 
@@ -124,6 +125,11 @@ def async_validate_analysis_yaml(self, id_list):
         log.error(
             f"Failed to run celery job, error: {e}")
 
+def rename(newname):
+    def decorator(f):
+        f.__name__ = newname
+        return f
+    return decorator
 
 class RawAnalysisView(ModelView):
     datamodel = SQLAInterface(RawAnalysis)
@@ -233,16 +239,19 @@ class RawAnalysisView(ModelView):
     @action("template_nf_rna", "Template NF RNA", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_rna(self, item):
         try:
-            analysis_template = \
-                prepare_temple_for_analysis(
-                    template_tag='NF-RNA-Seq')
-            if analysis_template is None:
-                analysis_template = ''
-            output = BytesIO(analysis_template.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_RNA")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF RNA template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
         except Exception as e:
             flash('Failed to generate NF RNA template', 'danger')
             log.error(e)
@@ -251,121 +260,214 @@ class RawAnalysisView(ModelView):
     @action("template_sm_rna", "Template Snakemake RNA", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_sm_rna(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="Snakemake_RNA")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate Snakemake RNA template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate Snakemake RNA template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
+
 
     @action("template_nf_chip", "Template NF ChIP", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_chip(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_ChIP")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF ChIP template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate NF ChIP template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
     @action("template_nf_atac", "Template NF ATAC", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_atac(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_ATAC")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF ATAC template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate NF ATAC template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
+
+    @action("template_nf_hic", "Template NF Hi-C", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def template_nf_hic(self, item):
+        try:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_HI_C")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF Hi-C template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
+            flash('Failed to generate NF HI-C template', 'danger')
+            log.error(e)
+            return redirect(url_for('RawAnalysisView.list'))
+
+
+    @action("template_nf_methylseq", "Template NF Methylseq", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def template_nf_methylseq(self, item):
+        try:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_Methylseq")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF Methylseq template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
+            flash('Failed to generate NF Methylseq template', 'danger')
+            log.error(e)
+            return redirect(url_for('RawAnalysisView.list'))
+
 
     @action("template_nf_sarek", "Template NF Sarek", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_sarek(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_Sarek")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF Sarek template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate NF Sarek template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
     @action("template_nf_ampliseq", "Template NF Ampliseq", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_ampliseq(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_Ampliseq")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF Ampliseq template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate NF Ampliseq template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
     @action("template_nf_cutandrun", "Template NF CutAndRun", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_cutandrun(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_CutAndRun")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF CutAndRun template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate NF CutAndRun template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
     @action("template_nf_bactmap", "Template NF BactMap", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_nf_bactmap(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="NF_BactMap")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate NF BactMap template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate NF BactMap template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
     @action("template_custom", "Template Custom", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
     def template_custom(self, item):
         try:
-            analysis_yaml = item.analysis_yaml
-            if analysis_yaml is None:
-                analysis_yaml = ''
-            output = BytesIO(analysis_yaml.encode('utf-8'))
-            analysis_name = item.analysis_name.encode('utf-8').decode()
-            output.seek(0)
-            self.update_redirect()
-            return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
-        except:
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag="Custom")
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            else:
+                flash('Failed to generate Custom template, no project', 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
             flash('Failed to generate Custom template', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
 class RawAnalysisQueueView(ModelView):
