@@ -23,6 +23,7 @@ from app.raw_analysis.raw_analysis_util import _get_file_collection_for_samples
 from app.raw_analysis.raw_analysis_util import _get_sample_metadata_checks_for_analysis
 from app.raw_analysis.raw_analysis_util import _get_validation_errors_for_analysis_design
 from app.raw_analysis_view import async_validate_analysis_yaml
+from app.raw_analysis_view import async_validate_analysis_schema
 
 def test_project_query(db):
     project1 = \
@@ -1069,3 +1070,149 @@ def test_async_validate_analysis_schema(db):
     assert len(status_dict) == 1
     assert raw_analysis5.raw_analysis_id in status_dict
     assert status_dict.get(raw_analysis5.raw_analysis_id) == 'FAILED'
+
+
+def test_validate_json_schema(db):
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
+    with open(schema_file, 'r') as fp:
+        schema_data = fp.read()
+    schema1 = \
+        RawAnalysisValidationSchema(
+            pipeline=pipeline1,
+            json_schema=schema_data)
+    try:
+        db.session.add(pipeline1)
+        db.session.add(schema1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema1.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'UNKNOWN'
+    ## valid design
+    validate_json_schema(schema1.raw_analysis_schema_id)
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema1.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'VALIDATED'
+    ## invalid schema
+    pipeline2 = \
+        Pipeline(
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    schema_data = """{'a': 'b'}
+    """
+    schema2 = \
+        RawAnalysisValidationSchema(
+            pipeline=pipeline2,
+            json_schema=schema_data)
+    try:
+        db.session.add(pipeline2)
+        db.session.add(schema2)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema2.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'UNKNOWN'
+    validate_json_schema(schema2.raw_analysis_schema_id)
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema2.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'FAILED'
+
+
+def test_async_validate_analysis_schema(db):
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
+    with open(schema_file, 'r') as fp:
+        schema_data = fp.read()
+    schema1 = \
+        RawAnalysisValidationSchema(
+            pipeline=pipeline1,
+            json_schema=schema_data)
+    try:
+        db.session.add(pipeline1)
+        db.session.add(schema1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema1.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'UNKNOWN'
+    ## valid design
+    status_dict = \
+        async_validate_analysis_schema(
+            id_list=[schema1.raw_analysis_schema_id])
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema1.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'VALIDATED'
+    assert len(status_dict) == 1
+    assert schema1.raw_analysis_schema_id in status_dict
+    assert status_dict.get(schema1.raw_analysis_schema_id) == 'VALIDATED'
+    ## invalid schema
+    pipeline2 = \
+        Pipeline(
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    schema_data = """{'a': 'b'}
+    """
+    schema2 = \
+        RawAnalysisValidationSchema(
+            pipeline=pipeline2,
+            json_schema=schema_data)
+    try:
+        db.session.add(pipeline2)
+        db.session.add(schema2)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema2.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'UNKNOWN'
+    status_dict = \
+        async_validate_analysis_schema(
+            id_list=[schema2.raw_analysis_schema_id])
+    (status,) = \
+        db.session.\
+            query(RawAnalysisValidationSchema.status).\
+            filter(RawAnalysisValidationSchema.raw_analysis_schema_id==schema2.raw_analysis_schema_id).\
+            one_or_none()
+    assert status == 'FAILED'
+    assert len(status_dict) == 1
+    assert schema2.raw_analysis_schema_id in status_dict
+    assert status_dict.get(schema2.raw_analysis_schema_id) == 'FAILED'

@@ -73,15 +73,13 @@ def validate_json_schema(
         json_schema = \
             raw_analysis_schema.json_schema
         if json_schema is not None:
-            json_schema = \
-                json_schema.encode('utf-8')
-        status = 'FAILED'
-        try:
-            _ = json.loads(json_schema)
-            status = 'VALIDATED'
-        except Exception as e:
-            log.error(f"Failed to run json validation, error: {e}")
-            status = 'FAILED'
+            try:
+                _ = json.loads(json_schema)
+                status = 'VALIDATED'
+            except Exception as e:
+                log.error(f"Failed to run json validation, error: {e}")
+                status = 'FAILED'
+        ## update db status
         try:
             db.session.\
                 query(RawAnalysisValidationSchema).\
@@ -91,6 +89,7 @@ def validate_json_schema(
         except:
             db.session.rollback()
             raise
+        return status
     except Exception as e:
         raise ValueError(
             f"Failed to validate json schema, error: {e}")
