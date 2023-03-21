@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from yaml import load
@@ -438,13 +439,13 @@ def generate_analysis_template(project_igf_id: str, template_tag: str) -> str:
             f"Failed to generate template project {project_igf_id}, error; {e}")
 
 
-def _get_analysis_template(template_tag: str) -> str:
+def _get_analysis_template(
+        template_tag: str,
+        default_template_path: str = os.path.join(os.path.dirname(__file__), 'default_analysis_template.txt')) \
+            -> str:
     try:
-        default_template =  \
-            """sample_metadata:
-    {% for SAMPLE_ID in SAMPLE_ID_LIST -%}
-        {{ SAMPLE_ID }}: ''
-    {% endfor -%}\nanalysis_metadata:''"""
+        with open(default_template_path, 'r') as fp:
+            default_template = fp.read()
         template_data = \
             db.session.\
                 query(RawAnalysisTemplate.template_data).\
