@@ -16,7 +16,7 @@ from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
 from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, SampleProjectView, SampleView
-from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView
+from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
 from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
 from .index_table_view import ProjectIndexView, SampleIndexView
@@ -149,32 +149,41 @@ appbuilder.\
 #        category="Analysis")
 appbuilder.\
     add_view(
-        RawAnalysisSchemaView,
-        "Create validation schema",
-        category_icon="fa-flask",
-        icon="fa-file-text-o",
-        category="Analysis")
-appbuilder.\
-    add_view(
         RawAnalysisView,
-        "Upload analysis design",
+        "Create new analysis design",
         category_icon="fa-flask",
         icon="fa-file-text-o",
         category="Analysis")
 appbuilder.\
     add_view(
         RawAnalysisQueueView,
-        "Validated analysis queue",
+        "View analysis upload queue",
         category_icon="fa-flask",
-        icon="fa-file-text-o",
+        icon="fa fa-binoculars",
         category="Analysis")
 appbuilder.\
     add_view(
         AnalysisView,
-        "Trigger analysis",
+        "Trigger analysis pipeline",
         category_icon="fa-flask",
         icon="fa-space-shuttle",
         category="Analysis")
+appbuilder.\
+    add_view(
+        RawAnalysisSchemaView,
+        "Validation schema",
+        category_icon="fa-flask",
+        icon="fa fa-check-square-o",
+        category="Analysis")
+appbuilder.\
+    add_view(
+        RawAnalysisTemplateView,
+        "Analysis template",
+        category_icon="fa-flask",
+        icon="fa fa-magic",
+        category="Analysis")
+
+
 """
     Data transfer
 """

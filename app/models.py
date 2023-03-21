@@ -285,7 +285,7 @@ class RawAnalysisTemplate(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
   template_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   template_tag = Column(String(80), nullable=False)
-  template_data = Column(LONGTEXTType())
+  template_data = Column(LONGTEXTType(), nullable=False)
   def __repr__(self):
     return self.template_tag
 

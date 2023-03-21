@@ -1,0 +1,10 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}    {{ SAMPLE_ID }}:
+        condition: CONDITION_NAME
+{% endfor -%}
+analysis_metadata:
+    NXF_VER: X.Y.Z
+    nfcore_pipeline: nf-core/ampliseq
+    nextflow_params:
+        - "-profile singularity"
+        - "-r A.B"

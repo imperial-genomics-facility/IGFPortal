@@ -1,0 +1,11 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}    {{ SAMPLE_ID }}:
+        antibody: ANTIBODY_NAME
+        control: CONTROL_SAMPLE_ID
+{% endfor -%}
+analysis_metadata:
+    NXF_VER: X.Y.Z
+    nfcore_pipeline: nf-core/chipseq
+    nextflow_params:
+        - "-profile singularity"
+        - "-r A.B"
