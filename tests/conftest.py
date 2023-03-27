@@ -123,6 +123,30 @@ def test_client(db):
             app.appbuilder.sm.add_permission_view_menu(
                 "can_list",
                 "SampleProjectView"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_get", "api"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_post", "api"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_search_new_analysis", "RawAnalysisApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_get_raw_analysis_data", "RawAnalysisApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_analysis_synched", "RawAnalysisApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_analysis_rejected", "RawAnalysisApi"))
     user = \
         app.appbuilder.sm.find_user(email="admin@fab.org")
     if user is None:
