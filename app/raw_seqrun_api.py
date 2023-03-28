@@ -76,7 +76,7 @@ class RawSeqrunApi(ModelRestApi):
                 output = BytesIO(csv_data.encode())
                 output.seek(0)
                 attachment_filename = f"{tag}.csv"
-                return send_file(output, attachment_filename=attachment_filename, as_attachment=True)
+                return send_file(output, download_name=attachment_filename, as_attachment=True)
         except Exception as e:
             logging.error(e)
 

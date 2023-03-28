@@ -163,6 +163,22 @@ def test_client(db):
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
                 "can_mark_ready_metadata_as_synced", "RawMetadataDataApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_add_new_seqrun", "RawSeqrunApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_search_run_samplesheet", "RawSeqrunApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_get_run_override_cycle", "RawSeqrunApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_get_samplesheet_id", "RawSeqrunApi"))
     user = \
         app.appbuilder.sm.find_user(email="admin@fab.org")
     if user is None:

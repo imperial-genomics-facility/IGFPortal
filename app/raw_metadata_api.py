@@ -78,7 +78,7 @@ class RawMetadataDataApi(ModelRestApi):
                 data = json.dumps(data)
                 output = BytesIO(data.encode())
                 output.seek(0)
-                return send_file(output, download_name='metadata.csv', as_attachment=True)
+                return send_file(output, download_name='metadata.json', as_attachment=True)
         except Exception as e:
             logging.error(e)
 
