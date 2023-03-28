@@ -10,6 +10,7 @@ from .models import RawMetadataModel
 from .raw_metadata.raw_metadata_util import search_metadata_table_and_get_new_projects
 from .raw_metadata.raw_metadata_util import parse_and_add_new_raw_metadata
 
+log = logging.getLogger(__name__)
 
 class RawMetadataDataApi(ModelRestApi):
     resource_name = "raw_metadata"
@@ -26,8 +27,14 @@ class RawMetadataDataApi(ModelRestApi):
             file_obj.seek(0)
             json_data = file_obj.read()
             new_projects = \
-                search_metadata_table_and_get_new_projects(data=json_data)
-            return self.response(200, new_projects=','.join(new_projects))
+                search_metadata_table_and_get_new_projects(
+                    data=json_data)
+            if len(new_projects) > 0:
+                new_projects = \
+                    ','.join(new_projects)
+            else:
+                new_projects = ""
+            return self.response(200, new_projects=new_projects)
         except Exception as e:
             logging.error(e)
 
@@ -71,7 +78,7 @@ class RawMetadataDataApi(ModelRestApi):
                 data = json.dumps(data)
                 output = BytesIO(data.encode())
                 output.seek(0)
-                return send_file(output, attachment_filename='metadata.csv', as_attachment=True)
+                return send_file(output, download_name='metadata.csv', as_attachment=True)
         except Exception as e:
             logging.error(e)
 

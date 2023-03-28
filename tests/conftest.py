@@ -147,6 +147,22 @@ def test_client(db):
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
                 "can_mark_analysis_rejected", "RawAnalysisApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_search_metadata", "RawMetadataDataApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_add_raw_metadata", "RawMetadataDataApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_download_ready_metadata", "RawMetadataDataApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_ready_metadata_as_synced", "RawMetadataDataApi"))
     user = \
         app.appbuilder.sm.find_user(email="admin@fab.org")
     if user is None:
