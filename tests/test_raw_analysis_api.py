@@ -1,4 +1,3 @@
-import requests
 import json
 import os
 from app.models import (
@@ -12,9 +11,9 @@ from flask_appbuilder.const import (
     API_SECURITY_USERNAME_KEY)
 
 def test_raw_analysis_api1(db, test_client, tmp_path):
-    with test_client.session_transaction() as session:
-        session['user_id'] = 1
-        session['_fresh'] = True
+    # with test_client.session_transaction() as session:
+    #     session['user_id'] = 1
+    #     session['_fresh'] = True
     res = \
         test_client.post(
             "/api/v1/security/login",

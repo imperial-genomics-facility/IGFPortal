@@ -18,7 +18,7 @@ def test_client(db):
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,
         "WTF_CSRF_ENABLED": False
     })
-    db.create_all()
+    #db.create_all()
     admin_role = \
         app.appbuilder.sm.find_role("Admin")
     if admin_role is None:
@@ -159,5 +159,5 @@ def test_client(db):
         "password")
     with app.test_client() as testing_client:
         with app.app_context():
-            db.init_app(app)
+            # db.init_app(app)
             yield testing_client
