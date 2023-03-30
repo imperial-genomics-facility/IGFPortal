@@ -168,7 +168,7 @@ def _get_file_collection_for_samples(
     sample_with_files = list()
     results = \
       db.session.\
-        query(Sample).\
+        query(Sample.sample_igf_id).\
         distinct(Sample.sample_igf_id).\
         join(Experiment, Sample.sample_id==Experiment.sample_id).\
         join(Run, Experiment.experiment_id==Run.experiment_id).\
@@ -181,8 +181,10 @@ def _get_file_collection_for_samples(
         filter(Collection.type.in_(fastq_collection_type_list)).\
         filter(Sample.sample_igf_id.in_(sample_igf_id_list)).\
         all()
-    sample_with_files = [
-        s.sample_igf_id for s in list(results)]
+    if results is not None:
+        sample_with_files = [
+            s.sample_igf_id
+                for s in list(results)]
     return sample_with_files
   except Exception as e:
     raise ValueError(

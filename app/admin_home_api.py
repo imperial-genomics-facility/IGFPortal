@@ -9,6 +9,8 @@ from .models import AdminHomeData
 from . import app, db, celery
 from .admin_home.admin_home_utils import parse_and_add_new_admin_view_data
 
+log = logging.getLogger(__name__)
+
 @celery.task(bind=True)
 def async_parse_and_add_new_admin_view_data(
     self, json_file: str) -> dict:
@@ -16,7 +18,7 @@ def async_parse_and_add_new_admin_view_data(
         parse_and_add_new_admin_view_data(json_file)
         return {"message": "success"}
     except Exception as e:
-        logging.error(
+        log.error(
             "Failed to run celery job, error: {0}".\
                 format(e))
 
@@ -43,9 +45,9 @@ class AdminHomeApi(ModelRestApi):
                     prefix='admin_view_',)
             with open(json_file, 'w') as fp:
                 json.dump(json_data, fp)
-            _ = \
+            msg = \
                 async_parse_and_add_new_admin_view_data.\
                     apply_async(args=[json_file])
             return self.response(200, message='loaded new data')
         except Exception as e:
-            logging.error(e)
+            log.error(e)

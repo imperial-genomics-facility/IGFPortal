@@ -181,6 +181,7 @@ def test_get_file_collection_for_samples(db):
         _get_file_collection_for_samples(
             sample_igf_id_list=['sample1', 'sample2'])
     assert len(sample_with_files) == 1
+    assert 'sample1' in sample_with_files
 
 def test_get_validation_status_for_analysis_design():
     schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
@@ -490,6 +491,14 @@ def test_get_sample_metadata_checks_for_analysis(db):
             project_igf_id='project1')
     assert len(error_list) == 2
     assert "samples are linked to multiple projects: project1, project2" in error_list
+    ## missing fastq for partial sample
+    error_list = \
+        _get_sample_metadata_checks_for_analysis(
+            sample_metadata={'sample1': '', 'sample2': ''},
+            project_igf_id='project1')
+    assert len(error_list) == 1
+    assert "Missing fastq for samples: sample2" in error_list
+
 
 
 def test_get_validation_errors_for_analysis_design(db):

@@ -179,6 +179,10 @@ def test_client(db):
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
                 "can_get_samplesheet_id", "RawSeqrunApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_update_admin_view_data", "AdminHomeApi"))
     user = \
         app.appbuilder.sm.find_user(email="admin@fab.org")
     if user is None:
