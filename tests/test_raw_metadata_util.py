@@ -7,6 +7,7 @@ from app.raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_
 from app.raw_metadata.raw_metadata_util import compare_metadata_sample_with_db
 from app.raw_metadata.raw_metadata_util import search_metadata_table_and_get_new_projects
 from app.raw_metadata.raw_metadata_util import parse_and_add_new_raw_metadata
+from app.raw_metadata_view import async_validate_metadata
 
 # class TestMetaDataValidation1(unittest.TestCase):
 #     def setUp(self):
@@ -154,6 +155,38 @@ def test_validate_raw_metadata_and_set_db_status(db):
         assert result.status == 'FAILED'
         assert result.report is not None
 
+def test_async_validate_metadata(db):
+        with open("data/metadata_file1.csv", "r") as fp:
+            lines = fp.readlines()
+            metadata = \
+                RawMetadataModel(
+                    raw_metadata_id=1,
+                    metadata_tag='test1',
+                    raw_csv_data='raw',
+                    formatted_csv_data='\n'.join(lines),
+                    report='')
+            try:
+                db.session.add(metadata)
+                db.session.flush()
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise
+        async_validate_metadata(id_list=[1,])
+        result = \
+            db.session.\
+                query(RawMetadataModel).\
+                filter(RawMetadataModel.raw_metadata_id==1).\
+                one_or_none()
+        # self.assertTrue(result is not None)
+        # self.assertEqual(result.metadata_tag, 'test1')
+        # self.assertEqual(result.status, 'FAILED')
+        # self.assertTrue(result.report is not None)
+        assert result is not None
+        assert result.metadata_tag == 'test1'
+        assert result.status == 'FAILED'
+        assert result.report is not None
+
     # def test_compare_metadata_sample_with_db(self):
 def test_compare_metadata_sample_with_db(db):
         project = \
@@ -250,5 +283,5 @@ def test_parse_and_add_new_raw_metadata(db):
         assert len(results) == 2
         assert 'test1' in results
 
-if __name__ == '__main__':
-  unittest.main()
+# if __name__ == '__main__':
+#   unittest.main()
