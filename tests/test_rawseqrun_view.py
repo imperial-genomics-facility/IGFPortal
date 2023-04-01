@@ -71,3 +71,28 @@ def test_async_trigger_airflow_pipeline(mock_object, db):
         os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
         result = async_trigger_airflow_pipeline('test_dag', [{'seqrun_id':'seqrun1'}], True)
         assert 'seqrun1' in result
+
+#@patch('app.raw_seqrun_view.trigger_airflow_pipeline', return_value=requests.patch('https://httpbin.org/patch', data ={'key': 'value'}, headers={'Content-Type': 'application/json'}))
+# def test_action_trigger_pre_demultiplexing(db, test_client):
+#     try:
+#         sa1 = \
+#             SampleSheetModel(
+#                 samplesheet_tag='test1',
+#                 csv_data='test data',
+#                 status='PASS',
+#                 validation_time=datetime.now(),
+#                 update_time=datetime.now())
+#         seqrun = \
+#             RawSeqrun(raw_seqrun_igf_id='seqrun1')
+#         db.session.add(seqrun)
+#         db.session.add(sa1)
+#         db.session.flush()
+#         db.session.commit()
+#     except:
+#         db.session.rollback()
+#         raise
+#     resp = test_client.post(
+#         f"/rawseqrunview/action/trigger_pre_demultiplexing/{seqrun.raw_seqrun_id}"
+#     )
+#     print(resp.__dict__)
+#     assert resp.status_code == 200
