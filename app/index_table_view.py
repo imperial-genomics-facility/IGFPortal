@@ -72,7 +72,7 @@ class ProjectIndexView(ModelView):
             df.to_csv(output, index=False)
             output.seek(0)
             self.update_redirect()
-            return send_file(output, attachment_filename=file_name, as_attachment=True)
+            return send_file(output, download_name=file_name, as_attachment=True)
         except Exception as e:
             log.error(e)
             flash('Failed to create csv', 'danger')

@@ -73,7 +73,7 @@ class RawMetadataSubmitView(ModelView):
             df.to_csv(output, index=False)
         output.seek(0)
         self.update_redirect()
-        return send_file(output, attachment_filename='{0}_formatted.csv'.format(tag), as_attachment=True)
+        return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
     @action("upload_raw_metadata", "Mark for upload", confirmation="Change metadata status?", icon="fa-rocket")
     def upload_raw_metadata_csv(self, item):
@@ -145,7 +145,7 @@ class RawMetadataValidationView(ModelView):
             df.to_csv(output, index=False)
         output.seek(0)
         self.update_redirect()
-        return send_file(output, attachment_filename='{0}_formatted.csv'.format(tag), as_attachment=True)
+        return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
     @action("mark_raw_metadata_as_rejected", "Reject raw metadata", confirmation="Mark metadata as rejected ?", icon="fa-exclamation", multiple=False, single=True)
     def mark_raw_metadata_as_rejected(self, item):

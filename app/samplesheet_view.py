@@ -63,7 +63,7 @@ class SampleSheetView(ModelView):
                 samplesheet_tag = samplesheet_tag.decode()
             output.seek(0)
             self.update_redirect()
-            return send_file(output, attachment_filename='SampleSheet_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+            return send_file(output, download_name=f"SampleSheet_{samplesheet_tag}.csv", as_attachment=True)
         except:
             flash('Failed to download samplesheet', 'danger')
             return redirect(url_for('SampleSheetView.list'))
@@ -91,7 +91,7 @@ class SampleSheetView(ModelView):
                 samplesheet_tag = samplesheet_tag.decode()
             output.seek(0)
             #self.update_redirect()
-            return send_file(output, attachment_filename='SampleSheet-I5_RC_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+            return send_file(output, download_name=f"SampleSheet-I5_RC_{samplesheet_tag}.csv", as_attachment=True)
         except:
             flash('Failed to download I5 RC samplesheet', 'danger')
             return redirect(url_for('SampleSheetView.list'))
@@ -118,7 +118,7 @@ class SampleSheetView(ModelView):
                 samplesheet_tag = samplesheet_tag.decode()
             output.seek(0)
             self.update_redirect()
-            return send_file(output, attachment_filename='SampleSheet-V2_{0}.csv'.format(samplesheet_tag), as_attachment=True)
+            return send_file(output, download_name=f"SampleSheet-V2_{samplesheet_tag}.csv", as_attachment=True)
         except:
             flash('Failed to download v2 samplesheet', 'danger')
             return redirect(url_for('SampleSheetView.list'))
