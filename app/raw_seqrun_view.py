@@ -13,6 +13,7 @@ from . import db
 from . import celery
 from .airflow.airflow_api_utils import trigger_airflow_pipeline
 from .airflow.airflow_api_utils import get_airflow_dag_id
+from flask_appbuilder.security.decorators import has_access
 
 log = logging.getLogger(__name__)
 
@@ -194,6 +195,7 @@ class RawSeqrunView(ModelView):
             return redirect(url_for('RawSeqrunView.list'))
 
 
+    @has_access
     @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="Confirm test pipeline run ?", multiple=True, single=False, icon="fa-rocket")
     def trigger_pre_demultiplexing(self, item):
         try:

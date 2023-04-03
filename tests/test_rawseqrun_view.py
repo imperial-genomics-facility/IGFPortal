@@ -92,7 +92,8 @@ def test_async_trigger_airflow_pipeline(mock_object, db):
 #         db.session.rollback()
 #         raise
 #     resp = test_client.post(
-#         f"/rawseqrunview/action/trigger_pre_demultiplexing/{seqrun.raw_seqrun_id}"
+#         "/rawseqrunview/action_post",
+#         data={'action':'trigger_pre_demultiplexing', 'rowid': [seqrun.raw_seqrun_id]}
 #     )
 #     print(resp.__dict__)
 #     assert resp.status_code == 200

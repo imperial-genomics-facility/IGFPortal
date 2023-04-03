@@ -66,7 +66,7 @@ def test_client(db):
         app.appbuilder.sm.add_permission_role(
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
-                "can_action",
+                "trigger_pre_demultiplexing",
                 "RawSeqrunView"))
         app.appbuilder.sm.add_permission_role(
             admin_role,
