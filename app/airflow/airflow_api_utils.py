@@ -58,12 +58,12 @@ def trigger_airflow_pipeline(
             f'dags/{dag_id}/dagRuns'
         data = {"conf": conf_data}
         res = \
-        post_to_airflow_api(
-            airflow_conf_file=airflow_conf_file,
-            url_suffix=url_suffix,
-            data=data,
-            verify=verify,
-            dry_run=dry_run)
+            post_to_airflow_api(
+                airflow_conf_file=airflow_conf_file,
+                url_suffix=url_suffix,
+                data=data,
+                verify=verify,
+                dry_run=dry_run)
         return res
     except Exception as e:
         raise ValueError(

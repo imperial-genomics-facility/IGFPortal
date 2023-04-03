@@ -15,7 +15,8 @@ from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
-from .metadata_view import ProjectView, UserView, SeqrunView, AnalysisView, SampleProjectView, SampleView
+from .analysis_view import AnalysisView
+from .metadata_view import ProjectView, UserView, SeqrunView, SampleProjectView, SampleView
 from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
 from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
