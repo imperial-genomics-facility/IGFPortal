@@ -195,7 +195,6 @@ class RawSeqrunView(ModelView):
             return redirect(url_for('RawSeqrunView.list'))
 
 
-    @has_access
     @action("trigger_pre_demultiplexing", "Test barcodes", confirmation="Confirm test pipeline run ?", multiple=True, single=False, icon="fa-rocket")
     def trigger_pre_demultiplexing(self, item):
         try:
