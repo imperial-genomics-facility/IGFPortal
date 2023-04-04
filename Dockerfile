@@ -1,5 +1,5 @@
 FROM python:3.8.16-slim
-LABEL version="v0.01"
+LABEL version="v0.02"
 LABEL description="Docker image for running IGFPortal server"
 COPY requirements.txt /tmp/requirements.txt
 RUN apt-get -y update && \
