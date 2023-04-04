@@ -14,6 +14,7 @@ from . import celery
 from .airflow.airflow_api_utils import trigger_airflow_pipeline
 from .airflow.airflow_api_utils import get_airflow_dag_id
 from flask_appbuilder.security.decorators import has_access
+from flask_appbuilder.baseviews import  expose
 
 log = logging.getLogger(__name__)
 
@@ -116,7 +117,8 @@ class RawSeqrunView(ModelView):
         "mismatches": "Barcode mismatch",
         "date_stamp": "Run date",
         "run_config": "Run setting",
-        "trigger_time": "Trigger date"}
+        "trigger_time": "Trigger date",
+        "samplesheet.csv_data": "Samplesheet data"}
     edit_columns = [
         "raw_seqrun_igf_id",
         "samplesheet",
@@ -293,3 +295,21 @@ class RawSeqrunView(ModelView):
         except Exception as e:
             log.error(e)
             flash("failed to remove fastqs for {0}".format(', '.join(run_id_list)), "danger")
+
+    # @expose('/get_samplesheet_data/<int:id>')
+    # @has_access
+    # def get_samplesheet_data(self, id):
+    #     try:
+    #         result = \
+    #             db.session.\
+    #                 query(SampleSheetModel.csv_data).\
+    #                 join(RawSeqrun, RawSeqrun.samplesheet_id==SampleSheetModel.samplesheet_id).\
+    #                 filter(RawSeqrun.raw_seqrun_id==id).\
+    #                 one_or_none()
+    #         if result is None:
+    #             result = ''
+    #         return result
+    #     except Exception as e:
+    #         log.error(e)
+    #         result = ''
+

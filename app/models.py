@@ -1,4 +1,5 @@
 import datetime, json
+from . import db
 from flask import Markup, url_for
 from flask_appbuilder import Model
 from sqlalchemy.dialects.mysql import INTEGER
@@ -8,6 +9,11 @@ from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText
 from sqlalchemy.types import TypeDecorator
 from flask_appbuilder.models.mixins import AuditMixin
+from flask_appbuilder.models.decorators import renders
+from sqlalchemy.orm import column_property
+from sqlalchemy import select, func, literal
+from sqlalchemy.sql.functions import coalesce
+from sqlalchemy.orm import object_session
 
 
 """
@@ -225,7 +231,7 @@ class RawSeqrun(Model):
   override_cycles = Column(String(30), nullable=True)
   status = Column(Enum("ACTIVE", "REJECTED", "PREDEMULT", "READY", "FINISHED"), nullable=False, server_default='ACTIVE')
   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
-  samplesheet_id = Column(INTEGER(unsigned=True), ForeignKey("samplesheet.samplesheet_id", onupdate="NO ACTION", ondelete="NO ACTION"), nullable=True)
+  samplesheet_id = Column(INTEGER(unsigned=True), ForeignKey("samplesheet.samplesheet_id", onupdate="NO ACTION", ondelete="NO ACTION"))
   samplesheet = relationship('SampleSheetModel')
   mismatches = Column(Enum("0", "1", "2"), nullable=True, server_default='1')
   trigger_time = Column(TIMESTAMP(), nullable=True)
