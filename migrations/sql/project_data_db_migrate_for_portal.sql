@@ -38,6 +38,8 @@ ALTER TABLE raw_seqrun ADD COLUMN trigger_time TIMESTAMP NULL;
 
 ALTER TABLE raw_seqrun ADD COLUMN run_config LONGTEXT;
 
+ALTER TABLE raw_seqrun MODIFY COLUMN status ENUM("ACTIVE", "REJECTED", "PREDEMULT", "READY", "FINISHED") NOT NULL DEFAULT 'ACTIVE';
+
 ALTER TABLE sample_index ADD FOREIGN KEY(project_index_id) REFERENCES project_index (project_index_id) ON DELETE SET NULL ON UPDATE CASCADE;
 
 UPDATE alembic_version SET version_num='a38c16db0e8d' WHERE alembic_version.version_num = '78b82238be89';
