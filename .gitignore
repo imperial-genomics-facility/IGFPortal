@@ -29,3 +29,4 @@ app/static/*
 tests/1__init__.py
 aaa
 facebook.ico
+migration_docker_db.sh
