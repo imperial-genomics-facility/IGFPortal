@@ -5,6 +5,7 @@ from flask_appbuilder import AppBuilder, SQLA
 from .index import CustomIndexView
 from celery import Celery
 from flask_caching import Cache
+from flask_migrate import Migrate
 
 """
  Logging configuration
@@ -16,6 +17,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 app = Flask(__name__)
 app.config.from_object("config")
 db = SQLA(app)
+migrate = Migrate(app, db)
 appbuilder = AppBuilder(app, db.session, indexview=CustomIndexView)
 
 
