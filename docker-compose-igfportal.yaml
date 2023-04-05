@@ -7,6 +7,10 @@ services:
         image: mysql:5.7
         env_file: env
         restart: always
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - "3306:3306"
         volumes:
@@ -18,6 +22,10 @@ services:
         image: redis:6.2
         restart: always
         container_name: redis_db
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - 6379:6379
         networks:
@@ -25,6 +33,10 @@ services:
     webserver:
         image: imperialgenomicsfacility/igfportal:v0.0.2
         env_file: env
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - 8080:8080
         restart: always
@@ -45,6 +57,10 @@ services:
           - portal_network
     nginx:
         image: nginx:1.23.3
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - "80:80"
           - "443:443"
@@ -58,11 +74,16 @@ services:
           - /tmp/nginx:/var/nginx/:rw
           - /home/igf/dev/static:/data/static:rw
         container_name: nginx
+        restart: always
         networks:
           - portal_network
     celery_worker1:
         image: imperialgenomicsfacility/igfportal:v0.0.2
         env_file: env
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         links:
           - portal_db
           - redis_db
@@ -81,6 +102,10 @@ services:
         image: imperialgenomicsfacility/igfportal:v0.0.2
         env_file: env
         restart: always
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - "5555:5555"
         links:
@@ -97,6 +122,10 @@ services:
           - portal_network
     adminer:
         image: adminer:latest
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         links:
           - portal_db
         ports:
