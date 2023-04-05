@@ -71,7 +71,7 @@ services:
         volumes:
           - /home/igf/dev/ssl_cert:/SSL:ro
           - /home/igf/dev/nginx.conf:/etc/nginx/nginx.conf:ro
-          - /tmp/nginx:/var/nginx/:rw
+          - /home/igf/dev/nginx:/var/nginx/:rw
           - /home/igf/dev/static:/data/static:rw
         container_name: nginx
         restart: always
