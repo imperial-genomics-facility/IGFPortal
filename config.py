@@ -10,6 +10,8 @@ from flask_appbuilder.security.manager import (
 #basedir = os.path.abspath(os.path.dirname(__file__))
 basedir = '/tmp'
 
+MAX_CONTENT_LENGTH = 32 * 1024 * 1024
+
 # Celery
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", 'memory://')
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", 'cache+memory://')
