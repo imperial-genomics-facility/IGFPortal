@@ -50,6 +50,7 @@ services:
           - /home/igf/dev/IGFPortal:/github/IGFPortal:ro
           - /home/igf/dev/ssl_cert:/SSL:ro
           - /home/igf/dev/static:/data/static:rw
+          - /home/igf/dev/secret/airflow_conf.json:/secret/airflow_conf.json:ro
           - /tmp:/TMP_WORK_DIR:rw
         container_name: webserver
         command: ["gunicorn -b 0.0.0.0:8080 --threads 4 server:app"]
