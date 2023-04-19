@@ -26,7 +26,7 @@ class RawAnalysisApi(ModelRestApi):
                     all()
             new_analysis_ids = [
                 row for (row,) in new_analysis_list]
-            return self.response(200, new_projects=new_analysis_ids)
+            return self.response(200, new_analysis=new_analysis_ids)
         except Exception as e:
             log.error(e)
 

@@ -32,7 +32,7 @@ def test_raw_analysis_api1(db, test_client, tmp_path):
             '/api/v1/raw_analysis/search_new_analysis',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
-    assert json.loads(res.data.decode("utf-8")).get('new_projects') == []
+    assert json.loads(res.data.decode("utf-8")).get('new_analysis') == []
     pipeline1 = \
         Pipeline(
             pipeline_name='pipeline1',
@@ -75,7 +75,7 @@ def test_raw_analysis_api1(db, test_client, tmp_path):
             '/api/v1/raw_analysis/search_new_analysis',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
-    assert json.loads(res.data.decode("utf-8")).get('new_projects') == [2]
+    assert json.loads(res.data.decode("utf-8")).get('new_analysis') == [2]
     res = \
         test_client.post(
             '/api/v1/raw_analysis/get_raw_analysis_data/2',
