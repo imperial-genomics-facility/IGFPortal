@@ -1,30 +1,95 @@
-import os, json, typing
+import os
+import json
+import typing
+import tempfile
 from typing import Tuple
 import pandas as pd
-from ..models import Project
-from ..models import IgfUser
-from ..models import ProjectUser
-from ..models import Project_attribute
-from ..models import Sample
-from ..models import Sample_attribute
-from ..models import Experiment
-from ..models import Experiment_attribute
-from ..models import Run
-from ..models import Run_attribute
-from ..models import Platform
-from ..models import Flowcell_barcode_rule
-from ..models import Seqrun
-from ..models import Seqrun_attribute
-from ..models import Seqrun_stats
-from ..models import Collection
-from ..models import Collection_attribute
-from ..models import Collection_group
-from ..models import File
-from ..models import File_attribute
-from ..models import Pipeline
-from ..models import Pipeline_seed
-from ..models import Analysis
-from .. import db
+from ..models import (
+    Project,
+    IgfUser,
+    ProjectUser,
+    Project_attribute,
+    Sample,
+    Sample_attribute,
+    Experiment,
+    Experiment_attribute,
+    Run,
+    Run_attribute,
+    Platform,
+    Flowcell_barcode_rule,
+    Seqrun,
+    Seqrun_attribute,
+    Seqrun_stats,
+    Collection,
+    Collection_attribute,
+    Collection_group,
+    File,
+    File_attribute,
+    Pipeline,
+    Pipeline_seed,
+    Analysis,
+    RawAnalysis,
+    RawAnalysisValidationSchema,
+    RawAnalysisTemplate,
+    Project_info_data,
+    Project_seqrun_info_data,
+    Project_seqrun_info_file,
+    Project_analysis_info_data,
+    Project_analysis_info_file,
+    RDSProject_backup)
+from .. import (
+    db,
+    app)
+
+def backup_specific_portal_tables(json_file: str) -> str:
+    try:
+        backup_order = [
+            RawAnalysis,
+            RawAnalysisValidationSchema,
+            RawAnalysisTemplate,
+            Project_info_data,
+            Project_seqrun_info_data,
+            Project_seqrun_info_file,
+            Project_analysis_info_data,
+            Project_analysis_info_file,
+            RDSProject_backup
+        ]
+        db_data = dict()
+        for table_name in backup_order:
+            data = \
+                pd.read_sql(
+                    db.session.query(table_name),
+                    db.session.bind)
+            if table_name.__tablename__=='raw_analysis':
+                data['date_stamp'] = \
+                    data['date_stamp'].astype(str)
+            if table_name.__tablename__=='raw_analysis_validation_schema':
+                data['date_stamp'] = \
+                    data['date_stamp'].astype(str)
+            if table_name.__tablename__=='project_seqrun_info_file':
+                data['date_created'] = \
+                    data['date_created'].astype(str)
+            if table_name.__tablename__=='project_seqrun_info_file':
+                data['date_updated'] = \
+                    data['date_updated'].astype(str)
+            if table_name.__tablename__=='project_analysis_info_file':
+                data['date_created'] = \
+                    data['date_created'].astype(str)
+            if table_name.__tablename__=='project_analysis_info_file':
+                data['date_updated'] = \
+                    data['date_updated'].astype(str)
+            if table_name.__tablename__=='rds_project_backup':
+                data['date_stamp'] = \
+                    data['date_stamp'].astype(str)
+            db_data.update({
+                table_name.__tablename__: data.to_dict(orient="records")})
+        with open(json_file, 'w') as fp:
+            json.dump(db_data, fp)
+        return json_file
+    except Exception as e:
+        raise ValueError(
+            f"Failed to backup portal tables, error: {e}")
+
 
 def cleanup_and_load_new_data_to_metadata_tables(
     input_json: str,
@@ -36,6 +101,15 @@ def cleanup_and_load_new_data_to_metadata_tables(
             json_data = json.load(fp)
         if not isinstance(json_data, dict):
             raise TypeError('No dictionary found for metadata update')
+        ## get a tmp json file
+        (_, json_file) = \
+            tempfile.mkstemp(
+                suffix='.json',
+                prefix='portal_metadata_',)
+        ## backup portal data
+        json_file = \
+            backup_specific_portal_tables(json_file)
+        ## backup main db
         delete_order_tables = [
             File_attribute,
             File,
@@ -83,10 +157,40 @@ def cleanup_and_load_new_data_to_metadata_tables(
             File,
             Collection_group,
             File_attribute]
+        portal_backup_order = [
+            RawAnalysis,
+            RawAnalysisValidationSchema,
+            RawAnalysisTemplate,
+            Project_info_data,
+            Project_seqrun_info_data,
+            Project_seqrun_info_file,
+            Project_analysis_info_data,
+            Project_analysis_info_file,
+            RDSProject_backup
+        ]
+        portal_delete_order = [
+            RawAnalysis,
+            RawAnalysisValidationSchema,
+            RawAnalysisTemplate,
+            Project_seqrun_info_data,
+            Project_seqrun_info_file,
+            Project_analysis_info_data,
+            Project_analysis_info_file,
+            Project_info_data,
+            RDSProject_backup
+        ]
         try:
+            ## delete main tables
             for table in delete_order_tables:
                 if table.__tablename__ in json_data.keys():
                     db.session.query(table).delete()
+            ## delete portal tables
+            with open(json_file, 'r') as fp:
+                portal_json_data = json.load(fp)
+            for table in portal_delete_order:
+                if table.__tablename__ in portal_json_data.keys():
+                    db.session.query(table).delete()
+            ## load main data
             for table in create_order_tables:
                 if table.__tablename__ in json_data.keys():
                     table_data = json_data.get(table.__tablename__)
@@ -102,6 +206,16 @@ def cleanup_and_load_new_data_to_metadata_tables(
                         bulk_insert_mappings(
                             table,
                             df.to_dict(orient="records"))
+            ## load portal data
+            for table in portal_backup_order:
+                if table.__tablename__ in portal_json_data.keys():
+                    table_data = json_data.get(table.__tablename__)
+                    df = pd.DataFrame(table_data)
+                    db.session.\
+                        bulk_insert_mappings(
+                            table,
+                            df.to_dict(orient="records"))
+            ## save all changes
             db.session.commit()
         except Exception as e:
             db.session.rollback()
