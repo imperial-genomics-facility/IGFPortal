@@ -58,7 +58,7 @@ def backup_specific_portal_tables(json_file: str) -> str:
         for table_name in backup_order:
             data = \
                 pd.read_sql(
-                    db.session.query(table_name),
+                    table_name.__tablename__,
                     db.session.bind)
             if table_name.__tablename__=='raw_analysis':
                 data['date_stamp'] = \
