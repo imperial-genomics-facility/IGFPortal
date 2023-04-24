@@ -4,6 +4,7 @@ import typing
 import tempfile
 from typing import Tuple
 import pandas as pd
+from dateutil.parser import parse
 from ..models import (
     Project,
     IgfUser,
@@ -37,9 +38,7 @@ from ..models import (
     Project_analysis_info_data,
     Project_analysis_info_file,
     RDSProject_backup)
-from .. import (
-    db,
-    app)
+from .. import db
 
 def backup_specific_portal_tables(json_file: str) -> str:
     try:
@@ -81,6 +80,36 @@ def backup_specific_portal_tables(json_file: str) -> str:
             if table_name.__tablename__=='rds_project_backup':
                 data['date_stamp'] = \
                     data['date_stamp'].astype(str)
+            # if table_name.__tablename__=='raw_analysis':
+            #     data = \
+            #         pd.read_sql(
+            #             table_name.__tablename__,
+            #             db.session.bind,
+            #             parse_dates=["date_stamp"])
+            # if table_name.__tablename__=='raw_analysis_validation_schema':
+            #     data = \
+            #         pd.read_sql(
+            #             table_name.__tablename__,
+            #             db.session.bind,
+            #             parse_dates=["date_stamp"])
+            # if table_name.__tablename__=='project_seqrun_info_file':
+            #     data = \
+            #         pd.read_sql(
+            #             table_name.__tablename__,
+            #             db.session.bind,
+            #             parse_dates=["date_created", "date_updated"])
+            # if table_name.__tablename__=='project_analysis_info_file':
+            #     data = \
+            #         pd.read_sql(
+            #             table_name.__tablename__,
+            #             db.session.bind,
+            #             parse_dates=["date_created", "date_updated"])
+            # if table_name.__tablename__=='rds_project_backup':
+            #     data = \
+            #         pd.read_sql(
+            #             table_name.__tablename__,
+            #             db.session.bind,
+            #             parse_dates=["date_stamp"])
             db_data.update({
                 table_name.__tablename__: data.to_dict(orient="records")})
         with open(json_file, 'w') as fp:
@@ -109,6 +138,9 @@ def cleanup_and_load_new_data_to_metadata_tables(
         ## backup portal data
         json_file = \
             backup_specific_portal_tables(json_file)
+        # with open(json_file, 'r') as fp:
+        #     t_data = fp.read()
+        # print(t_data)
         ## backup main db
         delete_order_tables = [
             File_attribute,
@@ -169,9 +201,9 @@ def cleanup_and_load_new_data_to_metadata_tables(
             RDSProject_backup
         ]
         portal_delete_order = [
-            RawAnalysis,
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
+            RawAnalysis,
             Project_seqrun_info_data,
             Project_seqrun_info_file,
             Project_analysis_info_data,
@@ -186,7 +218,9 @@ def cleanup_and_load_new_data_to_metadata_tables(
                     db.session.query(table).delete()
             ## delete portal tables
             with open(json_file, 'r') as fp:
+                # t_data = fp.read()
                 portal_json_data = json.load(fp)
+            print(portal_json_data)
             for table in portal_delete_order:
                 if table.__tablename__ in portal_json_data.keys():
                     db.session.query(table).delete()
@@ -195,11 +229,71 @@ def cleanup_and_load_new_data_to_metadata_tables(
                 if table.__tablename__ in json_data.keys():
                     table_data = json_data.get(table.__tablename__)
                     df = pd.DataFrame(table_data)
+                    ## project
+                    if table.__tablename__=='project' and \
+                       'start_timestamp' in df.columns:
+                        df['start_timestamp'] = \
+                            pd.to_datetime(df.start_timestamp)
+                    ## user
+                    if table.__tablename__=='user' and \
+                       'start_timestamp' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                    ## sample
+                    if table.__tablename__=='sample':
+                        if 'date_created' in df.columns:
+                            df['date_created'] = \
+                                pd.to_datetime(df.date_created)
+                        if 'taxon_id' in df.columns:
+                            df['taxon_id'] = \
+                                df['taxon_id'].fillna(0)
+                        df.fillna('', inplace=True)
+                    ## platform
+                    if table.__tablename__=='platform' and \
+                       'date_created' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                    ## seqrun
+                    if table.__tablename__=='seqrun' and \
+                       'date_created' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                    ## experiment
+                    if table.__tablename__=='experiment' and \
+                       'date_created' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                    ## run
+                    if table.__tablename__=='run' and \
+                       'date_created' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                    ## collection
+                    if table.__tablename__=='collection' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## file
+                    if table.__tablename__=='file' and \
+                       'date_created' in df.columns and \
+                       'date_updated' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                        df['date_updated'] = \
+                            pd.to_datetime(df.date_updated)
+                    ## pipeline
+                    if table.__tablename__=='pipeline' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## pipeline_seed
+                    if table.__tablename__=='pipeline_seed' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## fill NA
                     if table.__tablename__=='project_user':
                         pass
-                    elif table.__tablename__=='sample':
-                        df['taxon_id'] = df['taxon_id'].fillna(0)
-                        df.fillna('', inplace=True)
                     else:
                         df.fillna('', inplace=True)
                     db.session.\
@@ -209,8 +303,45 @@ def cleanup_and_load_new_data_to_metadata_tables(
             ## load portal data
             for table in portal_backup_order:
                 if table.__tablename__ in portal_json_data.keys():
-                    table_data = json_data.get(table.__tablename__)
+                    table_data = portal_json_data.get(table.__tablename__)
                     df = pd.DataFrame(table_data)
+                    ## raw_analysis
+                    if table.__tablename__ == 'raw_analysis' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## raw_analysis_validation_schema
+                    if table.__tablename__ == 'raw_analysis_validation_schema' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## project_seqrun_info_file
+                    if table.__tablename__ == 'project_seqrun_info_file' and \
+                       'date_created' in df.columns and \
+                       'date_updated' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                        df['date_updated'] = \
+                            pd.to_datetime(df.date_updated)
+                    ## project_analysis_info_file
+                    if table.__tablename__ == 'project_analysis_info_file' and \
+                       'date_created' in df.columns and \
+                       'date_updated' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                        df['date_updated'] = \
+                            pd.to_datetime(df.date_updated)
+                    ## rds_project_backup
+                    if table.__tablename__ == 'rds_project_backup' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## project_index
+                    if table.__tablename__ == 'project_index' and \
+                       'update_time' in df.columns:
+                        df['update_time'] = \
+                            pd.to_datetime(df.update_time)
+                    ## load data
                     db.session.\
                         bulk_insert_mappings(
                             table,
@@ -219,7 +350,8 @@ def cleanup_and_load_new_data_to_metadata_tables(
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise ValueError("Failed to load data db, error: {0}".format(e))
+            raise ValueError(
+                f"Failed to load data db, error: {e}")
         finally:
             if cleanup:
                 os.remove(input_json)
