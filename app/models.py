@@ -273,7 +273,7 @@ class RawAnalysisValidationSchema(Model):
     UniqueConstraint('pipeline_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
   raw_analysis_schema_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"), nullable=False)
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
   pipeline = relationship('Pipeline')
   json_schema = Column(JSONType)
   status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
