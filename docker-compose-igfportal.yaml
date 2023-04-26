@@ -11,8 +11,6 @@ services:
           driver: "json-file"
           options:
             max-size: "2048m"
-        ports:
-          - "3306:3306"
         volumes:
           - /home/igf/dev/mysqlappdb:/var/lib/mysql:rw
         container_name: portal_db
