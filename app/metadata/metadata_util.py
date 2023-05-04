@@ -220,7 +220,7 @@ def cleanup_and_load_new_data_to_metadata_tables(
             with open(json_file, 'r') as fp:
                 # t_data = fp.read()
                 portal_json_data = json.load(fp)
-            print(portal_json_data)
+            #print(portal_json_data)
             for table in portal_delete_order:
                 if table.__tablename__ in portal_json_data.keys():
                     db.session.query(table).delete()
