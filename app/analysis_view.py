@@ -50,6 +50,9 @@ def async_submit_analysis_pipeline(self, id_list):
                     query(Analysis.analysis_type).\
                     filter(Analysis.analysis_id==analysis_id).\
                     one_or_none()
+            if dag_name is not None and \
+               isinstance(dag_name, tuple):
+                dag_name = dag_name[0]
             res = \
                 trigger_airflow_pipeline(
                     dag_id=dag_name,
