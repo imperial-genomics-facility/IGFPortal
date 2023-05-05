@@ -44,9 +44,15 @@ def async_submit_analysis_pipeline(self, id_list):
     try:
         results = list()
         for analysis_id in id_list:
+            ## get dag id
+            dag_name = \
+                db.session.\
+                    query(Analysis.analysis_type).\
+                    filter(Analysis.analysis_id==analysis_id).\
+                    one_or_none()
             res = \
                 trigger_airflow_pipeline(
-                    dag_id=None,
+                    dag_id=dag_name,
                     conf_data={"analysis_id": analysis_id},
                     airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'])
             results.append(res.status_code)
