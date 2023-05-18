@@ -1,5 +1,6 @@
 import logging
 from io import BytesIO
+from . import db
 from .models import RawAnalysis
 from .models import RawAnalysisValidationSchema
 from .models import RawAnalysisTemplate
@@ -218,6 +219,35 @@ class RawAnalysisView(ModelView):
         )
     }
 
+    @action("reject_raw_analysis", "Reject analysis", confirmation="Reject analysis design?", multiple=False, single=True, icon="fa-exclamation")
+    def reject_raw_analysis(self, item):
+        try:
+            if isinstance(item, list):
+                for i in item:
+                    try:
+                        db.session.\
+                            query(RawAnalysis).\
+                            filter(RawAnalysis.raw_analysis_id==i.raw_analysis_id).\
+                            update({'status': 'REJECTED'})
+                        db.session.commit()
+                    except:
+                        db.session.rollback()
+                        raise
+            else:
+                try:
+                    db.session.\
+                        query(RawAnalysis).\
+                        filter(RawAnalysis.raw_analysis_id==i.raw_analysis_id).\
+                        update({'status': 'REJECTED'})
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+                    raise
+        except Exception as e:
+            log.error(e)
+            flash('Failed to reject analysis design', 'danger')
+            return redirect(url_for('RawAnalysisView.list'))
+
     @action("validate_and_submit_analysis", "Validate and upload analysis", confirmation="Validate analysis design?", multiple=True, single=False, icon="fa-rocket")
     def validate_and_submit_analysis(self, item):
         try:
@@ -235,7 +265,8 @@ class RawAnalysisView(ModelView):
             flash("Submitted jobs for {0}".format(', '.join(analysis_list)), "info")
             self.update_redirect()
             return redirect(url_for('RawAnalysisView.list'))
-        except:
+        except Exception as e:
+            log.error(e)
             flash('Failed to validate analysis design', 'danger')
             return redirect(url_for('RawAnalysisView.list'))
 
