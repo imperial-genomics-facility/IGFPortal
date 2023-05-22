@@ -13,6 +13,7 @@ services:
             max-size: "2048m"
         volumes:
           - /home/igf/dev/mysqlappdb_v2:/var/lib/mysql:rw
+          - /home/igf/dev/portal_db_backups/:/data
         container_name: portal_db
         networks:
           - portal_network
