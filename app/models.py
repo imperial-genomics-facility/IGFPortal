@@ -138,25 +138,18 @@ class IlluminaInteropFile(Model):
 class PreDeMultiplexingData(Model):
     __tablename__ = 'pre_demultiplexing_data'
     __table_args__ = (
-        UniqueConstraint('run_name', 'samplesheet_tag'),
+        UniqueConstraint('run_name', 'samplesheet_tag', 'date_stamp'),
         { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
     demult_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
     run_name = Column(String(50), nullable=False)
-    samplesheet_tag = Column(String(50), nullable=False)
-    flowcell_cluster_plot = Column(TEXT())
-    project_summary_table = Column(TEXT())
-    project_summary_plot = Column(TEXT())
-    sample_table = Column(TEXT())
-    sample_plot= Column(TEXT())
-    undetermined_table = Column(TEXT())
-    undetermined_plot = Column(TEXT())
-    file_path = Column(String(500), nullable=True)
-    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+    samplesheet_tag = Column(String(200), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='ACTIVE')
     date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
     def __repr__(self):
         return self.run_name
     def report(self):
-        return Markup('<a href="'+url_for('PreDeMultiplexingDataView.get_report', id=self.demult_id)+'">report</a>')
+        return Markup('<a href="'+url_for('IFrameView.view_predemult_report', id=self.demult_id)+'">report</a>')
 
 """
   Admin home view

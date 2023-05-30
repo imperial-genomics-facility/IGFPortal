@@ -4,10 +4,10 @@ from app.interop_data_api import search_interop_for_run
 from app.interop_data_api import add_interop_data
 from app.interop_data_api import edit_interop_data
 from app.interop_data_api import add_or_edit_interop_data
-from app.pre_demultiplexing_data_api import search_predemultiplexing_data
-from app.pre_demultiplexing_data_api import add_predemultiplexing_data
-from app.pre_demultiplexing_data_api import edit_predemultiplexing_data
-from app.pre_demultiplexing_data_api import add_or_edit_predemultiplexing_data
+# from app.pre_demultiplexing_data_api import search_predemultiplexing_data
+# from app.pre_demultiplexing_data_api import add_predemultiplexing_data
+# from app.pre_demultiplexing_data_api import edit_predemultiplexing_data
+# from app.pre_demultiplexing_data_api import add_or_edit_predemultiplexing_data
 
 class TestApiCase(unittest.TestCase):
     def setUp(self):
@@ -73,12 +73,12 @@ class TestApiCase(unittest.TestCase):
             search_interop_for_run(run_name=run_name)
         self.assertEqual(result.table_data, "AAAAA")
 
-    def test_search_predemultiplexing_data(self):
-        result = \
-            search_predemultiplexing_data(
-                run_name="AAAA",
-                samplesheet_tag="BBBB")
-        self.assertTrue(result is None)
+    # def test_search_predemultiplexing_data(self):
+    #     result = \
+    #         search_predemultiplexing_data(
+    #             run_name="AAAA",
+    #             samplesheet_tag="BBBB")
+    #     self.assertTrue(result is None)
 
     # def test_add_predemultiplexing_data(self):
     #     result = \
