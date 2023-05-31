@@ -109,7 +109,7 @@ IMG_UPLOAD_URL = "/static/uploads/"
 # IMG_SIZE = (300, 200, True)
 
 ## report upload folder
-REPORT_UPLOAD_PATH = "/static/reports/"
+REPORT_UPLOAD_PATH = "/data/static/reports/"
 
 # Theme configuration
 # these are located on static/appbuilder/css/themes

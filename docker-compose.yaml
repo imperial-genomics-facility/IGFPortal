@@ -33,6 +33,7 @@ services:
     webserver:
         image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
+        user: "${UID}:${GID}"
         ports:
           - 8080:8080
         restart: unless-stopped
@@ -51,6 +52,7 @@ services:
           - /home/vmuser/github/ssl:/SSL:ro
           - ./static:/data/static:rw
           - /home/vmuser/secrets/airflow_conf.json:/secret/airflow_conf.json:ro
+          - ./celery_tmp:/TMP_WORK_DIR:rw
         container_name: webserver
         command: ["flask run -h 0.0.0.0 -p 8080 --reload --debugger --without-threads"]
         networks:
@@ -72,7 +74,6 @@ services:
           - /home/vmuser/github/ssl:/SSL:ro
           - /home/vmuser/github/IGFPortal/nginx.conf:/etc/nginx/nginx.conf:ro
           - /tmp/nginx:/var/nginx/:rw
-          - ./static:/data/static:rw
         container_name: nginx
         restart: unless-stopped
         networks:
@@ -80,6 +81,7 @@ services:
     celery_worker1:
         image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
+        user: "${UID}:${GID}"
         logging:
           driver: "json-file"
           options:
@@ -94,6 +96,8 @@ services:
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
           - /home/vmuser/secrets/airflow_conf.json:/secret/airflow_conf.json:ro
+          - ./celery_tmp:/TMP_WORK_DIR:rw
+          - ./static:/data/static:rw
         container_name: celery_worker1
         command: ["celery -A app.celery worker --loglevel=WARNING"]
         networks:

@@ -97,6 +97,10 @@ class PreDeMultiplexingDataApi(ModelRestApi):
     @protect()
     def add_report(self):
         try:
+            log.warn('received_res')
+            log.warn(f"Files: {request.files}")
+            log.warn(f"Data: {request.data}")
+            log.warn(f"Form: {request.form}")
             if not request.files:
                 return self.response_400('No files')
             json_data = request.form
