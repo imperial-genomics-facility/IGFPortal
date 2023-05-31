@@ -31,6 +31,7 @@ services:
     webserver:
         image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
+        user: "${UID}:${GID}"
         logging:
           driver: "json-file"
           options:
@@ -48,6 +49,7 @@ services:
           - /home/igf/igf_portal/portal_v2/static:/data/static:rw
           - /home/igf/igf_portal/secret/airflow_conf.json:/secret/airflow_conf.json:ro
           - /tmp:/TMP_WORK_DIR:rw
+          - /home/igf/igf_portal/portal_v2/celery_tmp:/TMP_WORK_DIR:rw
         container_name: webserver
         command: ["gunicorn -b 0.0.0.0:8080 --threads 4 server:app"]
         networks:
@@ -69,7 +71,6 @@ services:
           - /home/igf/igf_portal/ssl_cert:/SSL:ro
           - /home/igf/igf_portal/portal_v2/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
           - /home/igf/igf_portal/portal_v2/nginx:/var/nginx/:rw
-          - /home/igf/igf_portal/portal_v2/static:/data/static:rw
         container_name: nginx
         restart: unless-stopped
         networks:
@@ -77,6 +78,7 @@ services:
     celery_worker1:
         image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
+        user: "${UID}:${GID}"
         logging:
           driver: "json-file"
           options:
@@ -91,7 +93,8 @@ services:
         volumes:
           - /home/igf/igf_portal/portal_v2/IGFPortal:/github/IGFPortal:ro
           - /home/igf/igf_portal/secret/airflow_conf.json:/secret/airflow_conf.json:ro
-          - /tmp:/TMP_WORK_DIR:rw
+          - /home/igf/igf_portal/portal_v2/celery_tmp:/TMP_WORK_DIR:rw
+          - /home/igf/igf_portal/portal_v2/static:/data/static:rw
         container_name: celery_worker1
         command: ["celery -A app.celery worker --loglevel=WARNING"]
         networks:
