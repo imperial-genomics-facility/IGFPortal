@@ -97,7 +97,7 @@ class IFrameView(BaseView):
         project_url = \
             url_for('ProjectView.get_project_data', id=project_id)
         # return self.render_template("iframe.html", url=file_path, project_url=project_url)
-        with open(file_path, 'r') as fp:
+        with open(file_path, 'rb') as fp:
             html_data = fp.read()
         return self.render_template("iframe.html", html_data=html_data, url_link=project_url)
 
@@ -109,6 +109,13 @@ class IFrameView(BaseView):
             get_path_for_predemult_report(id=id)
         url_link = \
             url_for('PreDeMultiplexingDataView.list')
-        with open(file_path, 'r') as fp:
-            html_data = fp.read()
-        return self.render_template("iframe.html", html_data=html_data, url_link=url_link)
+        if file_path.endswith('.html'):
+            with open(file_path, 'r') as fp:
+                html_data = fp.read()
+            return self.render_template("iframe.html", html_data=html_data, url_link=url_link)
+        # elif file_path.endswith('.pdf'):
+        #     with open(file_path, 'rb') as fp:
+        #         pdf_data = fp.read()
+        #     return self.render_template("iframe_pdf.html", pdf_data=pdf_data, url_link=url_link)
+        else:
+             return self.response(500)
