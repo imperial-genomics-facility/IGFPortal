@@ -103,7 +103,7 @@ class IFrameView(BaseView):
 
     @expose("/static/predemult/<int:id>")
     @has_access
-    @cache.cached(timeout=600)
+    @cache.cached(timeout=1200)
     def view_predemult_report(self, id):
         file_path = \
             get_path_for_predemult_report(id=id)
