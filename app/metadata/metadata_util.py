@@ -145,7 +145,6 @@ def cleanup_and_load_new_data_to_metadata_tables(
         delete_order_tables = [
             File_attribute,
             File,
-            Collection_attribute,
             Collection,
             Collection_group,
             Pipeline_seed,
@@ -185,7 +184,6 @@ def cleanup_and_load_new_data_to_metadata_tables(
             Pipeline,
             Pipeline_seed,
             Collection,
-            Collection_attribute,
             File,
             Collection_group,
             File_attribute]
