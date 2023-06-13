@@ -4,7 +4,7 @@ networks:
         driver: bridge
 services:
     portal_db:
-        image: mysql:5.7
+        image: mysql:5.7.42
         env_file: env
         restart: unless-stopped
         logging:
@@ -12,7 +12,7 @@ services:
           options:
             max-size: "2048m"
         volumes:
-          - /home/igf/dev/mysqlappdb_v3:/var/lib/mysql:rw
+          - /home/igf/dev/mysqlappdb_v4:/var/lib/mysql:rw
         container_name: portal_db
         networks:
           - portal_network
