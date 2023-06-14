@@ -249,19 +249,19 @@ def cleanup_and_load_new_data_to_metadata_tables(
                        'date_created' in df.columns:
                         df['date_created'] = \
                             pd.to_datetime(df.date_created)
-                    ## collection
-                    if table.__tablename__=='collection' and \
-                       'date_stamp' in df.columns:
-                        df['date_stamp'] = \
-                            pd.to_datetime(df.date_stamp)
-                    ## file
-                    if table.__tablename__=='file' and \
-                       'date_created' in df.columns and \
-                       'date_updated' in df.columns:
-                        df['date_created'] = \
-                            pd.to_datetime(df.date_created)
-                        df['date_updated'] = \
-                            pd.to_datetime(df.date_updated)
+                    # ## collection
+                    # if table.__tablename__=='collection' and \
+                    #    'date_stamp' in df.columns:
+                    #     df['date_stamp'] = \
+                    #         pd.to_datetime(df.date_stamp)
+                    # ## file
+                    # if table.__tablename__=='file' and \
+                    #    'date_created' in df.columns and \
+                    #    'date_updated' in df.columns:
+                    #     df['date_created'] = \
+                    #         pd.to_datetime(df.date_created)
+                    #     df['date_updated'] = \
+                    #         pd.to_datetime(df.date_updated)
                     ## pipeline
                     if table.__tablename__=='pipeline' and \
                        'date_stamp' in df.columns:
@@ -333,6 +333,50 @@ def cleanup_and_load_new_data_to_metadata_tables(
             db.session.rollback()
             raise ValueError(
                 f"Failed to load data db, error: {e}")
+        ## load collection tables
+        try:
+            delete_order_tables = [
+                Collection_group,
+                File,
+                Collection
+            ]
+            create_order_tables = [
+                Collection,
+                File,
+                Collection_group
+            ]
+            for table in delete_order_tables:
+                if table.__tablename__ in json_data.keys():
+                    db.session.query(table).delete()
+             ## load main data
+            for table in create_order_tables:
+                if table.__tablename__ in json_data.keys():
+                    table_data = json_data.get(table.__tablename__)
+                    df = pd.DataFrame(table_data)
+                    ## collection
+                    if table.__tablename__=='collection' and \
+                       'date_stamp' in df.columns:
+                        df['date_stamp'] = \
+                            pd.to_datetime(df.date_stamp)
+                    ## file
+                    if table.__tablename__=='file' and \
+                       'date_created' in df.columns and \
+                       'date_updated' in df.columns:
+                        df['date_created'] = \
+                            pd.to_datetime(df.date_created)
+                        df['date_updated'] = \
+                            pd.to_datetime(df.date_updated)
+                    df.fillna('', inplace=True)
+                    db.session.\
+                        bulk_insert_mappings(
+                            table,
+                            df.to_dict(orient="records"))
+            ## save all changes
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(
+                f"Failed to load collection data to db, error: {e}")
         finally:
             if cleanup:
                 os.remove(input_json)
