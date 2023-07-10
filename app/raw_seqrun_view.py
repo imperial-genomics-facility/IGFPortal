@@ -128,7 +128,7 @@ class RawSeqrunView(ModelView):
         "can_list",
         "can_show",
         "can_edit"]
-    base_order = ("raw_seqrun_igf_id", "desc")
+    base_order = ("raw_seqrun_id", "desc")
     add_form_extra_fields = {
         "samplesheet": QuerySelectField(
             "SampleSheetModel",
