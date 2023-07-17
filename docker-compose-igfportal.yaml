@@ -10,7 +10,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         volumes:
           - /home/igf/dev/mysqlappdb_v5:/var/lib/mysql:rw
         container_name: portal_db
@@ -23,7 +23,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         ports:
           - 6379:6379
         networks:
@@ -35,7 +35,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         ports:
           - 8080:8080
         restart: unless-stopped
@@ -60,7 +60,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         ports:
           - "80:80"
           - "443:443"
@@ -84,7 +84,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         links:
           - portal_db
           - redis_db
@@ -108,7 +108,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         ports:
           - "5555:5555"
         links:
@@ -128,7 +128,7 @@ services:
         logging:
           driver: "json-file"
           options:
-            max-size: "2048m"
+            max-size: "1024m"
         links:
           - portal_db
         ports:
