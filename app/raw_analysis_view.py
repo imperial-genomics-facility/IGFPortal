@@ -552,6 +552,29 @@ class RawAnalysisView(ModelView):
             log.error(e)
             return redirect(url_for('RawAnalysisView.list'))
 
+    @action("template_geomx_dcc", "Template GeoMx dcc", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def template_geomx_dcc(self, item):
+        try:
+            template_tag = "GEOMX_DCC"
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag=template_tag)
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_{template_tag}_analysis.yaml", as_attachment=True)
+            else:
+                flash(f"Failed to generate {template_tag} template, no project", 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
+            flash(f"Failed to generate {template_tag} template", 'danger')
+            log.error(e)
+            return redirect(url_for('RawAnalysisView.list'))
+
+
 class RawAnalysisQueueView(ModelView):
     datamodel = SQLAInterface(RawAnalysis)
     label_columns = {
