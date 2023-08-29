@@ -1,14 +1,15 @@
 import typing
 import logging
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
 from .. import db
 from ..models import RawSeqrun, SampleSheetModel
 
 def check_and_add_new_raw_seqrun(
-      seqrun_id_list: list) \
+      seqrun_id_list: list,
+      run_config_list: Optional[list] = None) \
         -> bool:
     try:
-        for seqrun_id in seqrun_id_list:
+        for seqrun_list_index, seqrun_id in enumerate(seqrun_id_list):
             seqrun_id = \
                 seqrun_id.\
                     strip().\
@@ -19,7 +20,17 @@ def check_and_add_new_raw_seqrun(
                     filter(RawSeqrun.raw_seqrun_igf_id==seqrun_id).\
                     one_or_none()
             if result is None:
-                db.session.add(RawSeqrun(raw_seqrun_igf_id=seqrun_id))
+                ## try to get run config from the json data or set it to ''
+                run_config = None
+                if run_config_list is not None and \
+                   len(run_config_list)+1 >= seqrun_list_index:
+                    run_config = run_config_list[seqrun_list_index]
+                if run_config is None:
+                    run_config = ''
+                db.session.add(
+                    RawSeqrun(
+                        raw_seqrun_igf_id=seqrun_id,
+                        run_config=run_config))
                 db.session.flush()
             db.session.commit()
     except Exception as e:
