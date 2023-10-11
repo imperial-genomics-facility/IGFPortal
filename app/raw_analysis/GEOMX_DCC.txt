@@ -3,6 +3,7 @@ sample_metadata:
         dsp_id: 
 {% endfor -%}
 analysis_metadata:
-    config_zip_file: /rds/general/project/genomics-facility-archive-2019/live/orwell/geomx
+    config_zip_file: /rds/general/project/genomics-facility-archive-2019/live/orwell/GeoMx/
+    geomx_pkc_file: /rds/general/project/genomics-facility-archive-2019/live/orwell/GeoMx/GeoMx_PKC_Files/Hs_R_NGS_WTA_v1.0.pkc
     geomx_dcc_params:
         - "--threads=8"
