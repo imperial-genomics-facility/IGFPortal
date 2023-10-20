@@ -145,7 +145,7 @@ class IFrameView(BaseView):
         file_path = \
             get_path_for_interop_report(id=id)
         url_link = \
-            url_for('IlluminaInteropData.list')
+            url_for('IlluminaInteropDataView.list')
         if file_path.endswith('.html'):
             with open(file_path, 'r') as fp:
                 html_data = fp.read()
