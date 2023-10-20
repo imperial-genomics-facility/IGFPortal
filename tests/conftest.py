@@ -196,6 +196,10 @@ def test_client(db):
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
                 "can_add_report", "PreDeMultiplexingDataApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_add_report", "SeqrunInteropApi"))
     user = \
         app.appbuilder.sm.find_user(email="admin@fab.org")
     if user is None:

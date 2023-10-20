@@ -97,39 +97,18 @@ class LONGTEXTType(TypeDecorator):
 class IlluminaInteropData(Model):
     __tablename__ = 'illumina_interop_data'
     __table_args__ = (
-        UniqueConstraint('run_name'),
+        UniqueConstraint('run_name', 'tag', 'date_stamp'),
         { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-    run_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-    run_name = Column(String(50), nullable=False)
-    table_data = Column(TEXT())
-    flowcell_data = Column(TEXT())
-    intensity_data = Column(TEXT())
-    cluster_count_data = Column(TEXT())
-    density_data = Column(TEXT())
-    qscore_bins_data = Column(TEXT())
-    qscore_cycles_data = Column(TEXT())
-    occupied_pass_filter = Column(TEXT())
+    report_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+    run_name = Column(String(100), nullable=False)
+    tag = Column(String(200), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='ACTIVE')
     date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
     def __repr__(self):
         return self.run_name
-
-    def seqrun(self):
-        return Markup('<a href="'+url_for('IlluminaInteropDataView.get_seqrun',id=self.run_id)+'">'+self.run_name+'</a>')
-
-class IlluminaInteropFile(Model):
-    __tablename__ = 'illumina_interop_file'
-    __table_args__ = (
-        UniqueConstraint('file_path'),
-        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-    file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-    file_path = Column(String(500), nullable=False)
-    file_tag = Column(String(50))
-    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
-    date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
-    run_id = Column(INTEGER(unsigned=True), ForeignKey("illumina_interop_data.run_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-    illumina_interop_data = relationship('IlluminaInteropData')
-    def __repr__(self):
-        return self.file_tag
+    def report(self):
+        return Markup('<a href="'+url_for('IFrameView.view_interop_report', id=self.report_id)+'">report</a>')
 
 """
   Pre de-multiplexing data

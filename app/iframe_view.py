@@ -11,7 +11,8 @@ from .models import (
     Project_seqrun_info_file,
     Project_seqrun_info_data,
     Project_analysis_info_data,
-    PreDeMultiplexingData)
+    PreDeMultiplexingData,
+    IlluminaInteropData)
 
 
 log = logging.getLogger(__name__)
@@ -71,6 +72,23 @@ def get_path_for_predemult_report(id):
         raise ValueError(
             f"Failed to get report for predemult entry {id}, error: {e}")
 
+def get_path_for_interop_report(id):
+    try:
+        record = \
+            db.session.\
+                query(IlluminaInteropData.file_path).\
+                filter(IlluminaInteropData.report_id==id).\
+                one_or_none()
+        if record is None:
+            log.warning(
+                f"Missing Interop data for id {id}")
+            return ''
+        (file_path,) = \
+            record
+        return file_path
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get report for interop report entry {id}, error: {e}")
 
 class IFrameView(BaseView):
     route_base = "/"
@@ -118,4 +136,19 @@ class IFrameView(BaseView):
         #         pdf_data = fp.read()
         #     return self.render_template("iframe_pdf.html", pdf_data=pdf_data, url_link=url_link)
         else:
-             return self.response(500)
+            return self.response(500)
+
+    @expose("/static/interop/<int:id>")
+    @has_access
+    @cache.cached(timeout=1200)
+    def view_interop_report(self, id):
+        file_path = \
+            get_path_for_interop_report(id=id)
+        url_link = \
+            url_for('IlluminaInteropData.list')
+        if file_path.endswith('.html'):
+            with open(file_path, 'r') as fp:
+                html_data = fp.read()
+            return self.render_template("iframe.html", html_data=html_data, url_link=url_link)
+        else:
+            return self.response(500)
