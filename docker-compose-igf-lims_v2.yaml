@@ -24,6 +24,8 @@ services:
           driver: "json-file"
           options:
             max-size: "2048m"
+        volumes:
+          - /home/igf/igf_portal/portal_v2/redis_data:/data:rw
         networks:
           - portal_network
     webserver:

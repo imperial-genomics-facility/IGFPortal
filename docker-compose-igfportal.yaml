@@ -28,6 +28,8 @@ services:
           - 6379:6379
         networks:
           - portal_network
+        volumes:
+          - /home/igf/dev/redis_data:/data:rw
     webserver:
         image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
