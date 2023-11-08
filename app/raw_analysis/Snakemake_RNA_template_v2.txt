@@ -5,7 +5,7 @@ sample_metadata:
 {% endfor -%}
 analysis_metadata:
   ref:
-    species: ENSEMBL_SPECIES_NAME_EG_
+    species: ENSEMBL_SPECIES_NAME_EG_"homo_sapiens"
     release: ENSEMBL_RELEASE_NUMBER_EG_110
     build: ENSEMBL_BUILD_NAME_EG_GRCh38
   trimming:
