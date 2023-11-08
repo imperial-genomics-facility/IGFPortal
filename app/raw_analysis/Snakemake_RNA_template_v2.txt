@@ -1,0 +1,32 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
+    condition: CONDITION_NAME (USE CAPS)
+    strandedness: reverse
+{% endfor -%}
+analysis_metadata:
+  ref:
+    species: ENSEMBL_SPECIES_NAME_EG_
+    release: ENSEMBL_RELEASE_NUMBER_EG_110
+    build: ENSEMBL_BUILD_NAME_EG_GRCh38
+  trimming:
+    activate: false
+  mergeReads:
+    activate: false
+  pca:
+    activate: true
+    labels:
+    - CONDITION_COLUMNS
+  diffexp:
+    variables_of_interest:
+      condition:
+        base_level: BASE_CONDITION
+    batch_effects: ''
+    contrasts:
+      DE_GROUP_SIMPLE:
+        variable_of_interest: CONDITION_COLUMN
+        level_of_interest: TREATMENT_CONDITION
+    model: "~MODEL_STRING"
+  params:
+    cutadapt-pe: ""
+    cutadapt-se: ""
+    star: --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMattributes NH HI AS NM MD --limitBAMsortRAM 12000000000
