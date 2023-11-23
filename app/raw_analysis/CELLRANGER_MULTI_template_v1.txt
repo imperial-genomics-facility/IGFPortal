@@ -2,6 +2,7 @@ sample_metadata:
 {% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
     feature_types: Gene Expression/Antibody Capture/CRISPR Guide Capture/Multiplexing Capture/VDJ-B/VDJ-T/VDJ-T-GD/Antigen Capture
     cellranger_group: GROUP_NAME
+{% endfor -%}
 analysis_metadata:
   cellranger_multi_config:
     - "[gene-expression]"
