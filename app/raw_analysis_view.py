@@ -223,21 +223,21 @@ class RawAnalysisView(ModelView):
     def reject_raw_analysis(self, item):
         try:
             if isinstance(item, list):
-                for i in item:
-                    try:
+                try:
+                    for i in item:
                         db.session.\
                             query(RawAnalysis).\
                             filter(RawAnalysis.raw_analysis_id==i.raw_analysis_id).\
                             update({'status': 'REJECTED'})
-                        db.session.commit()
-                    except:
-                        db.session.rollback()
-                        raise
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+                    raise
             else:
                 try:
                     db.session.\
                         query(RawAnalysis).\
-                        filter(RawAnalysis.raw_analysis_id==i.raw_analysis_id).\
+                        filter(RawAnalysis.raw_analysis_id==item.raw_analysis_id).\
                         update({'status': 'REJECTED'})
                     db.session.commit()
                 except:
@@ -556,6 +556,28 @@ class RawAnalysisView(ModelView):
     def template_geomx_dcc(self, item):
         try:
             template_tag = "GEOMX_DCC"
+            if item.project_id is not None:
+                formatted_template = \
+                    generate_analysis_template(
+                        project_igf_id=item.project.project_igf_id,
+                        template_tag=template_tag)
+                output = BytesIO(formatted_template.encode('utf-8'))
+                analysis_name = item.analysis_name.encode('utf-8').decode()
+                output.seek(0)
+                self.update_redirect()
+                return send_file(output, download_name=f"{analysis_name}_{template_tag}_analysis.yaml", as_attachment=True)
+            else:
+                flash(f"Failed to generate {template_tag} template, no project", 'danger')
+                return redirect(url_for('RawAnalysisView.list'))
+        except Exception as e:
+            flash(f"Failed to generate {template_tag} template", 'danger')
+            log.error(e)
+            return redirect(url_for('RawAnalysisView.list'))
+
+    @action("template_cellranger_multi", "Template cellranger multi", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def template_cellranger_multi(self, item):
+        try:
+            template_tag = "CELLRANGER_MULTI"
             if item.project_id is not None:
                 formatted_template = \
                     generate_analysis_template(
