@@ -60,7 +60,6 @@ services:
           - portal_network
     nginx:
         image: nginx:1.23.3
-        user: "${PORTAL_UID}:${GID}"
         logging:
           driver: "json-file"
           options:
