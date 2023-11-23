@@ -12,7 +12,7 @@ services:
           options:
             max-size: "1024m"
         volumes:
-          - /home/igf/dev/mysqlappdb_v5:/var/lib/mysql:rw
+          - /home/igf/dev/mysqlappdb:/var/lib/mysql:rw
         container_name: portal_db
         networks:
           - portal_network
@@ -20,6 +20,7 @@ services:
         image: redis:6.2
         restart: unless-stopped
         container_name: redis_db
+        user: "${PORTAL_UID}:${GID}"
         logging:
           driver: "json-file"
           options:
@@ -59,6 +60,7 @@ services:
           - portal_network
     nginx:
         image: nginx:1.23.3
+        user: "${PORTAL_UID}:${GID}"
         logging:
           driver: "json-file"
           options:
@@ -107,6 +109,7 @@ services:
         image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
         restart: unless-stopped
+        user: "${PORTAL_UID}:${GID}"
         logging:
           driver: "json-file"
           options:
@@ -127,6 +130,7 @@ services:
           - portal_network
     adminer:
         image: adminer:latest
+        user: "${PORTAL_UID}:${GID}"
         logging:
           driver: "json-file"
           options:
