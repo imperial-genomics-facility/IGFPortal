@@ -243,6 +243,7 @@ class RawAnalysisView(ModelView):
                 except:
                     db.session.rollback()
                     raise
+            return redirect(url_for('RawAnalysisView.list'))
         except Exception as e:
             log.error(e)
             flash('Failed to reject analysis design', 'danger')
