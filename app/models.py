@@ -129,6 +129,8 @@ class PreDeMultiplexingData(Model):
         return self.run_name
     def report(self):
         return Markup('<a href="'+url_for('IFrameView.view_predemult_report', id=self.demult_id)+'">report</a>')
+    def download_report(self):
+        return Markup('<a href="'+url_for('PreDeMultiplexingDataView.download_reports', id=self.demult_id)+'">download</a>')
 
 """
   Admin home view
