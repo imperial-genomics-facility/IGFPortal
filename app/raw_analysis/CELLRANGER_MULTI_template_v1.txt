@@ -36,7 +36,9 @@ analysis_metadata:
     - "#sample_id,cmo_ids,description"
     - "#[samples] # for Fixed RNA Profiling multiplexed libraries only"
     - "#sample_id,probe_barcode_ids,description"
-  scanpy:
+  scanpy_config:
+    TEMPLATE_FILE: /project/tgu/software/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.3.ipynb
+    IMAGE_FILE: /project/tgu/resources/pipeline_resource/singularity_images/scanpy-notebook-image/scanpy-notebook-image_v0.0.4.sif
     MITO_PREFIX: MT-
     RUN_SCRUBLET: true
     RUN_CELLCYCLE_SCORE: true
