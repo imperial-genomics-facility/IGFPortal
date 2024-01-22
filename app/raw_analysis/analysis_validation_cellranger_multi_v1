@@ -1,0 +1,59 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF Cellranger Multi analysis validation schema",
+    "description": "Schema for validation of Cellranger multi analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "feature_types": {
+                            "type": "string",
+                            "enum": [
+                               "Gene Expression",
+                               "Antibody Capture",
+                               "CRISPR Guide Capture",
+                               "Multiplexing Capture",
+                               "VDJ-B",
+                               "VDJ-T",
+                               "VDJ-T-GD",
+                               "Antigen Capture"
+                            ]
+                        },
+                        "cellranger_group": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9-_]+$"
+                        }
+                    }
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "scanpy": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "cellranger_multi_config": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["cellranger_multi_config", "scanpy"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}

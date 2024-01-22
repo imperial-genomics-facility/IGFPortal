@@ -31,12 +31,14 @@ class RawSeqrunApi(ModelRestApi):
                 json_data = json_data.decode('utf-8')
             json_data = json.loads(json_data)
             seqrun_id_list = json_data.get("seqrun_id_list")
+            run_config_list = json_data.get("run_config_list")
             if seqrun_id_list is None:
                 return self.response_400('No seqrun_id_list')
             if isinstance(seqrun_id_list, list) and \
                len(seqrun_id_list) > 0:
                 check_and_add_new_raw_seqrun(
-                    seqrun_id_list)
+                    seqrun_id_list,
+                    run_config_list)
                 return self.response(200, message='OK')
             else:
                 return self.response_400('Empty seqrun_id_list')
@@ -76,7 +78,7 @@ class RawSeqrunApi(ModelRestApi):
                 output = BytesIO(csv_data.encode())
                 output.seek(0)
                 attachment_filename = f"{tag}.csv"
-                return send_file(output, attachment_filename=attachment_filename, as_attachment=True)
+                return send_file(output, download_name=attachment_filename, as_attachment=True)
         except Exception as e:
             logging.error(e)
 

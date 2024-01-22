@@ -2,6 +2,7 @@ import logging
 from flask_appbuilder.baseviews import BaseView, expose
 from flask_appbuilder.security.decorators import protect, has_access
 from . import db
+from app import cache
 from .models import AdminHomeData
 
 log = logging.getLogger(__name__)
@@ -41,11 +42,13 @@ class HomeView(BaseView):
 
     @expose('/user_home')
     @has_access
+    @cache.cached(timeout=600)
     def general(self):
         return self.render_template('user_index.html')
 
     @expose('/admin_home')
     @has_access
+    @cache.cached(timeout=600)
     def admin_home(self):
         try:
             (finished_seqrun, finished_analysis,

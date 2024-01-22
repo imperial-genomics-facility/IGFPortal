@@ -7,7 +7,7 @@ from typing import Tuple
 from datetime import datetime
 from io import BytesIO, StringIO
 from flask_appbuilder.security.decorators import protect, has_access
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms.fields import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_appbuilder import ModelView
@@ -72,7 +72,7 @@ class ProjectIndexView(ModelView):
             df.to_csv(output, index=False)
             output.seek(0)
             self.update_redirect()
-            return send_file(output, attachment_filename=file_name, as_attachment=True)
+            return send_file(output, download_name=file_name, as_attachment=True)
         except Exception as e:
             log.error(e)
             flash('Failed to create csv', 'danger')

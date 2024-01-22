@@ -1,0 +1,27 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}    {{ SAMPLE_ID }}:
+        condition: CONDITION_NAME (USE CAPS)
+        strandedness: reverse
+{% endfor -%}
+analysis_metadata:
+    ref:
+        species: ENSEMBL_SPECIES_NAME
+        release: ENSEMBL_RELEASE_NUMBER
+        build: ENSEMBL_BUILD_NAME
+    trimming:
+        activate: False
+    mergeReads:
+        activate: False
+    pca:
+        activate: True
+        labels:
+          - LABEL_LIST
+    diffexp:
+        contrasts:
+            DE_GROUP:
+                - CONDITION_NAME_LIST
+        model: MODEL_STRING
+    params:
+        cutadapt-pe: ""
+        cutadapt-se: ""
+        star: --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMattributes NH HI AS NM MD --limitBAMsortRAM 12000000000

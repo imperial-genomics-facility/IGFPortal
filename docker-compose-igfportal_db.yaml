@@ -1,0 +1,32 @@
+version: '3.9'
+networks:
+    portal_network:
+        driver: bridge
+services:
+    portal_db:
+        image: mysql:5.7.42
+        env_file: env
+        restart: unless-stopped
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
+        volumes:
+          - /home/igf/dev/mysqlappdb_v5:/var/lib/mysql:rw
+        container_name: portal_db
+        networks:
+          - portal_network
+    adminer:
+        image: adminer:latest
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
+        links:
+          - portal_db
+        ports:
+          - "8081:8080"
+        restart: unless-stopped
+        container_name: adminer
+        networks:
+          - portal_network

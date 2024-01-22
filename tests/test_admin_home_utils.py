@@ -1,16 +1,28 @@
 import os, unittest, json, tempfile
-from app import appbuilder, db
+# from app import db, app
 from app.models import AdminHomeData
 from app.admin_home.admin_home_utils import parse_and_add_new_admin_view_data
 
-class TestAdminHomeUtil1(unittest.TestCase):
-    def setUp(self):
-        db.create_all()
+# class TestAdminHomeUtil1(unittest.TestCase):
+#     def setUp(self):
+#         # os.environ['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/app_admin_home.db"
+#         app.config.update({
+#             "TESTING": True,
+#             "CSRF_ENABLED": False,
+#             # "SQLALCHEMY_DATABASE_URI": "sqlite:////tmp/app_admin_home.db",
+#         })
+#         db.create_all()
+#         self.app_context = app.app_context()
+#         self.app_context.push()
+#         print(db.get_engine().url)
 
-    def tearDown(self):
-        db.drop_all()
+#     def tearDown(self):
+#         db.session.remove()
+#         self.app_context.pop()
+#         db.drop_all()
 
-    def test_parse_and_add_new_admin_view_data(self):
+def test_parse_and_add_new_admin_view_data(db):
+    # def test_parse_and_add_new_admin_view_data(self):
         json_data = {
             'admin_data_tag': 'test',
             'recent_finished_runs': 1,
@@ -33,9 +45,12 @@ class TestAdminHomeUtil1(unittest.TestCase):
                     query(AdminHomeData).\
                     filter(AdminHomeData.admin_data_tag=='test').\
                     one_or_none()
-            self.assertIsNotNone(results)
-            self.assertEqual(results.recent_finished_runs, 1)
-            self.assertTrue(isinstance(results.sequence_counts_plot, str))
+            # self.assertIsNotNone(results)
+            # self.assertEqual(results.recent_finished_runs, 1)
+            # self.assertTrue(isinstance(results.sequence_counts_plot, str))
+            assert results is not None
+            assert results.recent_finished_runs == 1
+            assert isinstance(results.sequence_counts_plot, str)
             json_data = {
                 'admin_data_tag': 'test',
                 'recent_finished_runs': 2,
@@ -52,8 +67,10 @@ class TestAdminHomeUtil1(unittest.TestCase):
                     query(AdminHomeData).\
                     filter(AdminHomeData.admin_data_tag=='test').\
                     one_or_none()
-            self.assertIsNotNone(results)
-            self.assertEqual(results.recent_finished_runs, 2)
+            # self.assertIsNotNone(results)
+            # self.assertEqual(results.recent_finished_runs, 2)
+            assert results is not None
+            assert results.recent_finished_runs == 2
 
-if __name__ == '__main__':
-  unittest.main()
+# if __name__ == '__main__':
+#   unittest.main()

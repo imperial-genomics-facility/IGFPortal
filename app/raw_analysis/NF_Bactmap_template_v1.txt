@@ -1,0 +1,9 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}: ""
+{% endfor -%}
+analysis_metadata:
+  NXF_VER: X.Y.Z
+  nfcore_pipeline: nf-core/bactmap
+  nextflow_params:
+    - "-profile singularity"
+    - "-r A.B"

@@ -1,0 +1,4 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}    {{ SAMPLE_ID }}: ''
+{% endfor -%}
+analysis_metadata: ''

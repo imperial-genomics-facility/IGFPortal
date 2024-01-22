@@ -7,18 +7,24 @@ from flask_appbuilder.security.manager import (
     AUTH_OAUTH,
 )
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+#basedir = os.path.abspath(os.path.dirname(__file__))
+basedir = '/tmp'
+
+MAX_CONTENT_LENGTH = 50 * 1024 * 1024
 
 # Celery
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", 'memory://')
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", 'cache+memory://')
 CELERY_WORK_DIR = os.environ.get("CELERY_WORK_DIR", '/tmp')
 
+# cache
+CACHE_REDIS_URL = os.environ.get("CACHE_REDIS_URL", 'unix://')
+
 # Your App secret key
 SECRET_KEY = os.environ.get("SECRET_KEY", "\2\1thisismyscretkey\1\2\e\y\y\h")
 
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///" + os.path.join(basedir, "app.db"))
+SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///" + os.path.join('/tmp', "app.db"))
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
 
@@ -101,6 +107,9 @@ IMG_UPLOAD_FOLDER = basedir + "/app/static/uploads/"
 IMG_UPLOAD_URL = "/static/uploads/"
 # Setup image size default is (300, 200, True)
 # IMG_SIZE = (300, 200, True)
+
+## report upload folder
+REPORT_UPLOAD_PATH = "/data/static/reports/"
 
 # Theme configuration
 # these are located on static/appbuilder/css/themes

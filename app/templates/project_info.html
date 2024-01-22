@@ -1,0 +1,272 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<h2>{{ project_igf_id }}</h2>
+
+<h3>List of analysis</h3>
+
+
+<h3>Project summary plot</h3>
+
+<div class="container">
+    <div class="row">
+      <div class="col-24 col-sm-12 col-md-15 col-lg-10">
+        <div class="card">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="lane{{ lane_id }}-plot" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" href="#project_column_plot" role="tab" aria-controls="project_column_plot" aria-selected="true">Column plot</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link"  href="#project_hist_plot" role="tab" aria-controls="project_hist_plot" aria-selected="false">Histogram plot</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link"  href="#project_status_plot" role="tab" aria-controls="project_status_plot" aria-selected="false">Status plot</a>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+             <div class="tab-content mt-3">
+              <div class="tab-pane active" id="project_column_plot" role="tabpanel" aria-labelledby="project_column_plot-tab">
+                <canvas id="project_column_plot"></canvas>
+              </div>
+              <div class="tab-pane" id="project_hist_plot" role="tabpanel" aria-labelledby="project_hist_plot-tab">
+                  <canvas id="project_hist_plot"></canvas>
+              </div>
+              <div class="tab-pane" id="project_status_plot" role="tabpanel" aria-labelledby="project_status_plot-tab">
+                  <canvas id="project_status_plot"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  $('#lane{{ lane_id }}-plot a').on('click', function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+  })
+  </script>
+
+
+<h3>Sample read counts</h3>
+<div id="dashboard_div_1" style='width: 100%; height: 100%' >
+    <div id="filter_sample_div" style="float:left; margin:10px;"></div>
+    <div style="clear:both;"></div>
+    <div id="sample_count_table_div"></div>
+</div>
+
+<h3>List of raw data report</h3>
+<div id="dashboard_div_2" style='width: 100%; height: 100%' >
+    <div id="filter_seqrun_div" style="float:left; margin:10px;"></div>
+    <div style="clear:both;"></div>
+    <div id="seqrun_files_table_div"></div>
+</div>
+
+<h3>List of analysis</h3>
+<div id="dashboard_div_3" style='width: 100%; height: 100%' >
+    <div id="filter_analysis_div" style="float:left; margin:10px;"></div>
+    <div style="clear:both;"></div>
+    <div id="analysis_files_table_div"></div>
+</div>
+
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var data = new google.visualization.DataTable({{ sample_read_count_data|safe }});
+        var chart = new google.visualization.ColumnChart(document.getElementById('project_column_plot'));
+        var options = {
+            width: 700,
+            height: {{ image_height }},
+            title: 'Column plot for sample read count',
+            animation: {startup: true,
+                        duration: 800,
+                        easing: 'in'},
+            bar: { groupWidth: "60%" },
+            vAxis: {title: 'Sample ID',
+                    textStyle:{fontSize: 10}
+                   },
+            hAxis: {title: 'Number of Reads',
+                    slantedText : true,
+                    slantedTextAngle : 45,
+                    textStyle:{fontSize: 10}
+                    },
+            orientation: 'vertical',
+            legend: {position: 'right',
+                     textStyle: {color: '#708090',
+                                 fontSize: 10}
+                    },
+            colors: ['#4682B4',  // Steel Blue
+                    '#A233A2',  // Vivid Violet
+                    '#FF7F50',  // Coral - orange
+                    '#6787E7',  // Cornflower Blue
+                    '#B75555',  // Fuzzy Wuzzy Brown
+                    '#2E8B57',  // Sea Green
+                    '#191970',  // Midnight Blue
+                    '#DB7093',  // Pale Violet Red
+                    '#90EE90',  // Light Green
+                    '#00FFFF',  // Aqua
+                    '#FFD700',  // Gold
+                    '#DC143C',  // Crimson
+                   ],
+          }
+        chart.draw(data, options);
+    }
+</script>
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawHist);
+    function drawHist() {
+        var data = new google.visualization.DataTable({{ sample_read_count_data|safe }});
+        var chart = new google.visualization.Histogram(document.getElementById('project_hist_plot'));
+        var options = {
+              width: 900,
+              height: 400,
+              title: 'Histogram plot for sample read count',
+              legend: { position: 'right',
+                        textStyle: {color: '#708090',
+                                    fontSize: 10}},
+              hAxis: { textStyle:{fontSize: 10,
+                                  color: '#708090'},
+                       slantedText : true,
+                       slantedTextAngle : 45,},
+              histogram: { maxNumBuckets: 50, },
+              colors:['#4682B4',  // Steel Blue
+                      '#A233A2',  // Vivid Violet
+                      '#FF7F50',  // Coral - orange
+                      '#6787E7',  // Cornflower Blue
+                      '#B75555',  // Fuzzy Wuzzy Brown
+                      '#2E8B57',  // Sea Green
+                      '#191970',  // Midnight Blue
+                      '#DB7093',  // Pale Violet Red
+                      '#90EE90',  // Light Green
+                      '#00FFFF',  // Aqua
+                      '#FFD700',  // Gold
+                      '#DC143C',  // Crimson
+                      '#B0C4DE',  // LightSteelBlue
+                      '#00FA9A',  // MediumSpringGreen
+                      '#FA8072',  // Salmon
+                      '#FFF0F5',  // LavenderBlush
+                      '#DB7093'   // PaleVioletRed
+                     ],
+            };
+        chart.draw(data, options);
+    }
+</script>
+
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['gantt']});
+    google.charts.setOnLoadCallback(drawStatus);
+    function drawStatus() {
+        var data = new google.visualization.DataTable({{ project_history_data|safe }});
+        var chart = new google.visualization.Gantt(document.getElementById('project_status_plot'));
+        var options = {
+          height: 600,
+          width: 700,
+          timeline: {
+            groupByRowLabel: true
+          }
+        };
+        chart.draw(data, options);
+    }
+</script>
+
+
+<script type='text/javascript'>
+    google.charts.load('current', {'packages':['corechart', 'controls']});
+    google.charts.setOnLoadCallback(drawSampleReadCountDashboard);
+    function drawSampleReadCountDashboard() {
+      var data = new google.visualization.DataTable({{ sample_read_count_data|safe }});
+      var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div_1'));
+      var filter_sample = new google.visualization.ControlWrapper({
+                               'controlType': 'StringFilter',
+                               'containerId': 'filter_sample_div',
+                               'options': {
+                                   'filterColumnLabel': 'Sample ID',
+                                   'matchType': 'any'
+                               }
+                         });
+      var table = new google.visualization.ChartWrapper({
+                       'chartType': 'Table',
+                       'containerId': 'sample_count_table_div',
+                       'options': {'width': '100%', 
+                                   'height': '100%', 
+                                   'page': 'enable',
+                                   'showRowNumber': false,
+                                   'allowHtml': true,
+                                   'pageSize': 100}
+                       });
+      dashboard.bind(filter_sample, table);
+      dashboard.draw(data);
+    }
+  </script>
+
+
+<script type='text/javascript'>
+  google.charts.load('current', {'packages':['corechart', 'controls']});
+  google.charts.setOnLoadCallback(drawSeqrunFilesDashboard);
+  function drawSeqrunFilesDashboard() {
+    var data1 = new google.visualization.DataTable({{ seqrun_results_gviz_data|safe }});
+    var dashboard1 = new google.visualization.Dashboard(document.getElementById('dashboard_div_2'));
+    var filter_seqrun = new google.visualization.ControlWrapper({
+                             'controlType': 'StringFilter',
+                             'containerId': 'filter_seqrun_div',
+                             'options': {
+                                 'filterColumnLabel': "Sequencing run",
+                                 'matchType': 'any'
+                             }
+                       });
+    var table1 = new google.visualization.ChartWrapper({
+                     'chartType': 'Table',
+                     'containerId': 'seqrun_files_table_div',
+                     'options': {'width': '100%', 
+                                 'height': '100%', 
+                                 'page': 'enable',
+                                 'showRowNumber': false,
+                                 'allowHtml': true,
+                                 'pageSize': 100}
+                     });
+    dashboard1.bind(filter_seqrun, table1);
+    dashboard1.draw(data1);
+  }
+</script>
+
+<script type='text/javascript'>
+  google.charts.load('current', {'packages':['corechart', 'controls']});
+  google.charts.setOnLoadCallback(drawAnalysisFilesDashboard);
+  function drawAnalysisFilesDashboard() {
+    var data2 = new google.visualization.DataTable({{ analysis_results_gviz_data|safe }});
+    var dashboard2 = new google.visualization.Dashboard(document.getElementById('dashboard_div_3'));
+    var filter_analysis = new google.visualization.ControlWrapper({
+                             'controlType': 'StringFilter',
+                             'containerId': 'filter_analysis_div',
+                             'options': {
+                                 'filterColumnLabel': "Analysis name",
+                                 'matchType': 'any'
+                             }
+                       });
+    var table2 = new google.visualization.ChartWrapper({
+                     'chartType': 'Table',
+                     'containerId': 'analysis_files_table_div',
+                     'options': {'width': '100%', 
+                                 'height': '100%', 
+                                 'page': 'enable',
+                                 'showRowNumber': false,
+                                 'allowHtml': true,
+                                 'pageSize': 100}
+                     });
+    dashboard2.bind(filter_analysis, table2);
+    dashboard2.draw(data2);
+  }
+</script>
+
+{% endblock %}

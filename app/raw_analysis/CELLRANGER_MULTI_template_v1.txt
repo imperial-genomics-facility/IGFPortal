@@ -1,0 +1,49 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
+    feature_types: Gene Expression/Antibody Capture/CRISPR Guide Capture/Multiplexing Capture/VDJ-B/VDJ-T/VDJ-T-GD/Antigen Capture
+    cellranger_group: GROUP_NAME
+{% endfor -%}
+analysis_metadata:
+  cellranger_multi_config:
+    - "[gene-expression]"
+    - "reference,/project/tgu/resources/pipeline_resource/transcriptome/cellranger/v7/GRCh38/refdata-gex-GRCh38-2020-A"
+    - "# probe-set,/path/to/probe/set, # Required, Fixed RNA Profiling only."
+    - "# filter-probes,<true|false>, # Optional, Fixed RNA Profiling only."
+    - "# r1-length,<int>"
+    - "# r2-length,<int>"
+    - "# chemistry,<auto>"
+    - "# expect-cells,<int>"
+    - "# force-cells,<int>"
+    - "# no-secondary,<true|false>"
+    - "# no-bam,<true|false>"
+    - "# check-library-compatibility,<true|false>"
+    - "# include-introns,<true|false>"
+    - "# min-assignment-confidence,<0.9>, # Optional, Cell Multiplexing only."
+    - "# cmo-set,/path/to/CMO/reference, # Optional, Cell Multiplexing only."
+    - "# barcode-sample-assignment,/path/to/barcode-sample-assignment/csv, # Optional, Cell Multiplexing only."
+    - "[feature] # For Feature Barcode libraries only"
+    - "# reference,/path/to/feature/reference"
+    - "# r1-length,<int>"
+    - "# r2-length,<int>"
+    - "# [vdj] # For TCR and BCR libraries only"
+    - "reference,/project/tgu/resources/pipeline_resource/vdj/v7/hg38/refdata-cellranger-vdj-GRCh38-alts-ensembl-7.1.0"
+    - "# inner-enrichment-primers,/path/to/primers"
+    - "# r1-length,<int>"
+    - "# r2-length,<int>"
+    - "[antigen-specificity] # for 5' BCR/TCR Antigen Capture only"
+    - "#control_id,mhc_allele"
+    - "#[samples] # for Cell Multiplexing libraries only"
+    - "#sample_id,cmo_ids,description"
+    - "#[samples] # for Fixed RNA Profiling multiplexed libraries only"
+    - "#sample_id,probe_barcode_ids,description"
+  scanpy_config:
+    TEMPLATE_FILE: /project/tgu/software/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.3.ipynb
+    IMAGE_FILE: /project/tgu/resources/pipeline_resource/singularity_images/scanpy-notebook-image/scanpy-notebook-image_v0.0.4.sif
+    MITO_PREFIX: MT-
+    RUN_SCRUBLET: true
+    RUN_CELLCYCLE_SCORE: true
+    CELL_MARKER_LIST: /project/tgu/resources/pipeline_resource/cell_markers/PangaloDB/PanglaoDB_markers_27_Mar_2020.tsv
+    CELL_MARKER_SPECIES: HG38
+    S_GENES: ''
+    G2M_GENES: ''
+    CELL_MARKER_MODE: NON-VDJ

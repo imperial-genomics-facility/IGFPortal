@@ -8,6 +8,8 @@ from flask_appbuilder.security.decorators import protect
 from . import app, db, celery
 from .metadata.metadata_util import cleanup_and_load_new_data_to_metadata_tables
 
+log = logging.getLogger(__name__)
+
 @celery.task(bind=True)
 def async_cleanup_and_load_new_data_to_metadata_tables(
     self, json_file: str) -> dict:
@@ -15,7 +17,7 @@ def async_cleanup_and_load_new_data_to_metadata_tables(
         cleanup_and_load_new_data_to_metadata_tables(json_file)
         return {"message": "success"}
     except Exception as e:
-        logging.error(
+        log.error(
             "Failed to run celery job, error: {0}".\
                 format(e))
 
@@ -51,6 +53,7 @@ class MetadataLoadApi(BaseApi):
                     apply_async(args=[json_file])
             return self.response(200, message='successfully submitted metadata update job')
         except Exception as e:
-            logging.error(e)
+            log.error(e)
+            return self.response_500('failed to submit metadata update job')
 
 

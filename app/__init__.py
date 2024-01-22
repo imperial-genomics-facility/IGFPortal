@@ -1,9 +1,11 @@
+import os
 import logging
-
 from flask import Flask, request
 from flask_appbuilder import AppBuilder, SQLA
 from .index import CustomIndexView
 from celery import Celery
+from flask_caching import Cache
+from flask_migrate import Migrate
 
 """
  Logging configuration
@@ -15,6 +17,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 app = Flask(__name__)
 app.config.from_object("config")
 db = SQLA(app)
+migrate = Migrate(app, db)
 appbuilder = AppBuilder(app, db.session, indexview=CustomIndexView)
 
 
@@ -37,6 +40,28 @@ celery = \
         broker_url=app.config['CELERY_BROKER_URL'],
         result_backend=app.config['CELERY_RESULT_BACKEND'])
 celery.conf.update(app.config)
+
+## CACHING
+cache_config = {
+    "CACHE_TYPE": "RedisCache",
+    "CACHE_DEFAULT_TIMEOUT": 300,
+    "CACHE_REDIS_URL": app.config['CACHE_REDIS_URL']
+}
+
+test_cache_config = {
+    "CACHE_TYPE": "SimpleCache",
+    "CACHE_DEFAULT_TIMEOUT": 300,
+}
+
+env_name = os.environ.get('ENV_NAME')
+if 'TESTING' in app.config and \
+   app.config.get('TESTING') is not None and \
+   app.config.get('TESTING'):
+  app.config.from_mapping(test_cache_config)
+  cache = Cache(app)
+else:
+  app.config.from_mapping(cache_config)
+  cache = Cache(app)
 
 ## GDPR
 @app.context_processor

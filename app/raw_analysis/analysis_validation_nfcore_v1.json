@@ -1,0 +1,65 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF NF-core analysis validation schema",
+    "description": "Schema for validation of NF-core analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "condition": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9-_]+$"
+                        },
+                        "strandedness": {
+                            "type": "string",
+                            "enum": ["reverse", "forward", "unstranded"]
+                        }
+                    }
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "NXF_VER": {
+                    "type": "string"
+                },
+                "nfcore_pipeline": {
+                    "type": "string",
+                    "enum": [
+                        "nf-core/smrnaseq",
+                        "nf-core/rnaseq",
+                        "nf-core/methylseq",
+                        "nf-core/sarek",
+                        "nf-core/ampliseq",
+                        "nf-core/rnafusion",
+                        "nf-core/rnavar",
+                        "nf-core/atacseq",
+                        "nf-core/chipseq",
+                        "nf-core/cutandrun",
+                        "nf-core/bactmap",
+                        "nf-core/hic"
+                    ]
+                },
+                "nextflow_params": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["NXF_VER", "nfcore_pipeline", "nextflow_params"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}

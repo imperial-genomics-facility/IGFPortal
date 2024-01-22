@@ -6,26 +6,41 @@ services:
     portal_db:
         image: mysql:5.7
         env_file: env
-        restart: always
+        restart: unless-stopped
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - "3306:3306"
         volumes:
-          - /home/vmuser/mysqlappdb:/var/lib/mysql:rw
+          - /home/vmuser/mysqlappdb3:/var/lib/mysql:rw
         container_name: portal_db
         networks:
           - portal_network
     redis_db:
         image: redis:6.2
-        restart: always
+        restart: unless-stopped
         container_name: redis_db
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
+        ports:
+          - 6379:6379
         networks:
           - portal_network
     webserver:
-        image: igfportal:v0.0.1
+        image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
+        user: "${UID}:${GID}"
         ports:
           - 8080:8080
-        restart: always
+        restart: unless-stopped
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         links:
           - portal_db
           - redis_db
@@ -36,12 +51,18 @@ services:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
           - /home/vmuser/github/ssl:/SSL:ro
           - ./static:/data/static:rw
+          - /home/vmuser/secrets/airflow_conf.json:/secret/airflow_conf.json:ro
+          - ./celery_tmp:/TMP_WORK_DIR:rw
         container_name: webserver
         command: ["flask run -h 0.0.0.0 -p 8080 --reload --debugger --without-threads"]
         networks:
           - portal_network
     nginx:
         image: nginx:1.23.3
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - "80:80"
           - "443:443"
@@ -53,31 +74,42 @@ services:
           - /home/vmuser/github/ssl:/SSL:ro
           - /home/vmuser/github/IGFPortal/nginx.conf:/etc/nginx/nginx.conf:ro
           - /tmp/nginx:/var/nginx/:rw
-          - ./static:/data/static:rw
         container_name: nginx
+        restart: unless-stopped
         networks:
           - portal_network
     celery_worker1:
-        image: igfportal:v0.0.1
+        image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
+        user: "${UID}:${GID}"
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         links:
           - portal_db
           - redis_db
         depends_on:
           - portal_db
           - redis_db
-        restart: always
+        restart: unless-stopped
         volumes:
           - /home/vmuser/github/IGFPortal:/github/IGFPortal:ro
           - /home/vmuser/secrets/airflow_conf.json:/secret/airflow_conf.json:ro
+          - ./celery_tmp:/TMP_WORK_DIR:rw
+          - ./static:/data/static:rw
         container_name: celery_worker1
-        command: ["celery -A app.celery worker --loglevel=INFO"]
+        command: ["celery -A app.celery worker --loglevel=WARNING"]
         networks:
           - portal_network
     celery_flower:
-        image: igfportal:v0.0.1
+        image: imperialgenomicsfacility/igfportal:v0.0.2.1
         env_file: env
-        restart: always
+        restart: unless-stopped
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         ports:
           - "5555:5555"
         links:
@@ -94,11 +126,15 @@ services:
           - portal_network
     adminer:
         image: adminer:latest
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "2048m"
         links:
           - portal_db
         ports:
           - "8081:8080"
-        restart: always
+        restart: unless-stopped
         container_name: adminer
         networks:
           - portal_network

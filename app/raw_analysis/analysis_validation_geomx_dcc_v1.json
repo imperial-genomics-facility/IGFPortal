@@ -1,0 +1,44 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF GeoMx DCC analysis validation schema",
+    "description": "Schema for validation of GeoMx DCC analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "dsp_id": {
+                            "type": "string",
+                            "pattern": "^DSP-"
+                        }
+                    }
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "config_zip_file": {
+                    "type": "string"
+                },
+                "geomx_dcc_params": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["config_zip_file", "geomx_dcc_params"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}

@@ -24,3 +24,11 @@ nginx.conf
 app/static/bclconvert_report_v0.02.html
 app/static/MultiQC_lane1.html
 app/static/MultiQC_lane1.html:Zone.Identifier
+app/static/*
+.coverage
+tests/1__init__.py
+aaa
+facebook.ico
+migration_docker_db.sh
+static/*
+celery_tmp/*
