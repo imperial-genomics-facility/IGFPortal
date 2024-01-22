@@ -1,7 +1,7 @@
 apache-airflow-client @ git+https://github.com/apache/airflow-client-python.git@99b3d15620e543cf7b01da8f076bb78ae3eb9b71
 celery==5.2.7
 coverage==7.0.3
-Flask==2.2.2
+Flask==2.2.5
 Flask-AppBuilder==4.1.6
 Flask-Caching==2.0.1
 Flask-Login==0.6.2
