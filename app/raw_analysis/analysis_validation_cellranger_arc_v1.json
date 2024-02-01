@@ -1,0 +1,79 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF Cellranger arc analysis validation schema",
+    "description": "Schema for validation of Cellranger arc analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "library_type": {
+                            "type": "string",
+                            "enum": [
+                               "Gene Expression",
+                               "Chromatin Accessibility"
+                            ]
+                        },
+                        "cellranger_group": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9-_]+$"
+                        }
+                    }
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "scanpy": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "cellranger_arc_config": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "properties": {
+                        "reference": {
+                            "type": "string"
+                        },
+                        "parameters": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [ "reference"]
+                },
+                "cellranger_arc_aggr_config": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "properties": {
+                        "reference": {
+                            "type": "string"
+                        },
+                        "parameters": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [ "reference"]
+                }
+            },
+            "required": ["cellranger_arc_config", "cellranger_arc_aggr_config", "scanpy"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}
