@@ -1,6 +1,6 @@
 sample_metadata:
 {% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
-    feature_types: Gene Expression/Chromatin Accessibility
+    library_type: Gene Expression/Chromatin Accessibility
     cellranger_group: GROUP_NAME
 {% endfor -%}
 analysis_metadata:
