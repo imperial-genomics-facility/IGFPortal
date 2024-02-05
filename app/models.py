@@ -313,6 +313,23 @@ class SampleIndex(AuditMixin, Model):
     return self.sample_name
 
 """
+  Project cleanup
+"""
+class ProjectCleanup(AuditMixin, Model):
+  __tablename__ = 'project_cleanup'
+  __table_args__ = (
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' },)
+  project_cleanup_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  user_email = Column(String(40), nullable=False)
+  user_name = Column(String(40), nullable=False)
+  projects = Column(TEXT(), nullable=False)
+  status = Column(Enum('NOT_STARTED', 'USER_NOTIFIED', 'DB_CLEANUP_FINISHED', 'FILES_DELETED'), nullable=False, server_default='NOT_STARTED')
+  deletion_date = Column(TIMESTAMP(), nullable=False)
+  update_date = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return f'{self.user_name}: {self.deletion_date}'
+
+"""
   Project info
 """
 
