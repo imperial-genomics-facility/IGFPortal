@@ -56,7 +56,7 @@ def update_trigger_date_for_cleanup(project_cleanup_id: int) -> None:
             db.session.rollback()
             raise
     except Exception as e:
-        raise ValueError(f"Failed to ad trigger date, error: {e}")
+        raise ValueError(f"Failed to add trigger date, error: {e}")
 
 
 class ProjectCleanupPendingView(ModelView):

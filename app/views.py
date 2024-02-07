@@ -22,6 +22,7 @@ from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
 from .index_table_view import ProjectIndexView, SampleIndexView
 from .iframe_view import IFrameView
+from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPendingView
 
 """
     Application wide 404 error handler
@@ -137,6 +138,13 @@ appbuilder.\
         category_icon="fa-folder-open-o",
         icon="fa-upload",
         category="Metadata")
+appbuilder.\
+    add_view(
+        SampleProjectView,
+        "Latest projects",
+        category_icon="fa-table",
+        icon="fa-list-ol",
+        category="Metadata")
 """
     Raw analysis view
 """
@@ -186,63 +194,71 @@ appbuilder.\
 
 
 """
-    Data transfer
+    Data cleanup
 """
 appbuilder.\
     add_view(
-        RDSProjectBackupView,
-        "Transfer project via RDS",
+        ProjectCleanupPendingView,
+        "Cleanup old projects",
         category_icon="fa-cubes",
         icon="fa-paper-plane",
-        category="Data transfer")
+        category="Data cleanup")
+
+appbuilder.\
+    add_view(
+        ProjectCleanupFinishedView,
+        "Removed projects",
+        category_icon="fa-cubes",
+        icon="fa-paper-plane",
+        category="Data cleanup")
 """
     Metadata view
 """
-appbuilder.\
-    add_view(
-        ProjectView,
-        "Projects",
-        category_icon="fa-table",
-        icon="fa-home",
-        category="Metadata table")
-appbuilder.\
-    add_view_no_menu(SampleView())
-appbuilder.\
-    add_view(
-        SampleProjectView,
-        "Samples",
-        category_icon="fa-table",
-        icon="fa-list-ol",
-        category="Metadata table")
-appbuilder.\
-    add_view(
-        UserView,
-        "Users",
-        category_icon="fa-table",
-        icon="fa-users",
-        category="Metadata table")
-appbuilder.\
-    add_view(
-        SeqrunView,
-        "Sequencing runs",
-        category_icon="fa-table",
-        icon="fa-paper-plane-o",
-        category="Metadata table")
+# appbuilder.\
+#     add_view(
+#         ProjectView,
+#         "Projects",
+#         category_icon="fa-table",
+#         icon="fa-home",
+#         category="Metadata table")
+# appbuilder.\
+#     add_view_no_menu(SampleView())
+# appbuilder.\
+#     add_view(
+#         SampleProjectView,
+#         "Samples",
+#         category_icon="fa-table",
+#         icon="fa-list-ol",
+#         category="Metadata table")
+# appbuilder.\
+#     add_view(
+#         UserView,
+#         "Users",
+#         category_icon="fa-table",
+#         icon="fa-users",
+#         category="Metadata table")
+# appbuilder.\
+#     add_view(
+#         SeqrunView,
+#         "Sequencing runs",
+#         category_icon="fa-table",
+#         icon="fa-paper-plane-o",
+#         category="Metadata table")
 
 """
     Index table view
 """
-appbuilder.\
-    add_view(
-        ProjectIndexView,
-        "Project index",
-        category_icon="fa-folder-open-o",
-        icon="fa-table",
-        category="Metadata")
-appbuilder.\
-    add_view(
-        SampleIndexView,
-        "Sample index",
-        category_icon="fa-folder-open-o",
-        icon="fa-table",
-        category="Metadata")
+# appbuilder.\
+#     add_view(
+#         ProjectIndexView,
+#         "Project index",
+#         category_icon="fa-folder-open-o",
+#         icon="fa-table",
+#         category="Metadata")
+# appbuilder.\
+#     add_view(
+#         SampleIndexView,
+#         "Sample index",
+#         category_icon="fa-folder-open-o",
+#         icon="fa-table",
+#         category="Metadata")
