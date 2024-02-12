@@ -323,7 +323,7 @@ class ProjectCleanup(AuditMixin, Model):
   user_email = Column(String(40), nullable=False)
   user_name = Column(String(40), nullable=False)
   projects = Column(TEXT(), nullable=False)
-  status = Column(Enum('NOT_STARTED', 'USER_NOTIFIED', 'DB_CLEANUP_FINISHED', 'FILES_DELETED'), nullable=False, server_default='NOT_STARTED')
+  status = Column(Enum('NOT_STARTED', 'PROCESSING', 'USER_NOTIFIED', 'DB_CLEANUP_FINISHED', 'FILES_DELETED'), nullable=False, server_default='NOT_STARTED')
   deletion_date = Column(TIMESTAMP(), nullable=False)
   update_date = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
   def __repr__(self):
