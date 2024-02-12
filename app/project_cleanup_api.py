@@ -6,6 +6,7 @@ from flask_appbuilder.api import expose, rison
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.security.decorators import protect
 from . import db
+from flask import g
 from io import BytesIO
 from .models import ProjectCleanup
 from .project_cleanup_view import (
@@ -66,7 +67,8 @@ class ProjectCleanupApi(ModelRestApi):
             try:
                 update_status_for_project_cleanup(
                     project_cleanup_id_list=[project_cleanup_id],
-                    status='USER_NOTIFIED')
+                    status='USER_NOTIFIED',
+                    user_id=g.user.id)
             except Exception as e:
                 log.error(e)
                 return self.response(200, status='failed')
@@ -81,7 +83,8 @@ class ProjectCleanupApi(ModelRestApi):
             try:
                 update_status_for_project_cleanup(
                     project_cleanup_id_list=[project_cleanup_id],
-                    status='DB_CLEANUP_FINISHED')
+                    status='DB_CLEANUP_FINISHED',
+                    user_id=g.user.id)
             except Exception as e:
                 log.error(e)
                 return self.response(200, status='failed')
@@ -104,7 +107,9 @@ class ProjectCleanupApi(ModelRestApi):
                 return self.response_400('No data')
             if file_name.endswith('.gz'):
                 json_data = gzip.decompress(json_data).decode('utf-8')
-            parse_and_add_project_cleanup_data(data=json_data)
+            parse_and_add_project_cleanup_data(
+                data=json_data,
+                user_id=g.user.id)
             return self.response(200, message='loaded new project cleanup data')
         except Exception as e:
             log.error(e)

@@ -153,6 +153,18 @@ def test_client(db):
         app.appbuilder.sm.add_permission_role(
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_user_notified", "ProjectCleanupApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_db_cleanup_finished", "ProjectCleanupApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_add_project_cleanup_data", "ProjectCleanupApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
                 "can_search_new_analysis", "RawAnalysisApi"))
         app.appbuilder.sm.add_permission_role(
             admin_role,
