@@ -1,12 +1,14 @@
 import os
 import time
+import json
 import logging
 from . import db
 from . import celery
+from typing import Any
 from .models import ProjectCleanup
 from .airflow.airflow_api_utils import trigger_airflow_pipeline
 from .airflow.airflow_api_utils import get_airflow_dag_id
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.filters import FilterInFunction
 from flask import redirect, flash, url_for, send_file
@@ -42,6 +44,60 @@ def async_trigger_airflow_cleanup_pipeline(self, dag_id, entry_list, update_trig
         return dict(zip(run_id_list, results))
     except Exception as e:
         raise ValueError(f"Failed to run celery job, error: {e}")
+
+def update_status_for_project_cleanup(
+        project_cleanup_id_list: list[int],
+        status: str) -> None:
+    try:
+        if len(project_cleanup_id_list) == 0:
+            raise ValueError("No id found in input list")
+        for id in project_cleanup_id_list:
+            try:
+                db.session.\
+                query(ProjectCleanup).\
+                filter(ProjectCleanup.project_cleanup_id==id).\
+                update({"status": status})
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise
+    except Exception as e:
+        raise ValueError(f"Failed to change status: {e}")
+
+
+def parse_and_add_project_cleanup_data(data: Any, cutoff_weeks: int = 16) -> None:
+    try:
+        if isinstance(data, bytes):
+            data = json.loads(data.decode())
+        if isinstance(data, str):
+            data = json.loads(data)
+        if not isinstance(data, list):
+            raise TypeError(
+                f"Expecting a list of dicts, got: {type(data)}")
+        try:
+            for entry in data:
+                user_email = entry.get("user_email")
+                user_name = entry.get("user_name")
+                projects = entry.get("projects")
+                if user_email is None or \
+                   user_name is None or \
+                   projects is None:
+                    raise KeyError(f"Missing user email, name or project list")
+                pc_data = \
+                    ProjectCleanup(
+                        user_email=user_email,
+                        user_name=user_name,
+                        projects=projects,
+                        status='NOT_STARTED',
+                        deletion_date=datetime.now()+timedelta(weeks=cutoff_weeks))
+                db.session.add(pc_data)
+                db.session.flush()
+                db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+    except Exception as e:
+        raise ValueError(f"Failed to add new data: {e}")
 
 
 def update_trigger_date_for_cleanup(project_cleanup_id: int) -> None:
@@ -94,7 +150,7 @@ class ProjectCleanupPendingView(ModelView):
         "can_show",
         "can_edit"]
     base_filters = [
-        ["status", FilterInFunction, lambda: ["NOT_STARTED", "USER_NOTIFIED", "DB_CLEANUP_FINISHED"]]]
+        ["status", FilterInFunction, lambda: ["NOT_STARTED", "PROCESSING", "USER_NOTIFIED", "DB_CLEANUP_FINISHED"]]]
     base_order = ("project_cleanup_id", "desc")
 
     @action("notify_user_about_cleanup", "Notify user about cleanup", confirmation="Confirm?", multiple=True, single=True, icon="fa-exclamation")
@@ -165,6 +221,10 @@ class ProjectCleanupPendingView(ModelView):
                 _ = \
                     async_trigger_airflow_cleanup_pipeline.\
                         apply_async(args=[airflow_dag_id, entry_list, True])
+                ## mark entries as PROCESSING to prevent repeat runs
+                update_status_for_project_cleanup(
+                    project_cleanup_id_list=entry_list,
+                    status='PROCESSING')
                 flash("Submitted DB cleanup for {0}".format(', '.join(entry_list)), "info")
             if len(failed_list) > 0:
                 flash("Failed DB cleanup for user {0}".format(', '.join(failed_list)), "danger")
