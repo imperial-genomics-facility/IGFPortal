@@ -5,6 +5,7 @@ import logging
 from . import db
 from . import celery
 from typing import Any
+from flask import g
 from .models import ProjectCleanup
 from .airflow.airflow_api_utils import trigger_airflow_pipeline
 from .airflow.airflow_api_utils import get_airflow_dag_id
@@ -22,7 +23,7 @@ NOTIFY_USER_DAG_TAG = 'notify_user_about_project_cleanup_dag'
 DB_CLEANUP_DAG_TAG = 'cleanup_db_entry_dag_tag'
 
 @celery.task(bind=True)
-def async_trigger_airflow_cleanup_pipeline(self, dag_id, entry_list, update_trigger_date=False):
+def async_trigger_airflow_cleanup_pipeline(self, dag_id, entry_list, user_id, update_trigger_date=False):
     try:
         results = list()
         run_id_list = list()
@@ -38,7 +39,8 @@ def async_trigger_airflow_cleanup_pipeline(self, dag_id, entry_list, update_trig
                update_trigger_date and \
                res.status_code == 200:
                 update_trigger_date_for_cleanup(
-                    project_cleanup_id=entry.get('project_cleanup_id'))
+                    project_cleanup_id=entry.get('project_cleanup_id'),
+                    user_id=user_id)
             time.sleep(10)
             results.append(res.status_code)
         return dict(zip(run_id_list, results))
@@ -46,8 +48,9 @@ def async_trigger_airflow_cleanup_pipeline(self, dag_id, entry_list, update_trig
         raise ValueError(f"Failed to run celery job, error: {e}")
 
 def update_status_for_project_cleanup(
-        project_cleanup_id_list: list[int],
-        status: str) -> None:
+        project_cleanup_id_list: list,
+        status: str,
+        user_id: int) -> None:
     try:
         if len(project_cleanup_id_list) == 0:
             raise ValueError("No id found in input list")
@@ -56,7 +59,7 @@ def update_status_for_project_cleanup(
                 db.session.\
                 query(ProjectCleanup).\
                 filter(ProjectCleanup.project_cleanup_id==id).\
-                update({"status": status})
+                update({"status": status, "changed_by_fk": user_id})
                 db.session.commit()
             except:
                 db.session.rollback()
@@ -65,7 +68,10 @@ def update_status_for_project_cleanup(
         raise ValueError(f"Failed to change status: {e}")
 
 
-def parse_and_add_project_cleanup_data(data: Any, cutoff_weeks: int = 16) -> None:
+def parse_and_add_project_cleanup_data(
+        data: Any,
+        user_id: int,
+        cutoff_weeks: int = 16) -> None:
     try:
         if isinstance(data, bytes):
             data = json.loads(data.decode())
@@ -83,13 +89,22 @@ def parse_and_add_project_cleanup_data(data: Any, cutoff_weeks: int = 16) -> Non
                    user_name is None or \
                    projects is None:
                     raise KeyError(f"Missing user email, name or project list")
+                if not isinstance(projects, list) or \
+                   len(projects) == 0:
+                    raise ValueError(
+                        f"Projects list should be list or non-zero elements: {type(projects)}, {len(projects)}")
+                ## adding the project list as text
+                projects = \
+                    json.dumps(projects)
                 pc_data = \
                     ProjectCleanup(
                         user_email=user_email,
                         user_name=user_name,
                         projects=projects,
                         status='NOT_STARTED',
-                        deletion_date=datetime.now()+timedelta(weeks=cutoff_weeks))
+                        deletion_date=datetime.now()+timedelta(weeks=cutoff_weeks),
+                        created_by_fk=user_id,
+                        changed_by_fk=user_id)
                 db.session.add(pc_data)
                 db.session.flush()
                 db.session.commit()
@@ -100,13 +115,13 @@ def parse_and_add_project_cleanup_data(data: Any, cutoff_weeks: int = 16) -> Non
         raise ValueError(f"Failed to add new data: {e}")
 
 
-def update_trigger_date_for_cleanup(project_cleanup_id: int) -> None:
+def update_trigger_date_for_cleanup(project_cleanup_id: int, user_id: int) -> None:
     try:
         try:
             db.session.\
                 query(ProjectCleanup).\
                 filter(ProjectCleanup.project_cleanup_id==project_cleanup_id).\
-                update({"update_date": datetime.now()})
+                update({"update_date": datetime.now(),  "changed_by_fk": user_id})
             db.session.commit()
         except:
             db.session.rollback()
@@ -181,7 +196,7 @@ class ProjectCleanupPendingView(ModelView):
                         f"Failed to get airflow dag id for {NOTIFY_USER_DAG_TAG}")
                 _ = \
                     async_trigger_airflow_cleanup_pipeline.\
-                        apply_async(args=[airflow_dag_id, entry_list, True])
+                        apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
                 flash("Submitted notify cleanup task for {0}".format(', '.join(entry_list)), "info")
             if len(failed_list) > 0:
                 flash("Failed to sent email to {0}".format(', '.join(failed_list)), "danger")
@@ -220,11 +235,12 @@ class ProjectCleanupPendingView(ModelView):
                         f"Failed to get airflow dag id for {DB_CLEANUP_DAG_TAG}")
                 _ = \
                     async_trigger_airflow_cleanup_pipeline.\
-                        apply_async(args=[airflow_dag_id, entry_list, True])
+                        apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
                 ## mark entries as PROCESSING to prevent repeat runs
                 update_status_for_project_cleanup(
                     project_cleanup_id_list=entry_list,
-                    status='PROCESSING')
+                    status='PROCESSING',
+                    user_id=g.user.id)
                 flash("Submitted DB cleanup for {0}".format(', '.join(entry_list)), "info")
             if len(failed_list) > 0:
                 flash("Failed DB cleanup for user {0}".format(', '.join(failed_list)), "danger")
