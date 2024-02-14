@@ -71,7 +71,7 @@ def update_status_for_project_cleanup(
 def parse_and_add_project_cleanup_data(
         data: Any,
         user_id: int,
-        cutoff_weeks: int = 16) -> None:
+        deletion_days: int = 15) -> None:
     try:
         if isinstance(data, bytes):
             data = json.loads(data.decode())
@@ -102,7 +102,7 @@ def parse_and_add_project_cleanup_data(
                         user_name=user_name,
                         projects=projects,
                         status='NOT_STARTED',
-                        deletion_date=datetime.now()+timedelta(weeks=cutoff_weeks),
+                        deletion_date=datetime.now()+timedelta(days=deletion_days),
                         created_by_fk=user_id,
                         changed_by_fk=user_id)
                 db.session.add(pc_data)
