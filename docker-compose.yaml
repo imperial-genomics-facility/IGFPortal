@@ -14,8 +14,12 @@ services:
         ports:
           - "3306:3306"
         volumes:
-          - /home/vmuser/mysqlappdb3:/var/lib/mysql:rw
+          - ./mysqlappdb:/var/lib/mysql:rw
         container_name: portal_db
+        healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            timeout: 20s
+            retries: 5
         networks:
           - portal_network
     redis_db:
