@@ -139,6 +139,8 @@ appbuilder.\
         icon="fa-upload",
         category="Metadata")
 appbuilder.\
+    add_view_no_menu(SampleView())
+appbuilder.\
     add_view(
         SampleProjectView,
         "Latest projects",
@@ -221,8 +223,6 @@ appbuilder.\
 #         category_icon="fa-table",
 #         icon="fa-home",
 #         category="Metadata table")
-# appbuilder.\
-#     add_view_no_menu(SampleView())
 # appbuilder.\
 #     add_view(
 #         SampleProjectView,
