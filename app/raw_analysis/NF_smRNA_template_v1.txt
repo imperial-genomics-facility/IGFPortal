@@ -7,3 +7,6 @@ analysis_metadata:
   nextflow_params:
     - "-profile singularity"
     - "-r A.B"
+    - "--igenomes_base $LOCAL_IGENOME_PATH"
+    - "-c $LOCAL_IGENOME_CONF"
+    - "--genome GRCh38.default"

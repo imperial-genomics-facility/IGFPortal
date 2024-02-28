@@ -9,5 +9,8 @@ analysis_metadata:
   nextflow_params:
     - "-profile singularity"
     - "-r A.B"
-    - "--aligner star_rsem"
+    - "--igenomes_base $LOCAL_IGENOME_PATH"
+    - "-c $LOCAL_IGENOME_CONF"
+    - "--genome GRCh38.default"
+    - "--aligner star_salmon"
     - "--seq_center IGF"

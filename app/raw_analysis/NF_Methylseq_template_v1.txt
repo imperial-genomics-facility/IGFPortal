@@ -8,3 +8,6 @@ analysis_metadata:
     - "-profile singularity"
     - "-r A.B"
     - "--aligner bismark"
+    - "--igenomes_base $LOCAL_IGENOME_PATH"
+    - "-c $LOCAL_IGENOME_CONF"
+    - "--genome GRCh38.default"
