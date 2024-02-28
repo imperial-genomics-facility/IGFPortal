@@ -3,7 +3,7 @@ from . import db
 from flask import Markup, url_for
 from flask_appbuilder import Model
 from sqlalchemy.dialects.mysql import INTEGER
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, text, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText

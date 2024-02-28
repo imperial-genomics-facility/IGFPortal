@@ -56,10 +56,21 @@ def update_status_for_project_cleanup(
             raise ValueError("No id found in input list")
         for id in project_cleanup_id_list:
             try:
+                deletion_date = \
+                    db.session.\
+                    query(ProjectCleanup.deletion_date).\
+                    filter(ProjectCleanup.project_cleanup_id==id).\
+                    one_or_none()
+                if deletion_date is None:
+                    raise ValueError(f"No deletion date found for id {id}")
+                deletion_date = deletion_date[0]
                 db.session.\
                 query(ProjectCleanup).\
                 filter(ProjectCleanup.project_cleanup_id==id).\
-                update({"status": status, "changed_by_fk": user_id})
+                update({
+                    "status": status,
+                    "deletion_date": deletion_date,
+                    "changed_by_fk": user_id})
                 db.session.commit()
             except:
                 db.session.rollback()
@@ -82,8 +93,8 @@ def parse_and_add_project_cleanup_data(
                 f"Expecting a list of dicts, got: {type(data)}")
         try:
             for entry in data:
-                user_email = entry.get("user_email")
-                user_name = entry.get("user_name")
+                user_email = entry.get("email_id")
+                user_name = entry.get("name")
                 projects = entry.get("projects")
                 if user_email is None or \
                    user_name is None or \
@@ -118,10 +129,18 @@ def parse_and_add_project_cleanup_data(
 def update_trigger_date_for_cleanup(project_cleanup_id: int, user_id: int) -> None:
     try:
         try:
+            deletion_date = \
+                    db.session.\
+                    query(ProjectCleanup.deletion_date).\
+                    filter(ProjectCleanup.project_cleanup_id==project_cleanup_id).\
+                    one_or_none()
+            if deletion_date is None:
+                raise ValueError(f"No deletion date found for id {project_cleanup_id}")
+            deletion_date = deletion_date[0]
             db.session.\
                 query(ProjectCleanup).\
                 filter(ProjectCleanup.project_cleanup_id==project_cleanup_id).\
-                update({"update_date": datetime.now(),  "changed_by_fk": user_id})
+                update({"update_date": datetime.now(), "deletion_date": deletion_date,  "changed_by_fk": user_id})
             db.session.commit()
         except:
             db.session.rollback()
@@ -168,7 +187,7 @@ class ProjectCleanupPendingView(ModelView):
         ["status", FilterInFunction, lambda: ["NOT_STARTED", "PROCESSING", "USER_NOTIFIED", "DB_CLEANUP_FINISHED"]]]
     base_order = ("project_cleanup_id", "desc")
 
-    @action("notify_user_about_cleanup", "Notify user about cleanup", confirmation="Confirm?", multiple=True, single=True, icon="fa-exclamation")
+    @action("notify_user_about_cleanup", "Notify user about cleanup", confirmation="Confirm?", multiple=False, single=True, icon="fa-share")
     def notify_user_about_cleanup(self, item):
         try:
             entry_list = list()
@@ -197,17 +216,17 @@ class ProjectCleanupPendingView(ModelView):
                 _ = \
                     async_trigger_airflow_cleanup_pipeline.\
                         apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
-                flash("Submitted notify cleanup task for {0}".format(', '.join(entry_list)), "info")
+                flash("Submitted notify cleanup task", "info")
             if len(failed_list) > 0:
-                flash("Failed to sent email to {0}".format(', '.join(failed_list)), "danger")
+                flash("Failed to sent email", "danger")
             self.update_redirect()
-            return redirect(url_for('ProjectCleanup.list'))
+            return redirect(url_for('ProjectCleanupPendingView.list'))
         except Exception as e:
             log.error(e)
             flash('Failed to mark projects deleted in DB', 'danger')
-            return redirect(url_for('ProjectCleanup.list'))
+            return redirect(url_for('ProjectCleanupPendingView.list'))
 
-    @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=True, single=True, icon="fa-exclamation")
+    @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation-triangle")
     def cleanup_db_entry(self, item):
         try:
             entry_list = list()
@@ -241,50 +260,62 @@ class ProjectCleanupPendingView(ModelView):
                     project_cleanup_id_list=entry_list,
                     status='PROCESSING',
                     user_id=g.user.id)
-                flash("Submitted DB cleanup for {0}".format(', '.join(entry_list)), "info")
+                flash("Submitted DB cleanup task", "info")
             if len(failed_list) > 0:
-                flash("Failed DB cleanup for user {0}".format(', '.join(failed_list)), "danger")
+                flash("Failed DB cleanup task", "danger")
             self.update_redirect()
-            return redirect(url_for('ProjectCleanup.list'))
+            return redirect(url_for('ProjectCleanupPendingView.list'))
         except Exception as e:
             log.error(e)
             flash('Failed to mark projects deleted in DB', 'danger')
-            return redirect(url_for('ProjectCleanup.list'))
+            return redirect(url_for('ProjectCleanupPendingView.list'))
 
 
-    @action("mark_cleanup_finished", "Mark cleanup finished", confirmation="Confirm?", multiple=True, single=True, icon="fa-exclamation")
+    @action("mark_cleanup_finished", "Mark cleanup finished", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation")
     def mark_cleanup_finished(self, item):
         try:
+            entry_list = list()
+            failed_list = list()
             if isinstance(item, list):
                 try:
                     for i in item:
-                        db.session.\
-                            query(ProjectCleanup).\
-                            filter(ProjectCleanup.project_cleanup_id==i.project_cleanup_id).\
-                            filter(ProjectCleanup.status=='DB_CLEANUP_FINISHED').\
-                            filter(datetime.now() >= ProjectCleanup.deletion_date).\
-                            update({'status': 'FILES_DELETED'})
+                        if i.status == "DB_CLEANUP_FINISHED":
+                            entry_list.append(i.project_cleanup_id)
+                            db.session.\
+                                query(ProjectCleanup).\
+                                filter(ProjectCleanup.project_cleanup_id==i.project_cleanup_id).\
+                                filter(ProjectCleanup.status=='DB_CLEANUP_FINISHED').\
+                                filter(datetime.now() >= ProjectCleanup.deletion_date).\
+                                update({'status': 'FILES_DELETED'})
+                        else:
+                            failed_list.append(i.project_cleanup_id)
                     db.session.commit()
                 except:
                     db.session.rollback()
                     raise
             else:
                 try:
-                    db.session.\
-                        query(ProjectCleanup).\
-                        filter(ProjectCleanup.project_cleanup_id==item.project_cleanup_id).\
-                        filter(ProjectCleanup.status=='DB_CLEANUP_FINISHED').\
-                        filter(datetime.now() >= ProjectCleanup.deletion_date).\
-                        update({'status': 'FILES_DELETED'})
-                    db.session.commit()
+                    if item.status == "DB_CLEANUP_FINISHED":
+                        entry_list.append(item.project_cleanup_id)
+                        db.session.\
+                            query(ProjectCleanup).\
+                            filter(ProjectCleanup.project_cleanup_id==item.project_cleanup_id).\
+                            filter(ProjectCleanup.status=='DB_CLEANUP_FINISHED').\
+                            filter(datetime.now() >= ProjectCleanup.deletion_date).\
+                            update({'status': 'FILES_DELETED'})
+                        db.session.commit()
+                    else:
+                        failed_list.append(item.project_cleanup_id)
                 except:
                     db.session.rollback()
                     raise
-            return redirect(url_for('ProjectCleanup.list'))
+                if len(failed_list) > 0:
+                    flash("Failed to change DB status", "danger")
+            return redirect(url_for('ProjectCleanupPendingView.list'))
         except Exception as e:
             log.error(e)
             flash('Failed to mark projects deleted', 'danger')
-            return redirect(url_for('ProjectCleanup.list'))
+            return redirect(url_for('ProjectCleanupPendingView.list'))
 
 
 class ProjectCleanupFinishedView(ModelView):
