@@ -155,8 +155,8 @@ class ProjectCleanupPendingView(ModelView):
         "user_name",
         "user_email",
         "status",
-        "deletion_date",
-        "update_date"]
+        "projects",
+        "deletion_date"]
     show_columns = [
         "user_name",
         "user_email",
@@ -183,93 +183,13 @@ class ProjectCleanupPendingView(ModelView):
         "can_list",
         "can_show",
         "can_edit"]
+    search_columns = [
+        "user_email",
+        "user_name",
+        "projects"]
     base_filters = [
         ["status", FilterInFunction, lambda: ["NOT_STARTED", "PROCESSING", "USER_NOTIFIED", "DB_CLEANUP_FINISHED"]]]
     base_order = ("project_cleanup_id", "desc")
-
-    @action("notify_user_about_cleanup", "Notify user about cleanup", confirmation="Confirm?", multiple=False, single=True, icon="fa-share")
-    def notify_user_about_cleanup(self, item):
-        try:
-            entry_list = list()
-            failed_list = list()
-            if isinstance(item, list):
-                for i in item:
-                    if i.status == "NOT_STARTED" and \
-                       datetime.now() < i.deletion_date:
-                        entry_list.append({'project_cleanup_id': i.project_cleanup_id})
-                    else:
-                        failed_list.append(i.project_cleanup_id)
-            else:
-                if item.status == "NOT_STARTED" and \
-                   datetime.now() < item.deletion_date:
-                    entry_list.append({'project_cleanup_id': item.project_cleanup_id})
-                else:
-                    failed_list.append(item.project_cleanup_id)
-            if len(entry_list) > 0:
-                airflow_dag_id = \
-                    get_airflow_dag_id(
-                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
-                        dag_tag=NOTIFY_USER_DAG_TAG)
-                if airflow_dag_id is None:
-                    raise ValueError(
-                        f"Failed to get airflow dag id for {NOTIFY_USER_DAG_TAG}")
-                _ = \
-                    async_trigger_airflow_cleanup_pipeline.\
-                        apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
-                flash("Submitted notify cleanup task", "info")
-            if len(failed_list) > 0:
-                flash("Failed to sent email", "danger")
-            self.update_redirect()
-            return redirect(url_for('ProjectCleanupPendingView.list'))
-        except Exception as e:
-            log.error(e)
-            flash('Failed to sent email', 'danger')
-            return redirect(url_for('ProjectCleanupPendingView.list'))
-
-    @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation-triangle")
-    def cleanup_db_entry(self, item):
-        try:
-            entry_list = list()
-            failed_list = list()
-            if isinstance(item, list):
-                for i in item:
-                    if i.status == "USER_NOTIFIED" and \
-                       datetime.now() >= i.deletion_date:
-                        entry_list.append(i.project_cleanup_id)
-                    else:
-                        failed_list.append(i.project_cleanup_id)
-            else:
-                if item.status == "USER_NOTIFIED" and \
-                   datetime.now() >= item.deletion_date:
-                    entry_list.append(item.project_cleanup_id)
-                else:
-                    failed_list.append(item.project_cleanup_id)
-            if len(entry_list) > 0:
-                airflow_dag_id = \
-                    get_airflow_dag_id(
-                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
-                        dag_tag=DB_CLEANUP_DAG_TAG)
-                if airflow_dag_id is None:
-                    raise ValueError(
-                        f"Failed to get airflow dag id for {DB_CLEANUP_DAG_TAG}")
-                _ = \
-                    async_trigger_airflow_cleanup_pipeline.\
-                        apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
-                ## mark entries as PROCESSING to prevent repeat runs
-                update_status_for_project_cleanup(
-                    project_cleanup_id_list=entry_list,
-                    status='PROCESSING',
-                    user_id=g.user.id)
-                flash("Submitted DB cleanup task", "info")
-            if len(failed_list) > 0:
-                flash("Failed DB cleanup task", "danger")
-            self.update_redirect()
-            return redirect(url_for('ProjectCleanupPendingView.list'))
-        except Exception as e:
-            log.error(e)
-            flash('Failed to mark projects deleted in DB', 'danger')
-            return redirect(url_for('ProjectCleanupPendingView.list'))
-
 
     @action("mark_cleanup_finished", "Mark cleanup finished", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation")
     def mark_cleanup_finished(self, item):
@@ -316,6 +236,90 @@ class ProjectCleanupPendingView(ModelView):
             log.error(e)
             flash('Failed to mark projects deleted', 'danger')
             return redirect(url_for('ProjectCleanupPendingView.list'))
+
+    @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation-triangle")
+    def cleanup_db_entry(self, item):
+        try:
+            entry_list = list()
+            failed_list = list()
+            if isinstance(item, list):
+                for i in item:
+                    if i.status == "USER_NOTIFIED" and \
+                       datetime.now() >= i.deletion_date:
+                        entry_list.append(i.project_cleanup_id)
+                    else:
+                        failed_list.append(i.project_cleanup_id)
+            else:
+                if item.status == "USER_NOTIFIED" and \
+                   datetime.now() >= item.deletion_date:
+                    entry_list.append(item.project_cleanup_id)
+                else:
+                    failed_list.append(item.project_cleanup_id)
+            if len(entry_list) > 0:
+                airflow_dag_id = \
+                    get_airflow_dag_id(
+                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
+                        dag_tag=DB_CLEANUP_DAG_TAG)
+                if airflow_dag_id is None:
+                    raise ValueError(
+                        f"Failed to get airflow dag id for {DB_CLEANUP_DAG_TAG}")
+                _ = \
+                    async_trigger_airflow_cleanup_pipeline.\
+                        apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
+                ## mark entries as PROCESSING to prevent repeat runs
+                update_status_for_project_cleanup(
+                    project_cleanup_id_list=entry_list,
+                    status='PROCESSING',
+                    user_id=g.user.id)
+                flash("Submitted DB cleanup task", "info")
+            if len(failed_list) > 0:
+                flash("Failed DB cleanup task", "danger")
+            self.update_redirect()
+            return redirect(url_for('ProjectCleanupPendingView.list'))
+        except Exception as e:
+            log.error(e)
+            flash('Failed to mark projects deleted in DB', 'danger')
+            return redirect(url_for('ProjectCleanupPendingView.list'))
+
+    @action("notify_user_about_cleanup", "Notify user about cleanup", confirmation="Confirm?", multiple=False, single=True, icon="fa-share")
+    def notify_user_about_cleanup(self, item):
+        try:
+            entry_list = list()
+            failed_list = list()
+            if isinstance(item, list):
+                for i in item:
+                    if i.status == "NOT_STARTED" and \
+                       datetime.now() < i.deletion_date:
+                        entry_list.append({'project_cleanup_id': i.project_cleanup_id})
+                    else:
+                        failed_list.append(i.project_cleanup_id)
+            else:
+                if item.status == "NOT_STARTED" and \
+                   datetime.now() < item.deletion_date:
+                    entry_list.append({'project_cleanup_id': item.project_cleanup_id})
+                else:
+                    failed_list.append(item.project_cleanup_id)
+            if len(entry_list) > 0:
+                airflow_dag_id = \
+                    get_airflow_dag_id(
+                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
+                        dag_tag=NOTIFY_USER_DAG_TAG)
+                if airflow_dag_id is None:
+                    raise ValueError(
+                        f"Failed to get airflow dag id for {NOTIFY_USER_DAG_TAG}")
+                _ = \
+                    async_trigger_airflow_cleanup_pipeline.\
+                        apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
+                flash("Submitted notify cleanup task", "info")
+            if len(failed_list) > 0:
+                flash("Failed to sent email", "danger")
+            self.update_redirect()
+            return redirect(url_for('ProjectCleanupPendingView.list'))
+        except Exception as e:
+            log.error(e)
+            flash('Failed to sent email', 'danger')
+            return redirect(url_for('ProjectCleanupPendingView.list'))
+
 
 
 class ProjectCleanupFinishedView(ModelView):
