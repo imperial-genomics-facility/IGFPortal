@@ -118,7 +118,7 @@ def parse_and_add_project_cleanup_data(
                         changed_by_fk=user_id)
                 db.session.add(pc_data)
                 db.session.flush()
-                db.session.commit()
+            db.session.commit()
         except:
             db.session.rollback()
             raise

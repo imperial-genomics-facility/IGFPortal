@@ -320,7 +320,7 @@ class ProjectCleanup(AuditMixin, Model):
   __table_args__ = (
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' },)
   project_cleanup_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  user_email = Column(String(40), nullable=False)
+  user_email = Column(String(80), nullable=False)
   user_name = Column(String(40), nullable=False)
   projects = Column(TEXT(), nullable=False)
   status = Column(Enum('NOT_STARTED', 'PROCESSING', 'USER_NOTIFIED', 'DB_CLEANUP_FINISHED', 'FILES_DELETED'), nullable=False, server_default='NOT_STARTED')
