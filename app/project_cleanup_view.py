@@ -196,13 +196,13 @@ class ProjectCleanupPendingView(ModelView):
                 for i in item:
                     if i.status == "NOT_STARTED" and \
                        datetime.now() < i.deletion_date:
-                        entry_list.append(i.project_cleanup_id)
+                        entry_list.append({'project_cleanup_id': i.project_cleanup_id})
                     else:
                         failed_list.append(i.project_cleanup_id)
             else:
                 if item.status == "NOT_STARTED" and \
                    datetime.now() < item.deletion_date:
-                    entry_list.append(item.project_cleanup_id)
+                    entry_list.append({'project_cleanup_id': item.project_cleanup_id})
                 else:
                     failed_list.append(item.project_cleanup_id)
             if len(entry_list) > 0:
