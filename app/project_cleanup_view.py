@@ -223,7 +223,7 @@ class ProjectCleanupPendingView(ModelView):
             return redirect(url_for('ProjectCleanupPendingView.list'))
         except Exception as e:
             log.error(e)
-            flash('Failed to mark projects deleted in DB', 'danger')
+            flash('Failed to sent email', 'danger')
             return redirect(url_for('ProjectCleanupPendingView.list'))
 
     @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation-triangle")
