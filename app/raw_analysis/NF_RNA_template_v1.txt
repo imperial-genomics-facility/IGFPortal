@@ -11,6 +11,7 @@ analysis_metadata:
     - "-r A.B"
     - "--igenomes_base $LOCAL_IGENOME_PATH"
     - "-c $LOCAL_IGENOME_CONF"
-    - "--genome GRCh38.default"
+    - "--igenomes_base $LOCAL_IGENOME_PATH"
+    - "--genome GRCh38.Ensembl_v111"
     - "--aligner star_salmon"
     - "--seq_center IGF"
