@@ -181,8 +181,7 @@ class ProjectCleanupPendingView(ModelView):
         "update_date": "Updated on"}
     base_permissions = [
         "can_list",
-        "can_show",
-        "can_edit"]
+        "can_show"]
     search_columns = [
         "user_email",
         "user_name",
