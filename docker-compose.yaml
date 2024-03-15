@@ -16,7 +16,7 @@ services:
         volumes:
           - ./mysqlappdb:/var/lib/mysql:rw
         container_name: portal_db
-        command: ["--explicit-defaults-for-timestamp=OFF"]
+        command: ["--explicit-defaults-for-timestamp=ON"]
         healthcheck:
             test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
             timeout: 20s
