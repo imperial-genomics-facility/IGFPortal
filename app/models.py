@@ -324,8 +324,8 @@ class ProjectCleanup(AuditMixin, Model):
   user_name = Column(String(40), nullable=False)
   projects = Column(TEXT(), nullable=False)
   status = Column(Enum('NOT_STARTED', 'REJECTED', 'PROCESSING', 'USER_NOTIFIED', 'DB_CLEANUP_FINISHED', 'FILES_DELETED'), nullable=False, server_default='NOT_STARTED')
-  deletion_date = Column(TIMESTAMP(), nullable=False)
-  update_date = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  deletion_date = Column(TIMESTAMP(), nullable=True, server_default=current_timestamp())
+  update_date = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=current_timestamp())
   def __repr__(self):
     return f'{self.user_name}: {self.deletion_date}'
 
