@@ -230,13 +230,11 @@ class ProjectCleanupPendingView(ModelView):
                     raise
                 if len(failed_list) > 0:
                     flash("Failed to change DB status", "danger")
-                self.update_redirect()
-            return redirect(self.get_redirect())
+            return redirect(url_for('ProjectCleanupPendingView.list'))
         except Exception as e:
             log.error(e)
             flash('Failed to mark projects deleted', 'danger')
-            self.update_redirect()
-            return redirect(self.get_redirect())
+            return redirect(url_for('ProjectCleanupPendingView.list'))
 
     @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation-triangle")
     def cleanup_db_entry(self, item):
