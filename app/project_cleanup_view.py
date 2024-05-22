@@ -230,11 +230,13 @@ class ProjectCleanupPendingView(ModelView):
                     raise
                 if len(failed_list) > 0:
                     flash("Failed to change DB status", "danger")
-            return redirect(url_for('ProjectCleanupPendingView.list'))
+                self.update_redirect()
+            return redirect(self.get_redirect())
         except Exception as e:
             log.error(e)
             flash('Failed to mark projects deleted', 'danger')
-            return redirect(url_for('ProjectCleanupPendingView.list'))
+            self.update_redirect()
+            return redirect(self.get_redirect())
 
     @action("cleanup_db_entry", "Cleanup DB entry", confirmation="Confirm?", multiple=False, single=True, icon="fa-exclamation-triangle")
     def cleanup_db_entry(self, item):
@@ -245,15 +247,15 @@ class ProjectCleanupPendingView(ModelView):
                 for i in item:
                     if i.status == "USER_NOTIFIED" and \
                        datetime.now() >= i.deletion_date:
-                        entry_list.append(i.project_cleanup_id)
+                        entry_list.append({'project_cleanup_id': i.project_cleanup_id})
                     else:
-                        failed_list.append(i.project_cleanup_id)
+                        failed_list.append({'project_cleanup_id': i.project_cleanup_id})
             else:
                 if item.status == "USER_NOTIFIED" and \
                    datetime.now() >= item.deletion_date:
-                    entry_list.append(item.project_cleanup_id)
+                    entry_list.append({'project_cleanup_id': item.project_cleanup_id})
                 else:
-                    failed_list.append(item.project_cleanup_id)
+                    failed_list.append({'project_cleanup_id': item.project_cleanup_id})
             if len(entry_list) > 0:
                 airflow_dag_id = \
                     get_airflow_dag_id(
@@ -274,11 +276,12 @@ class ProjectCleanupPendingView(ModelView):
             if len(failed_list) > 0:
                 flash("Failed DB cleanup task", "danger")
             self.update_redirect()
-            return redirect(url_for('ProjectCleanupPendingView.list'))
+            return redirect(self.get_redirect())
         except Exception as e:
             log.error(e)
             flash('Failed to mark projects deleted in DB', 'danger')
-            return redirect(url_for('ProjectCleanupPendingView.list'))
+            self.update_redirect()
+            return redirect(self.get_redirect())
 
     @action("notify_user_about_cleanup", "Notify user about cleanup", confirmation="Confirm?", multiple=False, single=True, icon="fa-share")
     def notify_user_about_cleanup(self, item):
@@ -313,11 +316,12 @@ class ProjectCleanupPendingView(ModelView):
             if len(failed_list) > 0:
                 flash("Failed to sent email", "danger")
             self.update_redirect()
-            return redirect(url_for('ProjectCleanupPendingView.list'))
+            return redirect(self.get_redirect())
         except Exception as e:
             log.error(e)
             flash('Failed to sent email', 'danger')
-            return redirect(url_for('ProjectCleanupPendingView.list'))
+            self.update_redirect()
+            return redirect(self.get_redirect())
 
 
 
