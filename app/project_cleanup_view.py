@@ -185,6 +185,7 @@ class ProjectCleanupPendingView(ModelView):
     search_columns = [
         "user_email",
         "user_name",
+        "status",
         "projects"]
     base_filters = [
         ["status", FilterInFunction, lambda: ["NOT_STARTED", "PROCESSING", "USER_NOTIFIED", "DB_CLEANUP_FINISHED"]]]
