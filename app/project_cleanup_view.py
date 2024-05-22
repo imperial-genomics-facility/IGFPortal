@@ -269,7 +269,7 @@ class ProjectCleanupPendingView(ModelView):
                         apply_async(args=[airflow_dag_id, entry_list, g.user.id, True])
                 ## mark entries as PROCESSING to prevent repeat runs
                 update_status_for_project_cleanup(
-                    project_cleanup_id_list=[k for row in entry_list for k in row],
+                    project_cleanup_id_list=[row.get('project_cleanup_id') for row in entry_list],
                     status='PROCESSING',
                     user_id=g.user.id)
                 flash("Submitted DB cleanup task", "info")
