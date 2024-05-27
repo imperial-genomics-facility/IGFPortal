@@ -131,11 +131,37 @@ def test_client(db):
         app.appbuilder.sm.add_permission_role(
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
+                "can_list",
+                "ProjectCleanupPendingView"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_list",
+                "ProjectCleanupFinishedView"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
                 "can_get", "api"))
         app.appbuilder.sm.add_permission_role(
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(
                 "can_post", "api"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_get_project_cleanup_data", "ProjectCleanupApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_user_notified", "ProjectCleanupApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_mark_db_cleanup_finished", "ProjectCleanupApi"))
+        app.appbuilder.sm.add_permission_role(
+            admin_role,
+            app.appbuilder.sm.add_permission_view_menu(
+                "can_add_project_cleanup_data", "ProjectCleanupApi"))
         app.appbuilder.sm.add_permission_role(
             admin_role,
             app.appbuilder.sm.add_permission_view_menu(

@@ -3,7 +3,7 @@ from . import db
 from flask import Markup, url_for
 from flask_appbuilder import Model
 from sqlalchemy.dialects.mysql import INTEGER
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, text, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText
@@ -311,6 +311,23 @@ class SampleIndex(AuditMixin, Model):
   project_index = relationship('ProjectIndex')
   def __repr__(self):
     return self.sample_name
+
+"""
+  Project cleanup
+"""
+class ProjectCleanup(AuditMixin, Model):
+  __tablename__ = 'project_cleanup'
+  __table_args__ = (
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' },)
+  project_cleanup_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  user_email = Column(String(80), nullable=False)
+  user_name = Column(String(40), nullable=False)
+  projects = Column(TEXT(), nullable=False)
+  status = Column(Enum('NOT_STARTED', 'REJECTED', 'PROCESSING', 'USER_NOTIFIED', 'DB_CLEANUP_FINISHED', 'FILES_DELETED'), nullable=False, server_default='NOT_STARTED')
+  deletion_date = Column(TIMESTAMP(), nullable=True, server_default=current_timestamp())
+  update_date = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=current_timestamp())
+  def __repr__(self):
+    return f'{self.user_name}: {self.deletion_date}'
 
 """
   Project info

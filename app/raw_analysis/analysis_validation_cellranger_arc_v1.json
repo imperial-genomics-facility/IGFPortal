@@ -1,0 +1,127 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF Cellranger arc analysis validation schema",
+    "description": "Schema for validation of Cellranger arc analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "library_type": {
+                            "type": "string",
+                            "enum": [
+                               "Gene Expression",
+                               "Chromatin Accessibility"
+                            ]
+                        },
+                        "cellranger_group": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9-_]+$"
+                        }
+                    }
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "scanpy_config": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "properties": {
+                        "TEMPLATE_FILE": {
+                            "type": "string"
+                        },
+                        "IMAGE_FILE": {
+                            "type": "string"
+                        },
+                        "MITO_PREFIX": {
+                            "type": "string"
+                        },
+                        "RUN_SCRUBLET": {
+                            "type":  "boolean"
+                        },
+                        "RUN_CELLCYCLE_SCORE": {
+                            "type":  "boolean"
+                        },
+                        "CELL_MARKER_LIST": {
+                            "type": "string"
+                        },
+                        "CELL_MARKER_SPECIES": {
+                            "type": "string"
+                        },
+                        "S_GENES": {
+                            "type": "string"
+                        },
+                        "G2M_GENES": {
+                            "type": "string"
+                        },
+                        "CELL_MARKER_MODE": {
+                            "type": "string",
+                            "enum": [
+                                "NON-VDJ",
+                                "VDJ"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "TEMPLATE_FILE",
+                        "IMAGE_FILE",
+                        "MITO_PREFIX",
+                        "RUN_SCRUBLET",
+                        "RUN_CELLCYCLE_SCORE",
+                        "CELL_MARKER_LIST",
+                        "CELL_MARKER_SPECIES",
+                        "S_GENES",
+                        "G2M_GENES",
+                        "CELL_MARKER_MODE"
+                    ]
+                },
+                "cellranger_arc_config": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "properties": {
+                        "reference": {
+                            "type": "string"
+                        },
+                        "parameters": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [ "reference"]
+                },
+                "cellranger_arc_aggr_config": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "properties": {
+                        "reference": {
+                            "type": "string"
+                        },
+                        "parameters": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [ "reference"]
+                }
+            },
+            "required": ["cellranger_arc_config", "cellranger_arc_aggr_config", "scanpy_config"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}
