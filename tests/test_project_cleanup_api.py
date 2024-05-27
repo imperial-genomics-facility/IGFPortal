@@ -213,11 +213,11 @@ def test_add_project_cleanup_data(db, test_client):
             get("access_token")
     file_data = \
         BytesIO(b"""[{
-        "user_email": "a@b.com",
-        "user_name": "A B",
+        "email_id": "a@b.com",
+        "name": "A B",
         "projects": ["ProjectA", "ProjectB"]}, {
-        "user_email": "c@e.com",
-        "user_name": "C E",
+        "email_id": "c@e.com",
+        "name": "C E",
         "projects": ["ProjectC", "ProjectE"]}]""")
     res = \
         test_client.post(
