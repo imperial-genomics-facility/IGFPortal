@@ -41,7 +41,7 @@ AIRFLOW_CONF_FILE=/container_path/secret/airflow_conf.json
 
 Copy the `nginx_template.conf` to `nginx.conf` and replace `server_name` value.
 
-```json
+```
 server {
     # Redirect http to https
     listen 80 default_server;
