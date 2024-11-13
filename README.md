@@ -17,9 +17,13 @@ IGFPortal is a web-based data management and analysis tool created by the NIHR I
 
 ```bash
 git clone https://github.com/imperial-genomics-facility/IGFPortal.git
+
+cd IGFPortal
 ```
 
 **2. Create an environment file**
+
+Create a new file `env` and add the following lines:
 
 ```
 PYTHONPATH=/container_path/IGFPortal
@@ -37,7 +41,7 @@ CELERY_WORK_DIR=/TMP_WORK_DIR_FOR_CELERY_WORKER
 AIRFLOW_CONF_FILE=/container_path/secret/airflow_conf.json
 ```
 
-**3. Create Nginx cconfig file**
+**3. Create Nginx config file**
 
 Copy the `nginx_template.conf` to `nginx.conf` and replace `server_name` value.
 
@@ -45,7 +49,7 @@ Copy the `nginx_template.conf` to `nginx.conf` and replace `server_name` value.
 server {
     # Redirect http to https
     listen 80 default_server;
-    server_name YOUR_SERVER_NAME;
+    server_name SERVER_ADDRESS;
     return 301 https://$server_name$request_uri;
 }
 ```
@@ -63,7 +67,7 @@ Update `docker-compose.yaml` file and add correct path for following:
   * Path of the local copy of IGFPortal repo (default is /home/vmuser/github/IGFPortal)
   * Path for SSL certs (default is /home/vmuser/github/ssl)
   * Path for static directory (default is ./static)
-  * Path for Airflow connection conf (default /home/vmuser/secrets/airflow_conf.json)
+  * Path for Apache Airflow connection conf (default /home/vmuser/secrets/airflow_conf.json)
 
 **6. Start the server using docker compose**
 
