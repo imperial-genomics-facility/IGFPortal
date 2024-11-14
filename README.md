@@ -8,7 +8,6 @@ IGFPortal is a web-based data management and analysis tool created by the NIHR I
 - **Result Visualization**: Offers an intuitive interface with graphical views for data analysis results and project status. Utilises Redis caching to minimise loading analysis reports.
 
 ## Requirements
-- **Python**: Version 3.8 or higher
 - **Docker**: For containerized deployments
 
 ## Installation
