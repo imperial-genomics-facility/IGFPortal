@@ -324,66 +324,6 @@ def validate_analysis_design(
         error_list = \
             _get_validation_errors_for_analysis_design(
                 raw_analysis_id=raw_analysis_id)
-        # validation_schema = None
-        # raw_analysis_design = \
-        #     db.session.\
-        #         query(RawAnalysis).\
-        #         filter(RawAnalysis.raw_analysis_id==raw_analysis_id).\
-        #         one_or_none()
-        # if raw_analysis_design is None:
-        #     raise ValueError(
-        #             f"No metadata entry found for id {raw_analysis_id}")
-        # analysis_yaml = \
-        #     raw_analysis_design.analysis_yaml
-        # analysis_yaml = \
-        #     analysis_yaml
-        # pipeline_id = \
-        #     raw_analysis_design.pipeline_id
-        # if pipeline_id is None:
-        #     error_list.append("No pipeline info found")
-        # project_igf_id = \
-        #     raw_analysis_design.project.project_igf_id
-        # if project_igf_id is None:
-        #     error_list.append("No project id found")
-        # else:
-        #     raw_analysis_schema = \
-        #         db.session.\
-        #             query(RawAnalysisValidationSchema).\
-        #             filter(RawAnalysisValidationSchema.pipeline_id==pipeline_id).\
-        #             one_or_none()
-        #     if raw_analysis_schema is None:
-        #         error_list.append("No analysis schema found")
-        #     else:
-        #         validation_schema = \
-        #             raw_analysis_schema.json_schema
-        # if validation_schema is not None:
-        #     try:
-        #         # check against schema
-        #         schema_validation_errors = \
-        #             _get_validation_status_for_analysis_design(
-        #                 analysis_yaml=analysis_yaml,
-        #                 validation_schema=validation_schema)
-        #         if len(schema_validation_errors) > 0:
-        #             error_list.extend(schema_validation_errors)
-        #     except Exception as e:
-        #         error_list.append("Failed to inspect design")
-        # if len(error_list) == 0:
-        #     # its time to check igf ids
-        #     # assuming it has sample_metadata as its passed validation checks
-        #     json_data = \
-        #         load(analysis_yaml, Loader=Loader)
-        #     sample_metadata = \
-        #         json_data.get('sample_metadata')
-        #     if sample_metadata is None:
-        #         error_list.append(
-        #             'sample_metadata missing after validation checks ??')
-        #     else:
-        #         sample_metadata_errors = \
-        #             _get_sample_metadata_checks_for_analysis(
-        #                 sample_metadata=sample_metadata,
-        #                 project_igf_id=project_igf_id)
-        #         if len(sample_metadata_errors) > 0:
-        #             error_list.extend(sample_metadata_errors)
         if len(error_list) == 0:
             status = 'VALIDATED'
             errors = ''
