@@ -296,6 +296,7 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) ->list:
                 if len(error_list) == 0:
                     json_data = \
                         load(analysis_yaml, Loader=Loader)
+                    ## FIX ME: add condition for study_metadata and sample_metadata
                     sample_metadata = \
                         json_data.get('sample_metadata')
                     if sample_metadata is None:
