@@ -193,6 +193,25 @@ class RawMetadataModel(Model):
     return self.metadata_tag
 
 """
+  Raw COSMX metadata
+"""
+
+class RawCosMxMetadataModel(Model):
+  __tablename__ = 'raw_cosmx_metadata_entry'
+  __table_args__ = (
+    UniqueConstraint('metadata_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+  raw_cosmx_metadata_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_metadata_tag = Column(String(80), nullable=False)                                     # 2 ^ 24
+  formatted_csv_data = Column(LONGTEXTType(), nullable=False)
+  report = Column(LONGTEXTType())
+  status = Column(Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"), nullable=False, server_default='UNKNOWN')
+  update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.cosmx_metadata_tag
+
+
+"""
   List of raw seqrun
 """
 class RawSeqrun(Model):
