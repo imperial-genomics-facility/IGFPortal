@@ -489,6 +489,7 @@ class Project(Model):
     * FASTQ
     * ALIGNMENT
     * ANALYSIS
+    * COSMX
 
   :param status: An enum list for project status, default ACTIVE, allowed entries are
 
