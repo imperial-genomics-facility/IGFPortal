@@ -385,8 +385,17 @@ def cleanup_and_load_new_data_to_metadata_tables(
 
 
 def check_for_projects_in_metadata_db(
-    project_list: list) -> \
+    project_list: list,
+    flag_existing_project: bool = False) -> \
         Tuple[dict, list]:
+    """
+    Check if project ids are present in metadata db
+
+    :param project_list: List of project ids
+    :param flag_existing_project: True if existing project ids should be checked
+    :return: A tuple containing a dictionary with project id as key and True/False as value
+             and a list of errors
+    """
     try:
         errors = list()
         results = \
@@ -401,12 +410,22 @@ def check_for_projects_in_metadata_db(
                 output.update({i: True})
             else:
                 output.update({i: False})
-        for key, val in output.items():
-            if not val:
-                errors.\
-                    append(
-                        "Project {0} is missing in db".\
-                            format(key))
+        if flag_existing_project:
+            for key, val in output.items():
+                if val:
+                    errors.append(
+                        f"Project {key} is already present in db")
+        else:
+            for key, val in output.items():
+                if not val:
+                    errors.append(
+                        f"Project {key} is missing in db")
+        # for key, val in output.items():
+        #     if not val:
+        #         errors.\
+        #             append(
+        #                 "Project {0} is missing in db".\
+        #                     format(key))
         return output, errors
     except Exception as e:
         raise ValueError(

@@ -1,0 +1,36 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "id": "https://github.com/imperial-genomics-facility/data-management-python/tree/master/data/validation_schema/cosmx_metadata_validation.json#",
+    "title": "IGF cosmx metadata validation schema",
+    "description": "Schema for validation of cosmx metadata input file",
+    "type" : "array",
+    "version": "1.0.0",
+    "minItems": 1,
+    "uniqueItems": true,
+    "items": {
+        "type": "object",
+        "properties" : {
+            "project_igf_id" : {
+              "type" : "string",
+              "pattern": "^IGFQ[a-zA-Z0-9-_]+$",
+              "maxLength": 70
+            },
+            "name" : {
+              "type" : "string",
+              "pattern": "^\\w+"
+            },
+            "username" : {
+              "type" : "string",
+              "pattern": "^\\S+$|^$",
+              "maxLength": 10
+            },
+            "email_id" : {
+              "type" : "string",
+              "pattern": "\\S+\\@\\S+\\.\\w+"
+            }
+        },
+        "required": ["project_igf_id",
+                     "name",
+                     "email_id"]
+    }
+}

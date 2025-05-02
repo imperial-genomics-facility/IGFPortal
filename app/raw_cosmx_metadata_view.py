@@ -10,6 +10,7 @@ from . import celery
 from io import BytesIO, StringIO
 from flask_appbuilder.actions import action
 from .models import RawCosMxMetadataModel
+from .raw_metadata.raw_cosmx_metadata_util import validate_raw_cosmx_metadata_and_set_db_status
 from . import db
 
 @celery.task(bind=True)
@@ -48,25 +49,6 @@ class RawCosmxMetadataSubmitView(ModelView):
     base_order = ("raw_cosmx_metadata_id", "desc")
     base_filters = [
         ["status", FilterInFunction, lambda: ["READY", "VALIDATED"]]]
-
-    @action("upload_raw_metadata", "Mark for upload", confirmation="Change metadata status?", icon="fa-rocket")
-    def upload_raw_metadata_csv(self, item):
-        id_list = list()
-        tag_list = list()
-        if isinstance(item, list):
-            id_list = [i.raw_cosmx_metadata_id for i in item]
-            tag_list = [i.cosmx_metadata_tag for i in item]
-        else:
-            id_list = [item.raw_cosmx_metadata_id]
-            tag_list = [item.cosmx_metadata_tag]
-        try:
-            mark_raw_cosmx_metadata_as_ready(id_list=id_list)
-            flash(f"Marked metadata ready for {', '.join(tag_list)}", "info")
-        except Exception as e:
-            logging.error(e)
-            flash(f"Error in upload {', '.join(tag_list)}", "danger")
-        self.update_redirect()
-        return redirect(self.get_redirect())
 
     @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket", multiple=True, single=False)
     def validate_metadata(self, item):
