@@ -60,3 +60,50 @@ def test_run_metadata_json_validation(tmp_path):
             metadata_file=metadata_file,
             schema_json=schema_json)
     assert len(error_list) == 1
+
+
+def test_set_metadata_validation_status(db):
+        metadata = \
+            RawCosMxMetadataModel(
+                raw_cosmx_metadata_id=1,
+                cosmx_metadata_tag='test1',
+                formatted_csv_data='formatted',
+                report='')
+        try:
+            db.session.add(metadata)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        result = \
+            db.session.\
+                query(RawCosMxMetadataModel).\
+                filter(RawCosMxMetadataModel.raw_cosmx_metadata_id==1).\
+                one_or_none()
+        assert result is not None
+        assert result.cosmx_metadata_tag == 'test1'
+        assert result.status == 'UNKNOWN'
+        _set_metadata_validation_status(
+            raw_cosmx_metadata_id=1,
+            status='failed',
+            report='error')
+        result = \
+            db.session.\
+                query(RawCosMxMetadataModel).\
+                filter(RawCosMxMetadataModel.raw_cosmx_metadata_id==1).\
+                one_or_none()
+        assert result is not None
+        assert result.cosmx_metadata_tag, 'test1'
+        assert result.status == 'FAILED'
+        _set_metadata_validation_status(
+            raw_cosmx_metadata_id=1,
+            status='validated')
+        result = \
+            db.session.\
+                query(RawCosMxMetadataModel).\
+                filter(RawCosMxMetadataModel.raw_cosmx_metadata_id==1).\
+                one_or_none()
+        assert result is not None
+        assert result.cosmx_metadata_tag == 'test1'
+        assert result.status == 'VALIDATED'
