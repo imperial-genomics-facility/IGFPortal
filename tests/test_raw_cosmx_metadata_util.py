@@ -107,3 +107,65 @@ def test_set_metadata_validation_status(db):
         assert result is not None
         assert result.cosmx_metadata_tag == 'test1'
         assert result.status == 'VALIDATED'
+
+def test_validate_raw_cosmx_metadata_and_set_db_status(db):
+    csv_data = """project_igf_id,name,email_id,username
+    IGFQA-1234,test user,test@user.com,testuser"""
+    metadata = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=1,
+            cosmx_metadata_tag='run1',
+            formatted_csv_data=csv_data.replace(" ", ""),
+            report='')
+    try:
+        db.session.add(metadata)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    status = \
+        validate_raw_cosmx_metadata_and_set_db_status(
+            raw_cosmx_metadata_id=1,
+            schema_json="app/raw_metadata/cosmx_metadata_validation.json")
+    assert status == 'VALIDATED'
+    csv_data = """project_id,name,email_id,username
+    IGFQA-1234,test user,test@user.com,testuser"""
+    metadata = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=2,
+            cosmx_metadata_tag='run2',
+            formatted_csv_data=csv_data.replace(" ", ""),
+            report='')
+    try:
+        db.session.add(metadata)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    status = \
+        validate_raw_cosmx_metadata_and_set_db_status(
+            raw_cosmx_metadata_id=2,
+            schema_json="app/raw_metadata/cosmx_metadata_validation.json")
+    assert status == 'FAILED'
+    csv_data = """project_igf_id,name,email_id,username
+    ABC-1234,test user,test_user.com,testuser"""
+    metadata = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=3,
+            cosmx_metadata_tag='run3',
+            formatted_csv_data=csv_data.replace(" ", ""),
+            report='')
+    try:
+        db.session.add(metadata)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    status = \
+        validate_raw_cosmx_metadata_and_set_db_status(
+            raw_cosmx_metadata_id=3,
+            schema_json="app/raw_metadata/cosmx_metadata_validation.json")
+    assert status == 'FAILED'

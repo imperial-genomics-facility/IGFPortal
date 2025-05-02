@@ -102,8 +102,9 @@ def _check_project_and_user_details(
         if not project_column in df.columns or \
            not name_column in df.columns or \
            not email_column in df.columns:
-            raise ValueError(
+            errors.append(
                 f"Column {project_column} or {name_column} or {email_column} not found in metadata file")
+            return errors
         project_id_list = \
             df[project_column].\
                 drop_duplicates().\
