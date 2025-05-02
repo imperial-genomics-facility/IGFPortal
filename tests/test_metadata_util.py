@@ -344,6 +344,15 @@ def test_check_for_projects_in_metadata_db(db, tmp_path):
         # self.assertEqual(len(errors), 1)
         assert output.get('test11') is not None
         assert len(errors) == 1
+        output, errors = \
+            check_for_projects_in_metadata_db(
+                project_list=["test11", "test12"],
+                flag_existing_project=True)
+        # self.assertTrue(output.get('test11'))
+        # self.assertFalse(output.get('test12'))
+        # self.assertEqual(len(errors), 1)
+        assert output.get('test11') is not None
+        assert len(errors) == 1
 
 # class TestMetadataUtil3(unittest.TestCase):
 #     def setUp(self):
