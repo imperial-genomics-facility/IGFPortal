@@ -26,7 +26,7 @@ def _run_metadata_json_validation(
         metadata_df.fillna('', inplace=True)
         for header_name in metadata_df.columns:
             if header_name not in metadata_json_fields:
-                error_list.append("Unexpected column {0} found")
+                error_list.append(f"Unexpected column {header_name} found")
         json_data = \
             metadata_df.\
                 to_dict(orient='records')
