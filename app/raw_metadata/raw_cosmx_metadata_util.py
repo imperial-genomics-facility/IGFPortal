@@ -199,3 +199,29 @@ def validate_raw_cosmx_metadata_and_set_db_status(
         raise ValueError(
             f"Failed to get metadata for id {raw_cosmx_metadata_id}, error: {e}")
 
+
+def download_ready_cosmx_metadata() -> dict:
+    """
+    Download the ready metadata from the database.
+
+    :return: dict
+        A dictionary containing the metadata tag and formatted csv data.
+    """
+    try:
+        results = \
+            db.session.\
+                query(
+                    RawCosMxMetadataModel.cosmx_metadata_tag,
+                    RawCosMxMetadataModel.formatted_csv_data).\
+                    filter(RawCosMxMetadataModel.status=='VALIDATED').\
+                    all()
+        if len(results)==0:
+            return {}
+        else:
+            data = dict()
+            for entry in results:
+                data.update({entry[0]: entry[1]})
+            return data
+    except Exception as e:
+        raise ValueError(
+            f"Failed to download ready metadata, error: {e}")

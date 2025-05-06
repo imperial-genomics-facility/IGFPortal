@@ -9,7 +9,8 @@ from app.raw_metadata.raw_cosmx_metadata_util import (
     _run_metadata_json_validation,
     _set_metadata_validation_status,
     _check_project_and_user_details,
-    validate_raw_cosmx_metadata_and_set_db_status)
+    validate_raw_cosmx_metadata_and_set_db_status,
+    download_ready_cosmx_metadata)
 
 def test_run_metadata_json_validation(tmp_path):
     schema_json = "app/raw_metadata/cosmx_metadata_validation.json"
@@ -269,3 +270,49 @@ def test_check_project_and_user_details(db, tmp_path):
             metadata_file=metadata_file)
     assert len(project_check_errors) == 1
     assert 'Email test@user.com registered with name testuser1, not testuser' in project_check_errors
+
+def test_download_ready_cosmx_metadata(db):
+    csv_data1 = """project_igf_id,name,email_id,username
+    IGFQA-1234,testuser,test@user.com,testuser"""
+    metadata1 = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=1,
+            cosmx_metadata_tag='run1',
+            formatted_csv_data=csv_data1.replace(" ", ""),
+            status="FAILED",
+            report='')
+    try:
+        db.session.add(metadata1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    project_entries = \
+        download_ready_cosmx_metadata()
+    assert len(project_entries) == 0
+    metadata2 = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=2,
+            cosmx_metadata_tag='run2',
+            formatted_csv_data=csv_data1.replace(" ", ""),
+            status="VALIDATED",
+            report='')
+    metadata3 = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=3,
+            cosmx_metadata_tag='run3',
+            formatted_csv_data=csv_data1.replace(" ", ""),
+            status="VALIDATED",
+            report='')
+    try:
+        db.session.add(metadata2)
+        db.session.add(metadata3)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    project_entries = \
+        download_ready_cosmx_metadata()
+    assert len(project_entries) == 2
