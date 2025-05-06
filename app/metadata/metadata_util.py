@@ -410,6 +410,8 @@ def check_for_projects_in_metadata_db(
                 output.update({i: True})
             else:
                 output.update({i: False})
+        print(project_list)
+        print(output)
         if flag_existing_project:
             for key, val in output.items():
                 if val:

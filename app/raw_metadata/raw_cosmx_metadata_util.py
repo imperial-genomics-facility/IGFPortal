@@ -174,15 +174,15 @@ def validate_raw_cosmx_metadata_and_set_db_status(
             if len(validation_errors) > 0:
                 error_list.\
                     extend(validation_errors)
-            errors = \
+            project_check_errors = \
                 _check_project_and_user_details(
                     metadata_file)
-            if len(errors) > 0:
+            if len(project_check_errors) > 0:
                 error_list.\
-                    extend(validation_errors)
+                    extend(project_check_errors)
             if len(error_list) > 0:
                 error_list = \
-                    ["{0}, {1}".format(i+1, e)
+                    [f"{i+1}, {e}"
                         for i,e in enumerate(error_list)]
                 _set_metadata_validation_status(
                     raw_cosmx_metadata_id=raw_cosmx_metadata_id,
