@@ -1,4 +1,4 @@
-from multiprocessing.sharedctypes import Value
+from io import StringIO
 from numpy import isin
 import pandas as pd
 import os, json, re, tempfile, logging, typing
@@ -220,7 +220,12 @@ def download_ready_cosmx_metadata() -> dict:
         else:
             data = dict()
             for entry in results:
-                data.update({entry[0]: entry[1]})
+                csv_data = entry[1]
+                json_data = \
+                    pd.read_csv(
+                        StringIO(csv_data)).\
+                            to_dict(orient='records')
+                data.update({entry[0]: json_data})
             return data
     except Exception as e:
         raise ValueError(
