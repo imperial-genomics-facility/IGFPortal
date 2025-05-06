@@ -7,6 +7,7 @@ from .admin_home_api import AdminHomeApi
 from .raw_seqrun_api import RawSeqrunApi
 from .raw_analysis_api import RawAnalysisApi
 from .project_cleanup_api import ProjectCleanupApi
+from .raw_cosmx_metadata_api import RawCosMxMetadataDataApi
 
 
 """
@@ -20,3 +21,4 @@ appbuilder.add_api(AdminHomeApi)
 appbuilder.add_api(RawSeqrunApi)
 appbuilder.add_api(RawAnalysisApi)
 appbuilder.add_api(ProjectCleanupApi)
+appbuilder.add_api(RawCosMxMetadataDataApi)
