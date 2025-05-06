@@ -7,7 +7,9 @@ from flask_appbuilder.security.decorators import protect
 from . import db
 from io import BytesIO
 from .models import RawCosMxMetadataModel
-from .raw_metadata.raw_cosmx_metadata_util import download_ready_cosmx_metadata
+from .raw_metadata.raw_cosmx_metadata_util import (
+    download_ready_cosmx_metadata,
+    mark_all_ready_metadata_as_synced)
 
 
 log = logging.getLogger(__name__)
@@ -32,5 +34,18 @@ class RawCosMxMetadataDataApi(ModelRestApi):
                 output = BytesIO(data.encode())
                 output.seek(0)
                 return send_file(output, download_name='metadata.json', as_attachment=True)
+        except Exception as e:
+            logging.error(e)
+
+    @expose('/mark_ready_metadata_as_synced',  methods=['GET'])
+    @protect()
+    def mark_ready_metadata_as_synced(self):
+        try:
+            try:
+                mark_all_ready_metadata_as_synced()
+                return self.response(200, message='all metadata synced')
+            except:
+                db.session.rollback()
+                raise
         except Exception as e:
             logging.error(e)
