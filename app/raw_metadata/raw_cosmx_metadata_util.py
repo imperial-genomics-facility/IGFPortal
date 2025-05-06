@@ -230,3 +230,18 @@ def download_ready_cosmx_metadata() -> dict:
     except Exception as e:
         raise ValueError(
             f"Failed to download ready metadata, error: {e}")
+
+def mark_all_ready_metadata_as_synced() -> None:
+    """
+    Mark all ready metadata as synced.
+    """
+    try:
+        db.session.\
+            query(RawCosMxMetadataModel).\
+            filter(RawCosMxMetadataModel.status=='VALIDATED').\
+            update({
+                'status': 'SYNCHED'})
+        db.session.commit()
+    except Exception as e:
+        raise ValueError(
+            f"Failed to mark all ready metadata as synced, error: {e}")

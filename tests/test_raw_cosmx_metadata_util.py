@@ -10,7 +10,8 @@ from app.raw_metadata.raw_cosmx_metadata_util import (
     _set_metadata_validation_status,
     _check_project_and_user_details,
     validate_raw_cosmx_metadata_and_set_db_status,
-    download_ready_cosmx_metadata)
+    download_ready_cosmx_metadata,
+    mark_all_ready_metadata_as_synced)
 
 def test_run_metadata_json_validation(tmp_path):
     schema_json = "app/raw_metadata/cosmx_metadata_validation.json"
@@ -320,3 +321,54 @@ def test_download_ready_cosmx_metadata(db):
     assert 'run3' in project_entries
     assert project_entries.get('run2') == \
         [{"project_igf_id": "IGFQA-1234","name": "testuser","email_id":"test@user.com","username":"testuser"}]
+
+def test_mark_all_ready_metadata_as_synced(db):
+    csv_data1 = """project_igf_id,name,email_id,username
+    IGFQA-1234,testuser,test@user.com,testuser"""
+    metadata1 = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=1,
+            cosmx_metadata_tag='run1',
+            formatted_csv_data=csv_data1.replace(" ", ""),
+            status="FAILED",
+            report='')
+    metadata2 = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=2,
+            cosmx_metadata_tag='run2',
+            formatted_csv_data=csv_data1.replace(" ", ""),
+            status="VALIDATED",
+            report='')
+    metadata3 = \
+        RawCosMxMetadataModel(
+            raw_cosmx_metadata_id=3,
+            cosmx_metadata_tag='run3',
+            formatted_csv_data=csv_data1.replace(" ", ""),
+            status="VALIDATED",
+            report='')
+    try:
+        db.session.add(metadata1)
+        db.session.add(metadata2)
+        db.session.add(metadata3)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    mark_all_ready_metadata_as_synced()
+    project_entries = \
+        db.session.\
+            query(RawCosMxMetadataModel).\
+            filter(RawCosMxMetadataModel.status=='SYNCHED').\
+            all()
+    assert len(project_entries) == 2
+    assert project_entries[0].cosmx_metadata_tag == 'run2'
+    assert project_entries[1].cosmx_metadata_tag == 'run3'
+    project_entries = \
+        db.session.\
+            query(RawCosMxMetadataModel).\
+            filter(RawCosMxMetadataModel.cosmx_metadata_tag=='run1').\
+            all()
+    assert len(project_entries) == 1
+    assert project_entries[0].cosmx_metadata_tag == 'run1'
+    assert project_entries[0].status == 'FAILED'
