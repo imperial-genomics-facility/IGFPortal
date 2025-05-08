@@ -1,6 +1,6 @@
 import json, logging, gzip
 from flask_appbuilder import ModelRestApi
-from flask import request, send_file
+from flask import request, send_file, Response
 from flask_appbuilder.api import expose, rison
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.security.decorators import protect
@@ -37,15 +37,12 @@ class RawCosMxMetadataDataApi(ModelRestApi):
         except Exception as e:
             logging.error(e)
 
-    @expose('/mark_ready_metadata_as_synced',  methods=['GET'])
+    @expose('/mark_ready_metadata_as_synced/<raw_cosmx_metadata_id>',  methods=['POST'])
     @protect()
-    def mark_ready_metadata_as_synced(self):
+    def mark_ready_metadata_as_synced(self, raw_cosmx_metadata_id: int) -> Response:
         try:
-            try:
-                mark_all_ready_metadata_as_synced()
-                return self.response(200, message='all metadata synced')
-            except:
-                db.session.rollback()
-                raise
+            mark_all_ready_metadata_as_synced(
+                raw_cosmx_metadata_id=raw_cosmx_metadata_id)
+            return self.response(200, message='all metadata synced')
         except Exception as e:
             logging.error(e)

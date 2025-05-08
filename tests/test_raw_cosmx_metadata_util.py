@@ -355,15 +355,23 @@ def test_mark_all_ready_metadata_as_synced(db):
     except:
         db.session.rollback()
         raise
-    mark_all_ready_metadata_as_synced()
+    mark_all_ready_metadata_as_synced(2)
     project_entries = \
         db.session.\
             query(RawCosMxMetadataModel).\
             filter(RawCosMxMetadataModel.status=='SYNCHED').\
             all()
-    assert len(project_entries) == 2
+    assert len(project_entries) == 1
     assert project_entries[0].cosmx_metadata_tag == 'run2'
-    assert project_entries[1].cosmx_metadata_tag == 'run3'
+    project_entries = \
+        db.session.\
+            query(RawCosMxMetadataModel).\
+            filter(RawCosMxMetadataModel.cosmx_metadata_tag=='run3').\
+            all()
+    assert len(project_entries) == 1
+    assert project_entries[0].cosmx_metadata_tag == 'run3'
+    assert project_entries[0].status == 'VALIDATED'
+    mark_all_ready_metadata_as_synced(1)
     project_entries = \
         db.session.\
             query(RawCosMxMetadataModel).\

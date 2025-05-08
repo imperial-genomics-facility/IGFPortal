@@ -231,17 +231,23 @@ def download_ready_cosmx_metadata() -> dict:
         raise ValueError(
             f"Failed to download ready metadata, error: {e}")
 
-def mark_all_ready_metadata_as_synced() -> None:
+def mark_all_ready_metadata_as_synced(raw_cosmx_metadata_id: int) -> None:
     """
-    Mark all ready metadata as synced.
+    Mark validated metadata as synced in the database.
+
+    :param raw_cosmx_metadata_id: int
+        The id of the raw metadata to be marked as synced.
+    :return: None
     """
     try:
         db.session.\
             query(RawCosMxMetadataModel).\
+            filter(RawCosMxMetadataModel.raw_cosmx_metadata_id==raw_cosmx_metadata_id).\
             filter(RawCosMxMetadataModel.status=='VALIDATED').\
             update({
                 'status': 'SYNCHED'})
         db.session.commit()
     except Exception as e:
+        db.session.rollback()
         raise ValueError(
             f"Failed to mark all ready metadata as synced, error: {e}")

@@ -83,8 +83,8 @@ def test_mark_ready_metadata_as_synced_api(db, test_client):
         json.loads(res.data.decode("utf-8")).\
             get("access_token")
     res = \
-        test_client.get(
-            '/api/v1/raw_cosmx_metadata/mark_ready_metadata_as_synced',
+        test_client.post(
+            '/api/v1/raw_cosmx_metadata/mark_ready_metadata_as_synced/1',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
     csv_data1 = """project_igf_id,name,email_id,username
@@ -120,8 +120,8 @@ def test_mark_ready_metadata_as_synced_api(db, test_client):
         db.session.rollback()
         raise
     res = \
-        test_client.get(
-            '/api/v1/raw_cosmx_metadata/mark_ready_metadata_as_synced',
+        test_client.post(
+            '/api/v1/raw_cosmx_metadata/mark_ready_metadata_as_synced/2',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
     project_entries = \
@@ -129,9 +129,13 @@ def test_mark_ready_metadata_as_synced_api(db, test_client):
             query(RawCosMxMetadataModel).\
             filter(RawCosMxMetadataModel.status=='SYNCHED').\
             all()
-    assert len(project_entries) == 2
+    assert len(project_entries) == 1
     assert project_entries[0].cosmx_metadata_tag == 'run2'
-    assert project_entries[1].cosmx_metadata_tag == 'run3'
+    res = \
+        test_client.post(
+            '/api/v1/raw_cosmx_metadata/mark_ready_metadata_as_synced/1',
+            headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
     project_entries = \
         db.session.\
             query(RawCosMxMetadataModel).\
