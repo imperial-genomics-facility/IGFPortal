@@ -317,9 +317,9 @@ def test_download_ready_cosmx_metadata(db):
     project_entries = \
         download_ready_cosmx_metadata()
     assert len(project_entries) == 2
-    assert 'run2' in project_entries
-    assert 'run3' in project_entries
-    assert project_entries.get('run2') == \
+    assert 2 in project_entries
+    assert 3 in project_entries
+    assert project_entries.get(2) == \
         [{"project_igf_id": "IGFQA-1234","name": "testuser","email_id":"test@user.com","username":"testuser"}]
 
 def test_mark_all_ready_metadata_as_synced(db):

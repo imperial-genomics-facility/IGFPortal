@@ -211,7 +211,7 @@ def download_ready_cosmx_metadata() -> dict:
         results = \
             db.session.\
                 query(
-                    RawCosMxMetadataModel.cosmx_metadata_tag,
+                    RawCosMxMetadataModel.raw_cosmx_metadata_id,
                     RawCosMxMetadataModel.formatted_csv_data).\
                     filter(RawCosMxMetadataModel.status=='VALIDATED').\
                     all()

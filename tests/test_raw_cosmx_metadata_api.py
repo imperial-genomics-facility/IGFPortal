@@ -66,8 +66,8 @@ def test_download_ready_metadata_api(db, test_client):
     assert res.status_code == 200
     json_data = \
         json.loads(res.data.decode('utf-8'))
-    assert 'run3' in json_data
-    assert json_data.get('run3') == \
+    assert '3' in json_data
+    assert json_data.get('3') == \
         [{"project_igf_id": "IGFQA-1234","name": "testuser","email_id":"test@user.com","username":"testuser"}]
 
 def test_mark_ready_metadata_as_synced_api(db, test_client):
