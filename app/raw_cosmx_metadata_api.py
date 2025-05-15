@@ -43,6 +43,6 @@ class RawCosMxMetadataDataApi(ModelRestApi):
         try:
             mark_all_ready_metadata_as_synced(
                 raw_cosmx_metadata_id=raw_cosmx_metadata_id)
-            return self.response(200, message='all metadata synced')
+            return self.response(200, message='Metadata synced')
         except Exception as e:
             logging.error(e)
