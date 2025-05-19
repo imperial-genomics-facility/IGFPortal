@@ -1,4 +1,4 @@
-import unittest, json
+import unittest, json, pytest
 from app.models import RawAnalysis
 from app.models import RawAnalysisValidationSchema
 from app.models import RawAnalysis
@@ -18,16 +18,205 @@ from app.raw_analysis.raw_analysis_util import pipeline_query
 from app.raw_analysis.raw_analysis_util import project_query
 from app.raw_analysis.raw_analysis_util import validate_json_schema
 from app.raw_analysis.raw_analysis_util import validate_analysis_design
-from app.raw_analysis.raw_analysis_util import _get_validation_status_for_analysis_design
-from app.raw_analysis.raw_analysis_util import _get_project_id_for_samples
-from app.raw_analysis.raw_analysis_util import _get_file_collection_for_samples
-from app.raw_analysis.raw_analysis_util import _get_sample_metadata_checks_for_analysis
-from app.raw_analysis.raw_analysis_util import _get_validation_errors_for_analysis_design
-from app.raw_analysis.raw_analysis_util import _fetch_all_samples_for_project
-from app.raw_analysis.raw_analysis_util import _get_analysis_template
-from app.raw_analysis.raw_analysis_util import generate_analysis_template
+from app.raw_analysis.raw_analysis_util import (
+    _get_validation_status_for_analysis_design,
+    _get_project_id_for_samples,
+    _get_file_collection_for_samples,
+    _get_sample_metadata_checks_for_analysis,
+    _get_validation_errors_for_analysis_design,
+    _fetch_all_samples_for_project,
+    _get_analysis_template,
+    generate_analysis_template_for_analysis,
+    _fetch_pipeline_name_for_raw_analysis_id,
+    _fetch_project_igf_id_and_deliverable_for_raw_analysis_id)
 from app.raw_analysis_view import async_validate_analysis_yaml
 from app.raw_analysis_view import async_validate_analysis_schema
+
+def test_generate_analysis_template_for_analysis(db):
+    ## setup metadata
+    template_data1 = \
+        """sample_metadata:
+        {% for SAMPLE_ID in SAMPLE_ID_LIST %}
+        {{ SAMPLE_ID }}:
+            condition: CONDITION_NAME
+            strandedness: reverse
+        {% endfor %}analysis_metadata:
+            pipeline_name: xyz"""
+    template_data2 = \
+        """run_metadata:
+        cosmx_run_id: IGF_PROJECT_ID_AND_RUN_ID
+        analysis_metadata:
+          run_fov_qc: true
+          run_type: RNA / PROTEIN"""
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2',
+            deliverable='COSMX')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    template1 = \
+        RawAnalysisTemplate(
+            template_tag="pipeline1",
+            template_data=template_data1)
+    template2 = \
+        RawAnalysisTemplate(
+            template_tag="pipeline2",
+            template_data=template_data2)
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    pipeline2 = \
+        Pipeline(
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_analysis1 = \
+        RawAnalysis(
+            analysis_name='analysis1',
+            pipeline=pipeline1,
+            project=project1,
+            analysis_yaml='AAA')
+    raw_analysis2 = \
+        RawAnalysis(
+            analysis_name='analysis2',
+            pipeline=pipeline2,
+            project=project2,
+            analysis_yaml='AAA')
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.add(template1)
+        db.session.add(template2)
+        db.session.add(pipeline1)
+        db.session.add(pipeline2)
+        db.session.add(raw_analysis1)
+        db.session.add(raw_analysis2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    formatted_template = \
+        generate_analysis_template_for_analysis(
+            raw_analysis1.raw_analysis_id)
+    assert 'IGF111:' in [line.strip() for line in formatted_template.split('\n')]
+    assert 'condition: CONDITION_NAME' in [line.strip() for line in formatted_template.split('\n')]
+    formatted_template = \
+        generate_analysis_template_for_analysis(
+            raw_analysis2.raw_analysis_id)
+    assert 'cosmx_run_id: IGF_PROJECT_ID_AND_RUN_ID' in [line.strip() for line in formatted_template.split('\n')]
+
+
+
+def test_fetch_pipeline_name_for_raw_analysis_id(db):
+    pipeline1 = \
+        Pipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_analysis1 = \
+        RawAnalysis(
+            analysis_name='analysis1',
+            pipeline=pipeline1,
+            analysis_yaml='AAA')
+    pipeline2 = \
+        Pipeline(
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_analysis2 = \
+        RawAnalysis(
+            analysis_name='analysis2',
+            pipeline=pipeline2,
+            analysis_yaml='AAA')
+    raw_analysis3 = \
+        RawAnalysis(
+            analysis_name='analysis3',
+            analysis_yaml='AAA')
+    try:
+        db.session.add(pipeline1)
+        db.session.add(pipeline2)
+        db.session.flush()
+        db.session.add(raw_analysis1)
+        db.session.add(raw_analysis2)
+        db.session.add(raw_analysis3)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    pipeline_name = \
+        _fetch_pipeline_name_for_raw_analysis_id(
+            raw_analysis1.raw_analysis_id)
+    assert pipeline_name == "pipeline1"
+    pipeline_name = \
+        _fetch_pipeline_name_for_raw_analysis_id(
+            raw_analysis2.raw_analysis_id)
+    assert pipeline_name == "pipeline2"
+    with pytest.raises(ValueError):
+        pipeline_name = \
+            _fetch_pipeline_name_for_raw_analysis_id(
+                raw_analysis3.raw_analysis_id)
+
+
+
+def test_fetch_project_igf_id_and_deliverable_for_raw_analysis_id(db):
+    project1 = \
+        Project(
+            project_id=1,
+            project_igf_id="test1")
+    project2 = \
+        Project(
+            project_id=2,
+            project_igf_id="test2",
+            deliverable='COSMX')
+    raw_analysis1 = \
+        RawAnalysis(
+            analysis_name='analysis1',
+            project=project1,
+            analysis_yaml='AAA')
+    raw_analysis2 = \
+        RawAnalysis(
+            analysis_name='analysis2',
+            project=project2,
+            analysis_yaml='BBB')
+    try:
+        db.session.add(project1)
+        db.session.flush()
+        db.session.add(project2)
+        db.session.flush()
+        db.session.add(raw_analysis1)
+        db.session.flush()
+        db.session.add(raw_analysis2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    (project_igf_id, deliverable) = \
+        _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
+            raw_analysis_id=raw_analysis1.raw_analysis_id)
+    assert project_igf_id == "test1"
+    assert deliverable == 'FASTQ'
+    (project_igf_id, deliverable) = \
+        _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
+            raw_analysis_id=raw_analysis2.raw_analysis_id)
+    assert project_igf_id == "test2"
+    assert deliverable == 'COSMX'
+
 
 def test_project_query(db):
     project1 = \
@@ -1298,68 +1487,68 @@ def test_get_analysis_template(db):
     assert template_data is not None
     assert 'condition: CONDITION_NAME' in [t.strip() for t in template_data.split('\n')]
 
-def test_generate_analysis_template(db):
-    ## setup metadata
-    template = \
-        """sample_metadata:
-        {% for SAMPLE_ID in SAMPLE_ID_LIST %}
-        {{ SAMPLE_ID }}:
-            condition: CONDITION_NAME
-            strandedness: reverse
-        {% endfor %}analysis_metadata:
-            pipeline_name: xyz"""
-    project1 = \
-        Project(
-            project_igf_id='project1')
-    project2 = \
-        Project(
-            project_igf_id='project2')
-    sample1 = \
-        Sample(
-            sample_igf_id='IGF111',
-            project=project1)
-    sample2 = \
-        Sample(
-            sample_igf_id='IGF112',
-            project=project1)
-    template1 = \
-        RawAnalysisTemplate(
-            template_tag="template1",
-            template_data=template)
-    try:
-        db.session.add(project1)
-        db.session.add(project2)
-        db.session.add(sample1)
-        db.session.add(sample2)
-        db.session.add(template1)
-        db.session.flush()
-        db.session.commit()
-    except:
-        db.session.rollback()
-        raise
-    ## valid project and template
-    formatted_template = \
-        generate_analysis_template(
-            project_igf_id="project1",
-            template_tag="template1")
-    assert 'IGF111:' in [line.strip() for line in formatted_template.split('\n')]
-    assert 'condition: CONDITION_NAME' in [line.strip() for line in formatted_template.split('\n')]
-    ## invalid project valid template
-    formatted_template = \
-        generate_analysis_template(
-            project_igf_id="project2",
-            template_tag="template1")
-    assert len([line.strip() for line in formatted_template.split('\n')]) == 3
-    ## valid project invalid template
-    formatted_template = \
-        generate_analysis_template(
-            project_igf_id="project1",
-            template_tag="xxx")
-    assert "IGF111: ''" in [line.strip() for line in formatted_template.split('\n')]
-    assert 'condition: CONDITION_NAME' not in [line.strip() for line in formatted_template.split('\n')]
-    ## invalid project invalid template
-    formatted_template = \
-        generate_analysis_template(
-            project_igf_id="project2",
-            template_tag="xyz")
-    assert len([line.strip() for line in formatted_template.split('\n')]) == 2
+# def test_generate_analysis_template(db):
+#     ## setup metadata
+#     template = \
+#         """sample_metadata:
+#         {% for SAMPLE_ID in SAMPLE_ID_LIST %}
+#         {{ SAMPLE_ID }}:
+#             condition: CONDITION_NAME
+#             strandedness: reverse
+#         {% endfor %}analysis_metadata:
+#             pipeline_name: xyz"""
+#     project1 = \
+#         Project(
+#             project_igf_id='project1')
+#     project2 = \
+#         Project(
+#             project_igf_id='project2')
+#     sample1 = \
+#         Sample(
+#             sample_igf_id='IGF111',
+#             project=project1)
+#     sample2 = \
+#         Sample(
+#             sample_igf_id='IGF112',
+#             project=project1)
+#     template1 = \
+#         RawAnalysisTemplate(
+#             template_tag="template1",
+#             template_data=template)
+#     try:
+#         db.session.add(project1)
+#         db.session.add(project2)
+#         db.session.add(sample1)
+#         db.session.add(sample2)
+#         db.session.add(template1)
+#         db.session.flush()
+#         db.session.commit()
+#     except:
+#         db.session.rollback()
+#         raise
+#     ## valid project and template
+#     formatted_template = \
+#         generate_analysis_template(
+#             project_igf_id="project1",
+#             template_tag="template1")
+#     assert 'IGF111:' in [line.strip() for line in formatted_template.split('\n')]
+#     assert 'condition: CONDITION_NAME' in [line.strip() for line in formatted_template.split('\n')]
+#     ## invalid project valid template
+#     formatted_template = \
+#         generate_analysis_template(
+#             project_igf_id="project2",
+#             template_tag="template1")
+#     assert len([line.strip() for line in formatted_template.split('\n')]) == 3
+#     ## valid project invalid template
+#     formatted_template = \
+#         generate_analysis_template(
+#             project_igf_id="project1",
+#             template_tag="xxx")
+#     assert "IGF111: ''" in [line.strip() for line in formatted_template.split('\n')]
+#     assert 'condition: CONDITION_NAME' not in [line.strip() for line in formatted_template.split('\n')]
+#     ## invalid project invalid template
+#     formatted_template = \
+#         generate_analysis_template(
+#             project_igf_id="project2",
+#             template_tag="xyz")
+#     assert len([line.strip() for line in formatted_template.split('\n')]) == 2

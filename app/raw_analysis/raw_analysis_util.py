@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from typing import Tuple
 from yaml import load
 from yaml import Loader
 from ..models import RawAnalysis
@@ -19,15 +20,6 @@ from jsonschema import Draft202012Validator
 from jinja2 import Template
 
 log = logging.getLogger(__name__)
-
-def prepare_temple_for_analysis(template_tag: str) -> str:
-    try:
-        pass
-    # fetch template from RawAnalysisTemplate table
-    # or just return sample_metadata: IGF ids as yaml
-    except Exception as e:
-        raise ValueError(
-            f"Failed to get template, error: {e}")
 
 def project_query():
     try:
@@ -238,6 +230,7 @@ def _get_sample_metadata_checks_for_analysis(
 def _get_validation_errors_for_analysis_design(raw_analysis_id: int) ->list:
     try:
         error_list = list()
+        project_igf_id = ''
         # get raw analysis design
         raw_analysis_design = \
             db.session.\
@@ -364,22 +357,85 @@ def _fetch_all_samples_for_project(project_igf_id: str) -> list:
         raise ValueError(
             f"Failed to get sample list for project {project_igf_id}, error; {e}")
 
-def generate_analysis_template(project_igf_id: str, template_tag: str) -> str:
+def generate_analysis_template_for_analysis(raw_analysis_id: int) -> str:
     try:
-        sample_id_list = \
-            _fetch_all_samples_for_project(
-                project_igf_id=project_igf_id)
+        # fetch project_igf_id for analysis
+        # fetch pipeline name for analysis
+        # fetch template for pipeline
+        # use default template if no template found
+        (project_igf_id, deliverable) = \
+            _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
+                raw_analysis_id)
+        pipeline_name = \
+            _fetch_pipeline_name_for_raw_analysis_id(
+                raw_analysis_id)
+        if deliverable == 'COSMX':
+            sample_id_list = []
+        else:
+            sample_id_list = \
+                _fetch_all_samples_for_project(
+                    project_igf_id=project_igf_id)
         template_data = \
             _get_analysis_template(
-                template_tag=template_tag)
+                template_tag=pipeline_name)
         template = \
             Template(template_data, keep_trailing_newline=True)
+        ## cosmx export will work with this function
         formatted_template = \
             template.render(SAMPLE_ID_LIST=sample_id_list)
         return formatted_template
     except Exception as e:
         raise ValueError(
-            f"Failed to generate template project {project_igf_id}, error; {e}")
+            f"Failed to generate template for analysis {raw_analysis_id}, error; {e}")
+
+def _fetch_pipeline_name_for_raw_analysis_id(raw_analysis_id: int) -> str:
+    try:
+        (pipeline_name,) = \
+            db.session.\
+                query(Pipeline.pipeline_name).\
+                join(RawAnalysis, Pipeline.pipeline_id==RawAnalysis.pipeline_id).\
+                filter(RawAnalysis.raw_analysis_id==raw_analysis_id).\
+                one_or_none()
+        if pipeline_name is None or pipeline_name == '':
+            raise ValueError(f"No project entry found for raw analysis {raw_analysis_id}")
+        return pipeline_name
+    except Exception as e:
+        raise ValueError(f"Failed to get pipeline name for raw analysis {raw_analysis_id}")
+
+
+def _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(raw_analysis_id: int) -> Tuple[str, str]:
+    try:
+        (project_igf_id, deliverable) = \
+            db.session.\
+                query(
+                    Project.project_igf_id,
+                    Project.deliverable).\
+                join(RawAnalysis, Project.project_id==RawAnalysis.project_id).\
+                filter(RawAnalysis.raw_analysis_id==raw_analysis_id).\
+                one_or_none()
+        if project_igf_id is None or project_igf_id == '':
+            raise ValueError(f"No project entry found for raw analysis {raw_analysis_id}")
+        return (project_igf_id, deliverable)
+    except Exception as e:
+        raise ValueError(
+            f"No project_igf_id for raw analysis {raw_analysis_id}")
+
+# def generate_analysis_template(project_igf_id: str, template_tag: str) -> str:
+#     try:
+#         sample_id_list = \
+#             _fetch_all_samples_for_project(
+#                 project_igf_id=project_igf_id)
+#         template_data = \
+#             _get_analysis_template(
+#                 template_tag=template_tag)
+#         template = \
+#             Template(template_data, keep_trailing_newline=True)
+#         formatted_template = \
+#             template.render(SAMPLE_ID_LIST=sample_id_list)
+#         return formatted_template
+#     except Exception as e:
+#         raise ValueError(
+#             f"Failed to generate template project {project_igf_id}, error; {e}")
 
 
 def _get_analysis_template(
