@@ -489,6 +489,91 @@ class RDSProject_backup(Model):
   def __repr__(self):
     return self.project.project_igf_id
 
+class RawProject(Model):
+
+  '''
+  A table for loading raw project information
+
+  :param project_id: An integer id for project table
+  :param project_igf_id: A required string as project id specific to IGF team, allowed length 50
+  :param project_name: An optional string as project name
+  :param start_timestamp: An optional timestamp for project creation, default current timestamp
+  :param description: An optional text column to document project description
+  :param deliverable: An enum list to document project deliverable, default FASTQ,allowed entries are
+
+    * FASTQ
+    * ALIGNMENT
+    * ANALYSIS
+    * COSMX
+
+  :param status: An enum list for project status, default ACTIVE, allowed entries are
+
+    * ACTIVE
+    * FINISHED
+    * WITHDRAWN
+  '''
+  __tablename__ = 'raw_project'
+  __table_args__ = (
+     UniqueConstraint('project_igf_id'),
+     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+
+  project_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_igf_id = Column(String(70), nullable=False)
+  project_name = Column(String(40))
+  start_timestamp = Column(TIMESTAMP(), nullable=True, server_default=current_timestamp())
+  description = Column(TEXT())
+  status = Column(Enum('ACTIVE', 'FINISHED', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
+  deliverable = Column(Enum('FASTQ', 'ALIGNMENT', 'ANALYSIS', 'COSMX'), server_default='FASTQ')
+
+  def __repr__(self):
+    '''
+    Display RawProject entry
+    '''
+    return  self.project_igf_id
+
+
+class RawPipeline(Model):
+
+  '''
+  A table for loading raw pipeline information
+
+  :param pipeline_id: An integer id for pipeline table
+  :param pipeline_name: A required string to specify pipeline name, allowed length 50
+  :param pipeline_db: A required string to specify pipeline database url, allowed length 200
+  :param pipeline_init_conf: An optional json field to specify initial pipeline configuration
+  :param pipeline_run_conf: An optional json field to specify modified pipeline configuration
+  :param pipeline_type: An optional enum list to specify pipeline type, default EHIVE, allowed values are
+
+    * EHIVE
+    * UNKNOWN
+    * AIRFLOW
+    * NEXTFLOW
+
+  :param is_active: An optional enum list to specify the status of pipeline, default Y
+                    allowed values are Y and N
+  :param date_stamp: An optional timestamp column to record file creation or modification time, default current timestamp
+  '''
+  __tablename__ = 'raw_pipeline'
+  __table_args__ = (
+    UniqueConstraint('pipeline_name'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+
+  pipeline_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  pipeline_name = Column(String(120), nullable=False)
+  pipeline_db = Column(String(200), nullable=False)
+  pipeline_init_conf = Column(JSONType)
+  pipeline_run_conf = Column(JSONType)
+  pipeline_type = Column(Enum('EHIVE', 'AIRFLOW', 'NEXTFLOW', 'UNKNOWN'), nullable=False, server_default='EHIVE')
+  is_active = Column(Enum('Y', 'N'), nullable=False, server_default='Y')
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+
+  def __repr__(self):
+    '''
+    Display RawPipeline entry
+    '''
+    return self.pipeline_name
+
+
 """
   Metadata db
 """
