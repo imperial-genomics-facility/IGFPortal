@@ -556,6 +556,9 @@ def test_get_validation_status_for_analysis_design():
             check_error = True
     assert check_error
 
+def test_cosmx_validation(db):
+    pass
+
 def test_get_sample_metadata_checks_for_analysis(db):
     project1 = \
         Project(
@@ -946,6 +949,10 @@ def test_validate_analysis_design(db):
     project2 = \
         Project(
             project_igf_id='project2')
+    project3 = \
+        Project(
+            project_igf_id='project3',
+            deliverable='COSMX')
     sample1 = \
         Sample(
             sample_igf_id='IGF111',
@@ -1000,6 +1007,7 @@ def test_validate_analysis_design(db):
     try:
         db.session.add(project1)
         db.session.add(project2)
+        db.session.add(project3)
         db.session.add(sample1)
         db.session.add(sample2)
         db.session.add(sample3)
@@ -1017,8 +1025,11 @@ def test_validate_analysis_design(db):
         raise
     ## setup design schema
     schema_file = 'app/raw_analysis/analysis_validation_nfcore_v1.json'
+    schema_file2 = 'app/raw_analysis/analysis_validation_cosmx_qc_v1.json'
     with open(schema_file, 'r') as fp:
         schema_data = fp.read()
+    with open(schema_file2, 'r') as fp:
+        schema_data2 = fp.read()
     pipeline1 = \
         Pipeline(
             pipeline_name='pipeline1',
@@ -1029,9 +1040,21 @@ def test_validate_analysis_design(db):
         json_schema=schema_data,
         pipeline=pipeline1,
         status="VALIDATED")
+    pipeline2 = \
+        Pipeline(
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    analysis_schema2 = \
+        RawAnalysisValidationSchema(
+        json_schema=schema_data2,
+        pipeline=pipeline2,
+        status="VALIDATED")
     try:
         db.session.add(pipeline1)
+        db.session.add(pipeline2)
         db.session.add(analysis_schema1)
+        db.session.add(analysis_schema2)
         db.session.commit()
     except:
         db.session.rollback()
@@ -1102,6 +1125,30 @@ def test_validate_analysis_design(db):
         validate_analysis_design(
             raw_analysis_id=raw_analysis5.raw_analysis_id)
     assert status == 'FAILED'
+    ## cosmx design
+    design_6 = """
+    run_metadata:
+        cosmx_run_id: IGF_TEST
+    analysis_metadata:
+        run_type: RNA
+    """
+    raw_analysis6 = \
+        RawAnalysis(
+            analysis_name='analysis6',
+            project=project3,
+            pipeline=pipeline2,
+            analysis_yaml=design_6)
+    try:
+        db.session.add(raw_analysis6)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    ## invalid analysis design errors
+    status = \
+        validate_analysis_design(
+            raw_analysis_id=raw_analysis6.raw_analysis_id)
+    assert status == 'VALIDATED'
 
 
 def test_async_validate_analysis_schema(db):

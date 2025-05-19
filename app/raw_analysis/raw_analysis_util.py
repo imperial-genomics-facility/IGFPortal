@@ -231,6 +231,7 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) ->list:
     try:
         error_list = list()
         project_igf_id = ''
+        deliverable = ''
         # get raw analysis design
         raw_analysis_design = \
             db.session.\
@@ -259,6 +260,8 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) ->list:
             else:
                 project_igf_id = \
                     raw_analysis_design.project.project_igf_id
+                deliverable = \
+                    raw_analysis_design.project.deliverable
             # get validation schema
             raw_analysis_schema = \
                 db.session.\
@@ -286,10 +289,11 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) ->list:
                     error_list.append(
                         "Failed to inspect analysis design")
                 ## valid schema, lets check sample ids
-                if len(error_list) == 0:
+                ## only for sequencing projects, not for cosmx
+                if len(error_list) == 0 and \
+                   deliverable == 'FASTQ':
                     json_data = \
                         load(analysis_yaml, Loader=Loader)
-                    ## FIX ME: add condition for study_metadata and sample_metadata
                     sample_metadata = \
                         json_data.get('sample_metadata')
                     if sample_metadata is None:

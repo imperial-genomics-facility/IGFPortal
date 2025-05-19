@@ -1,5 +1,4 @@
 run_metadata:
   cosmx_run_id: IGF_PROJECT_ID_AND_RUN_ID
 analysis_metadata:
-  run_fov_qc: true
   run_type: RNA / PROTEIN
