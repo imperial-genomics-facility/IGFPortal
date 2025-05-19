@@ -1,29 +1,57 @@
 import json
 import logging
 from flask_appbuilder import has_access
-from flask import render_template, redirect, flash, url_for, send_file, abort
+from flask import (
+    render_template,
+    redirect,
+    flash,
+    url_for,
+    send_file,
+    abort)
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_appbuilder import ModelView, ModelRestApi, SimpleFormView
-from flask_appbuilder.baseviews import BaseView, expose
+from flask_appbuilder import (
+    ModelView,
+    ModelRestApi,
+    SimpleFormView)
+from flask_appbuilder.baseviews import (
+    BaseView,
+    expose)
 from . import appbuilder, db
-from .models import IlluminaInteropData, PreDeMultiplexingData
+from .models import (
+    IlluminaInteropData,
+    PreDeMultiplexingData)
 from .forms import SeqrunInteropForm
 from .models import AdminHomeData
 from .interop_view import IlluminaInteropDataView
 from .home_view import HomeView
 from .pre_demultiplexing_view import PreDeMultiplexingDataView
 from .samplesheet_view import SampleSheetView
-from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
+from .raw_metadata_view import (
+    RawMetadataValidationView,
+    RawMetadataSubmitView)
 from .raw_seqrun_view import RawSeqrunView
 from .analysis_view import AnalysisView
-from .metadata_view import ProjectView, UserView, SeqrunView, SampleProjectView, SampleView
-from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
+from .metadata_view import (
+    ProjectView,
+    UserView,
+    SeqrunView,
+    SampleProjectView,
+    SampleView)
+from .raw_analysis_view import (
+    RawAnalysisView,
+    RawAnalysisSchemaView,
+    RawAnalysisQueueView,
+    RawAnalysisTemplateView)
 from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
-from .index_table_view import ProjectIndexView, SampleIndexView
+from .index_table_view import (
+    ProjectIndexView,
+    SampleIndexView)
 from .iframe_view import IFrameView
-from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPendingView
-
+from .project_cleanup_view import (
+    ProjectCleanupFinishedView,
+    ProjectCleanupPendingView)
+from .raw_cosmx_metadata_view import RawCosmxMetadataSubmitView
 """
     Application wide 404 error handler
 """
@@ -146,6 +174,13 @@ appbuilder.\
         "Latest projects",
         category_icon="fa-table",
         icon="fa-list-ol",
+        category="Metadata")
+appbuilder.\
+    add_view(
+        RawCosmxMetadataSubmitView,
+        "Register COSMX metadata",
+        category_icon="fa-folder-open-o",
+        icon="fa-th",
         category="Metadata")
 """
     Raw analysis view
