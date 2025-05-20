@@ -7,6 +7,8 @@ from flask_appbuilder.baseviews import BaseView, expose
 from flask_appbuilder.security.decorators import protect, has_access
 from app import db
 from .models import (
+    CosmxSlideQCData,
+    AnalysesQCData,
     # Project_analysis_info_file,
     # Project_seqrun_info_file,
     # Project_seqrun_info_data,
@@ -72,6 +74,43 @@ def get_path_for_predemult_report(id):
         raise ValueError(
             f"Failed to get report for predemult entry {id}, error: {e}")
 
+def get_path_for_cosmx_qc_report(id):
+    try:
+        record = \
+            db.session.\
+                query(CosmxSlideQCData.file_path).\
+                filter(CosmxSlideQCData.qc_id==id).\
+                one_or_none()
+        if record is None:
+            log.warning(
+                f"Missing cosmx qc for id {id}")
+            return ''
+        (file_path,) = \
+            record
+        return file_path
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get report for cosmx qc entry {id}, error: {e}")
+
+def get_path_for_analyses_qc_report(id):
+    try:
+        record = \
+            db.session.\
+                query(AnalysesQCData.file_path).\
+                filter(AnalysesQCData.qc_id==id).\
+                one_or_none()
+        if record is None:
+            log.warning(
+                f"Missing analyses qc for id {id}")
+            return ''
+        (file_path,) = \
+            record
+        return file_path
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get report for analyses qc entry {id}, error: {e}")
+
+
 def get_path_for_interop_report(id):
     try:
         record = \
@@ -135,6 +174,36 @@ class IFrameView(BaseView):
         #     with open(file_path, 'rb') as fp:
         #         pdf_data = fp.read()
         #     return self.render_template("iframe_pdf.html", pdf_data=pdf_data, url_link=url_link)
+        else:
+            return self.response(500)
+
+    @expose("/static/cosmx_qc/<int:id>")
+    @has_access
+    @cache.cached(timeout=1200)
+    def view_cosmx_qc_report(self, id):
+        file_path = \
+            get_path_for_cosmx_qc_report(id=id)
+        url_link = \
+            url_for('CosmxSlideQCDataView.list')
+        if file_path.endswith('.html'):
+            with open(file_path, 'r') as fp:
+                html_data = fp.read()
+            return self.render_template("iframe.html", html_data=html_data, url_link=url_link)
+        else:
+            return self.response(500)
+
+    @expose("/static/analyses_qc/<int:id>")
+    @has_access
+    @cache.cached(timeout=1200)
+    def view_analyses_qc_report(self, id):
+        file_path = \
+            get_path_for_analyses_qc_report(id=id)
+        url_link = \
+            url_for('AnalysesQCDataView.list')
+        if file_path.endswith('.html'):
+            with open(file_path, 'r') as fp:
+                html_data = fp.read()
+            return self.render_template("iframe.html", html_data=html_data, url_link=url_link)
         else:
             return self.response(500)
 

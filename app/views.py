@@ -52,6 +52,9 @@ from .project_cleanup_view import (
     ProjectCleanupFinishedView,
     ProjectCleanupPendingView)
 from .raw_cosmx_metadata_view import RawCosmxMetadataSubmitView
+from .cosmx_slide_qc_data_view import CosmxSlideQCDataView
+from .analyses_qc_data_view import AnalysesQCDataView
+
 """
     Application wide 404 error handler
 """
@@ -228,7 +231,20 @@ appbuilder.\
         category_icon="fa-flask",
         icon="fa fa-magic",
         category="Analysis")
-
+appbuilder.\
+    add_view(
+        CosmxSlideQCDataView,
+        "COSMX QC",
+        category_icon="fa-flask",
+        icon="fa-line-chart",
+        category="Analysis")
+appbuilder.\
+    add_view(
+        AnalysesQCDataView,
+        "Analyses QC",
+        category_icon="fa-flask",
+        icon="fa-line-chart",
+        category="Analysis")
 
 """
     Data cleanup
