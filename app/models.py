@@ -339,6 +339,20 @@ class RawAnalysisTemplate(Model):
   def __repr__(self):
     return self.template_tag
 
+
+class RawAnalysisTemplateV2(Model):
+  __tablename__ = 'raw_analysis_template_v2'
+  __table_args__ = (
+    UniqueConstraint('pipeline_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  template_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('raw_pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  pipeline = relationship('RawPipeline')
+  template_data = Column(LONGTEXTType(), nullable=False)
+
+  def __repr__(self):
+    return self.pipeline.pipeline_name
+
 """
 Index tables
 """
