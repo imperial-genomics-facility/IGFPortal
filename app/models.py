@@ -665,6 +665,26 @@ class Raw_cosmx_slide_annotation(Model):
       f"cosmx_slide_id = '{self.cosmx_slide_id}'"
 
 
+class CosmxSlideQCData(Model):
+    __tablename__ = 'cosmx_slide_qc_data'
+    __table_args__ = (
+        UniqueConstraint('cosmx_slide_igf_id', 'qc_tag', 'date_stamp'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+    cosmx_slide_igf_id = Column(String(200), nullable=False)
+    qc_tag = Column(String(200), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='ACTIVE')
+    date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+    def __repr__(self):
+        return self.cosmx_slide_igf_id
+
+    # def report(self):
+    #     return Markup('<a href="'+url_for('IFrameView.view_predemult_report', id=self.demult_id)+'">report</a>')
+    # def download_report(self):
+    #     return Markup('<a href="'+url_for('PreDeMultiplexingDataView.download_reports', id=self.demult_id)+'">download</a>')
+
+
 """
   Metadata db
 """
