@@ -635,7 +635,7 @@ class Raw_cosmx_slide_annotation(Model):
   """
   __tablename__ = 'raw_cosmx_slide_annotation'
   __table_args__ = (
-    UniqueConstraint('cosmx_slide_igf_id'),
+    UniqueConstraint('cosmx_slide_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
   cosmx_slide_annotation_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)

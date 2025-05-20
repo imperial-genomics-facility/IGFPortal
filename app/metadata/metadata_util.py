@@ -32,12 +32,13 @@ from ..models import (
     RawAnalysis,
     RawAnalysisValidationSchema,
     RawAnalysisTemplate,
-    Project_info_data,
-    Project_seqrun_info_data,
-    Project_seqrun_info_file,
-    Project_analysis_info_data,
-    Project_analysis_info_file,
-    RDSProject_backup)
+    # Project_info_data,
+    # Project_seqrun_info_data,
+    # Project_seqrun_info_file,
+    # Project_analysis_info_data,
+    # Project_analysis_info_file,
+    # RDSProject_backup
+    )
 from .. import db
 
 def backup_specific_portal_tables(json_file: str) -> str:
@@ -46,12 +47,12 @@ def backup_specific_portal_tables(json_file: str) -> str:
             RawAnalysis,
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
-            Project_info_data,
-            Project_seqrun_info_data,
-            Project_seqrun_info_file,
-            Project_analysis_info_data,
-            Project_analysis_info_file,
-            RDSProject_backup
+            # Project_info_data,
+            # Project_seqrun_info_data,
+            # Project_seqrun_info_file,
+            # Project_analysis_info_data,
+            # Project_analysis_info_file,
+            # RDSProject_backup
         ]
         db_data = dict()
         for table_name in backup_order:
@@ -65,21 +66,21 @@ def backup_specific_portal_tables(json_file: str) -> str:
             if table_name.__tablename__=='raw_analysis_validation_schema':
                 data['date_stamp'] = \
                     data['date_stamp'].astype(str)
-            if table_name.__tablename__=='project_seqrun_info_file':
-                data['date_created'] = \
-                    data['date_created'].astype(str)
-            if table_name.__tablename__=='project_seqrun_info_file':
-                data['date_updated'] = \
-                    data['date_updated'].astype(str)
-            if table_name.__tablename__=='project_analysis_info_file':
-                data['date_created'] = \
-                    data['date_created'].astype(str)
-            if table_name.__tablename__=='project_analysis_info_file':
-                data['date_updated'] = \
-                    data['date_updated'].astype(str)
-            if table_name.__tablename__=='rds_project_backup':
-                data['date_stamp'] = \
-                    data['date_stamp'].astype(str)
+            # if table_name.__tablename__=='project_seqrun_info_file':
+            #     data['date_created'] = \
+            #         data['date_created'].astype(str)
+            # if table_name.__tablename__=='project_seqrun_info_file':
+            #     data['date_updated'] = \
+            #         data['date_updated'].astype(str)
+            # if table_name.__tablename__=='project_analysis_info_file':
+            #     data['date_created'] = \
+            #         data['date_created'].astype(str)
+            # if table_name.__tablename__=='project_analysis_info_file':
+            #     data['date_updated'] = \
+            #         data['date_updated'].astype(str)
+            # if table_name.__tablename__=='rds_project_backup':
+            #     data['date_stamp'] = \
+            #         data['date_stamp'].astype(str)
             # if table_name.__tablename__=='raw_analysis':
             #     data = \
             #         pd.read_sql(
@@ -174,23 +175,23 @@ def cleanup_and_load_new_data_to_metadata_tables(
             RawAnalysis,
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
-            Project_info_data,
-            Project_seqrun_info_data,
-            Project_seqrun_info_file,
-            Project_analysis_info_data,
-            Project_analysis_info_file,
-            RDSProject_backup
+            # Project_info_data,
+            # Project_seqrun_info_data,
+            # Project_seqrun_info_file,
+            # Project_analysis_info_data,
+            # Project_analysis_info_file,
+            # RDSProject_backup
         ]
         portal_delete_order = [
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
             RawAnalysis,
-            Project_seqrun_info_data,
-            Project_seqrun_info_file,
-            Project_analysis_info_data,
-            Project_analysis_info_file,
-            Project_info_data,
-            RDSProject_backup
+            # Project_seqrun_info_data,
+            # Project_seqrun_info_file,
+            # Project_analysis_info_data,
+            # Project_analysis_info_file,
+            # Project_info_data,
+            # RDSProject_backup
         ]
         try:
             ## delete main tables

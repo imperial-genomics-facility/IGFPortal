@@ -31,22 +31,22 @@ from .raw_metadata_view import (
     RawMetadataSubmitView)
 from .raw_seqrun_view import RawSeqrunView
 from .analysis_view import AnalysisView
-from .metadata_view import (
-    ProjectView,
-    UserView,
-    SeqrunView,
-    SampleProjectView,
-    SampleView)
+from .metadata_view import SampleView, SampleProjectView
+#     ProjectView,
+#     UserView,
+#     SeqrunView,
+#     SampleProjectView,
+#     SampleView)
 from .raw_analysis_view import (
     RawAnalysisView,
     RawAnalysisSchemaView,
     RawAnalysisQueueView,
     RawAnalysisTemplateView)
-from .rds_project_backup_view import RDSProjectBackupView
+# from .rds_project_backup_view import RDSProjectBackupView
 from .pipeline_trigger_view import PipelineTriggerView
-from .index_table_view import (
-    ProjectIndexView,
-    SampleIndexView)
+# from .index_table_view import (
+#     ProjectIndexView,
+#     SampleIndexView)
 from .iframe_view import IFrameView
 from .project_cleanup_view import (
     ProjectCleanupFinishedView,

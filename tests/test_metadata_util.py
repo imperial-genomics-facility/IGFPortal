@@ -11,11 +11,12 @@ from app.models import (
     RawAnalysis,
     RawAnalysisValidationSchema,
     RawAnalysisTemplate,
-    Project_info_data,
-    Project_seqrun_info_data,
-    Project_seqrun_info_file,
-    Project_analysis_info_data,
-    Project_analysis_info_file)
+    # Project_info_data,
+    # Project_seqrun_info_data,
+    # Project_seqrun_info_file,
+    # Project_analysis_info_data,
+    # Project_analysis_info_file
+    )
 from app.metadata.metadata_util import (
     backup_specific_portal_tables,
     cleanup_and_load_new_data_to_metadata_tables,
@@ -154,37 +155,37 @@ def test_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
                 project=project3,
                 analysis_name="test_analysis",
                 analysis_type="test_analysis_type")
-        project_info_data = \
-            Project_info_data(
-                project_info_data_id=1,
-                sample_read_count_data="test",
-                project_history_data="test",
-                project=project3)
-        project_seqrun_info_data = \
-            Project_seqrun_info_data(
-                project_seqrun_info_data_id=1,
-                project=project3,
-                seqrun=seqrun,
-                lane_number='1',
-                index_group_tag="test_ig",
-                project_info_data=project_info_data)
-        project_seqrun_info_file = \
-            Project_seqrun_info_file(
-                project_seqrun_info_file_id=1,
-                project_seqrun_info_data=project_seqrun_info_data,
-                file_path="test")
-        project_analysis_info_data = \
-            Project_analysis_info_data(
-                project_analysis_info_data_id=1,
-                project=project3,
-                analysis=analysis,
-                analysis_tag="test_analysis_tag",
-                project_info_data=project_info_data)
-        project_analysis_info_file = \
-            Project_analysis_info_file(
-                project_analysis_info_file_id=1,
-                project_analysis_info_data=project_analysis_info_data,
-                file_path="test")
+        # project_info_data = \
+        #     Project_info_data(
+        #         project_info_data_id=1,
+        #         sample_read_count_data="test",
+        #         project_history_data="test",
+        #         project=project3)
+        # project_seqrun_info_data = \
+        #     Project_seqrun_info_data(
+        #         project_seqrun_info_data_id=1,
+        #         project=project3,
+        #         seqrun=seqrun,
+        #         lane_number='1',
+        #         index_group_tag="test_ig",
+        #         project_info_data=project_info_data)
+        # project_seqrun_info_file = \
+        #     Project_seqrun_info_file(
+        #         project_seqrun_info_file_id=1,
+        #         project_seqrun_info_data=project_seqrun_info_data,
+        #         file_path="test")
+        # project_analysis_info_data = \
+        #     Project_analysis_info_data(
+        #         project_analysis_info_data_id=1,
+        #         project=project3,
+        #         analysis=analysis,
+        #         analysis_tag="test_analysis_tag",
+        #         project_info_data=project_info_data)
+        # project_analysis_info_file = \
+        #     Project_analysis_info_file(
+        #         project_analysis_info_file_id=1,
+        #         project_analysis_info_data=project_analysis_info_data,
+        #         file_path="test")
         try:
             db.session.add(project2)
             db.session.add(project3)
@@ -195,11 +196,11 @@ def test_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
             db.session.add(platform)
             db.session.add(seqrun)
             db.session.add(analysis)
-            db.session.add(project_info_data)
-            db.session.add(project_seqrun_info_data)
-            db.session.add(project_seqrun_info_file)
-            db.session.add(project_analysis_info_data)
-            db.session.add(project_analysis_info_file)
+            # db.session.add(project_info_data)
+            # db.session.add(project_seqrun_info_data)
+            # db.session.add(project_seqrun_info_file)
+            # db.session.add(project_analysis_info_data)
+            # db.session.add(project_analysis_info_file)
             db.session.flush()
             db.session.commit()
         except:
@@ -266,45 +267,45 @@ def test_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
         assert result.analysis_name == "analysis1"
         assert result.project_id == 3
         assert result.pipeline_id == 1
-        result = \
-            db.session.\
-                query(Project_info_data).\
-                filter(Project_info_data.project_info_data_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.sample_read_count_data == "test"
-        assert result.project_id == 3
-        result = \
-            db.session.\
-                query(Project_seqrun_info_data).\
-                filter(Project_seqrun_info_data.project_seqrun_info_data_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.project_id == 3
-        assert result.project_info_data_id == 1
-        result = \
-            db.session.\
-                query(Project_seqrun_info_file).\
-                filter(Project_seqrun_info_file.project_seqrun_info_file_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.project_seqrun_info_data_id == 1
-        assert result.file_path == "test"
-        result = \
-            db.session.\
-                query(Project_analysis_info_data).\
-                filter(Project_analysis_info_data.project_analysis_info_data_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.analysis_tag == "test_analysis_tag"
-        assert result.analysis_id == 1
-        result = \
-            db.session.\
-                query(Project_analysis_info_file).\
-                filter(Project_analysis_info_file.project_analysis_info_file_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.file_path == "test"
+        # result = \
+        #     db.session.\
+        #         query(Project_info_data).\
+        #         filter(Project_info_data.project_info_data_id==1).\
+        #         one_or_none()
+        # assert result is not None
+        # assert result.sample_read_count_data == "test"
+        # assert result.project_id == 3
+        # result = \
+        #     db.session.\
+        #         query(Project_seqrun_info_data).\
+        #         filter(Project_seqrun_info_data.project_seqrun_info_data_id==1).\
+        #         one_or_none()
+        # assert result is not None
+        # assert result.project_id == 3
+        # assert result.project_info_data_id == 1
+        # result = \
+        #     db.session.\
+        #         query(Project_seqrun_info_file).\
+        #         filter(Project_seqrun_info_file.project_seqrun_info_file_id==1).\
+        #         one_or_none()
+        # assert result is not None
+        # assert result.project_seqrun_info_data_id == 1
+        # assert result.file_path == "test"
+        # result = \
+        #     db.session.\
+        #         query(Project_analysis_info_data).\
+        #         filter(Project_analysis_info_data.project_analysis_info_data_id==1).\
+        #         one_or_none()
+        # assert result is not None
+        # assert result.analysis_tag == "test_analysis_tag"
+        # assert result.analysis_id == 1
+        # result = \
+        #     db.session.\
+        #         query(Project_analysis_info_file).\
+        #         filter(Project_analysis_info_file.project_analysis_info_file_id==1).\
+        #         one_or_none()
+        # assert result is not None
+        # assert result.file_path == "test"
 
 
 
