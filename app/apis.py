@@ -8,6 +8,8 @@ from .raw_seqrun_api import RawSeqrunApi
 from .raw_analysis_api import RawAnalysisApi
 from .project_cleanup_api import ProjectCleanupApi
 from .raw_cosmx_metadata_api import RawCosMxMetadataDataApi
+from .cosmx_qc_data_api import CosmxSlideQCDataApi
+from .analyses_qc_data_api import AnalysesQCDataApi
 
 
 """
@@ -22,3 +24,5 @@ appbuilder.add_api(RawSeqrunApi)
 appbuilder.add_api(RawAnalysisApi)
 appbuilder.add_api(ProjectCleanupApi)
 appbuilder.add_api(RawCosMxMetadataDataApi)
+appbuilder.add_api(CosmxSlideQCDataApi)
+appbuilder.add_api(AnalysesQCDataApi)
