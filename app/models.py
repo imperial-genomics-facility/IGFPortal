@@ -276,6 +276,24 @@ class RawAnalysis(Model):
     return self.analysis_name
 
 
+class RawAnalysisV2(Model):
+  __tablename__ = 'raw_analysis_v2'
+  __table_args__ = (
+    UniqueConstraint('analysis_name', 'project_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  raw_analysis_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_id = Column(INTEGER(unsigned=True), ForeignKey('raw_project.project_id', onupdate="CASCADE", ondelete="SET NULL"))
+  project = relationship('RawProject')
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('raw_pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"))
+  pipeline = relationship('RawPipeline')
+  analysis_name = Column(String(120), nullable=False)
+  analysis_yaml = Column(LONGTEXTType(), nullable=True)
+  status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+  report = Column(LONGTEXTType())
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.analysis_name
+
 """
   Raw analysis validation schema
 """
@@ -294,7 +312,19 @@ class RawAnalysisValidationSchema(Model):
   def __repr__(self):
     return self.pipeline.pipeline_name
 
-
+class RawAnalysisValidationSchemaV2(Model):
+  __tablename__ = 'raw_analysis_validation_schema_v2'
+  __table_args__ = (
+    UniqueConstraint('pipeline_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  raw_analysis_schema_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('raw_pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  pipeline = relationship('RawPipeline')
+  json_schema = Column(JSONType)
+  status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  def __repr__(self):
+    return self.pipeline.pipeline_name
 """
   Raw analysis template
 """
@@ -309,47 +339,46 @@ class RawAnalysisTemplate(Model):
   def __repr__(self):
     return self.template_tag
 
-
 """
 Index tables
 """
 
-class ProjectIndex(AuditMixin, Model):
-  __tablename__ = 'project_index'
-  __table_args__ = (
-    UniqueConstraint('project_tag'),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  project_index_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_tag = Column(String(80), nullable=False)
-  project_csv_data = Column(LONGTEXTType())
-  update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
-  def __repr__(self):
-    return self.project_tag
-  def sample_table(self):
-        return Markup('<a href="'+url_for('ProjectIndexView.get_index_for_project', id=self.project_index_id)+'">samples</a>')
+# class ProjectIndex(AuditMixin, Model):
+#   __tablename__ = 'project_index'
+#   __table_args__ = (
+#     UniqueConstraint('project_tag'),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   project_index_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   project_tag = Column(String(80), nullable=False)
+#   project_csv_data = Column(LONGTEXTType())
+#   update_time = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+#   def __repr__(self):
+#     return self.project_tag
+#   def sample_table(self):
+#         return Markup('<a href="'+url_for('ProjectIndexView.get_index_for_project', id=self.project_index_id)+'">samples</a>')
 
-class SampleIndex(AuditMixin, Model):
-  __tablename__ = 'sample_index'
-  __table_args__ = (
-    UniqueConstraint('project_index_id', 'sample_name'),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  sample_index_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  sample_name = Column(String(80), nullable=False)
-  igf_id = Column(String(80), nullable=True)
-  container_id = Column(String(80), nullable=True)
-  rin_score = Column(String(10), nullable=True)
-  well_position = Column(String(10), nullable=True)
-  pool_id = Column(String(10), nullable=True)
-  i7_index_name = Column(String(20), nullable=False)
-  i7_index = Column(String(20), nullable=False)
-  i5_index_name = Column(String(20), nullable=True)
-  i5_index = Column(String(20), nullable=True)
-  avg_region_molarity = Column(String(10), nullable=True)
-  avg_fragment_size = Column(INTEGER, nullable=True)
-  project_index_id = Column(INTEGER(unsigned=True), ForeignKey("project_index.project_index_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project_index = relationship('ProjectIndex')
-  def __repr__(self):
-    return self.sample_name
+# class SampleIndex(AuditMixin, Model):
+#   __tablename__ = 'sample_index'
+#   __table_args__ = (
+#     UniqueConstraint('project_index_id', 'sample_name'),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   sample_index_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   sample_name = Column(String(80), nullable=False)
+#   igf_id = Column(String(80), nullable=True)
+#   container_id = Column(String(80), nullable=True)
+#   rin_score = Column(String(10), nullable=True)
+#   well_position = Column(String(10), nullable=True)
+#   pool_id = Column(String(10), nullable=True)
+#   i7_index_name = Column(String(20), nullable=False)
+#   i7_index = Column(String(20), nullable=False)
+#   i5_index_name = Column(String(20), nullable=True)
+#   i5_index = Column(String(20), nullable=True)
+#   avg_region_molarity = Column(String(10), nullable=True)
+#   avg_fragment_size = Column(INTEGER, nullable=True)
+#   project_index_id = Column(INTEGER(unsigned=True), ForeignKey("project_index.project_index_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project_index = relationship('ProjectIndex')
+#   def __repr__(self):
+#     return self.sample_name
 
 """
   Project cleanup
@@ -372,102 +401,102 @@ class ProjectCleanup(AuditMixin, Model):
   Project info
 """
 
-class Project_info_data(Model):
-  __tablename__ = 'project_info_data'
-  __table_args__ = (
-    UniqueConstraint('project_info_data_id',),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  project_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  sample_read_count_data = Column(LONGTEXTType())
-  project_history_data = Column(LONGTEXTType())
-  project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project = relationship('Project')
-  def __repr__(self):
-    return self.project_info_data.project_info_data_id
+# class Project_info_data(Model):
+#   __tablename__ = 'project_info_data'
+#   __table_args__ = (
+#     UniqueConstraint('project_info_data_id',),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   project_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   sample_read_count_data = Column(LONGTEXTType())
+#   project_history_data = Column(LONGTEXTType())
+#   project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project = relationship('Project')
+#   def __repr__(self):
+#     return self.project_info_data.project_info_data_id
 
 
 """
   Project seqrun info
 """
 
-class Project_seqrun_info_data(Model):
-  __tablename__ = 'project_seqrun_info_data'
-  __table_args__ = (
-    UniqueConstraint('project_id', 'seqrun_id', 'lane_number', 'index_group_tag'),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  project_seqrun_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project = relationship('Project')
-  seqrun_id = Column(INTEGER(unsigned=True), ForeignKey("seqrun.seqrun_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  seqrun = relationship('Seqrun')
-  project_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_info_data.project_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project_info_data = relationship("Project_info_data")
-  lane_number = Column(Enum('1', '2', '3', '4', '5', '6', '7', '8'), nullable=False)
-  index_group_tag = Column(String(120), nullable=False)
-  def __repr__(self):
-    return self.project_seqrun_info_data.project_seqrun_info_data_id
+# class Project_seqrun_info_data(Model):
+#   __tablename__ = 'project_seqrun_info_data'
+#   __table_args__ = (
+#     UniqueConstraint('project_id', 'seqrun_id', 'lane_number', 'index_group_tag'),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   project_seqrun_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project = relationship('Project')
+#   seqrun_id = Column(INTEGER(unsigned=True), ForeignKey("seqrun.seqrun_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   seqrun = relationship('Seqrun')
+#   project_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_info_data.project_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project_info_data = relationship("Project_info_data")
+#   lane_number = Column(Enum('1', '2', '3', '4', '5', '6', '7', '8'), nullable=False)
+#   index_group_tag = Column(String(120), nullable=False)
+#   def __repr__(self):
+#     return self.project_seqrun_info_data.project_seqrun_info_data_id
 
 """
   Project seqrun file
 """
 
-class Project_seqrun_info_file(Model):
-  __tablename__ = 'project_seqrun_info_file'
-  __table_args__ = (
-    UniqueConstraint('file_path',),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  project_seqrun_info_file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_seqrun_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_seqrun_info_data.project_seqrun_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project_seqrun_info_data = relationship("Project_seqrun_info_data")
-  file_tag = Column(String(120),)
-  file_path = Column(String(1000), nullable=False)
-  md5 = Column(String(65))
-  size = Column(String(52))
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
-  date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
-  def __repr__(self):
-    return self.project_seqrun_info_file.project_seqrun_info_file_id
+# class Project_seqrun_info_file(Model):
+#   __tablename__ = 'project_seqrun_info_file'
+#   __table_args__ = (
+#     UniqueConstraint('file_path',),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   project_seqrun_info_file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   project_seqrun_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_seqrun_info_data.project_seqrun_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project_seqrun_info_data = relationship("Project_seqrun_info_data")
+#   file_tag = Column(String(120),)
+#   file_path = Column(String(1000), nullable=False)
+#   md5 = Column(String(65))
+#   size = Column(String(52))
+#   date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+#   date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+#   def __repr__(self):
+#     return self.project_seqrun_info_file.project_seqrun_info_file_id
 
 """
   Project analysis info
 """
 
-class Project_analysis_info_data(Model):
-  __tablename__ = 'project_analysis_info_data'
-  __table_args__ = (
-    UniqueConstraint('project_id', 'analysis_id'),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  project_analysis_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project = relationship('Project')
-  analysis_id = Column(INTEGER(unsigned=True), ForeignKey("analysis.analysis_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  analysis = relationship('Analysis')
-  project_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_info_data.project_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project_info_data = relationship("Project_info_data")
-  analysis_tag = Column(String(120), nullable=False)
-  def __repr__(self):
-    return self.project_analysis_info_data.project_analysis_info_data_id
+# class Project_analysis_info_data(Model):
+#   __tablename__ = 'project_analysis_info_data'
+#   __table_args__ = (
+#     UniqueConstraint('project_id', 'analysis_id'),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   project_analysis_info_data_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   project_id = Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project = relationship('Project')
+#   analysis_id = Column(INTEGER(unsigned=True), ForeignKey("analysis.analysis_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   analysis = relationship('Analysis')
+#   project_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_info_data.project_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project_info_data = relationship("Project_info_data")
+#   analysis_tag = Column(String(120), nullable=False)
+#   def __repr__(self):
+#     return self.project_analysis_info_data.project_analysis_info_data_id
 
 """
   Project analysis file
 """
 
-class Project_analysis_info_file(Model):
-  __tablename__ = 'project_analysis_info_file'
-  __table_args__ = (
-    UniqueConstraint('file_path',),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  project_analysis_info_file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_analysis_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_analysis_info_data.project_analysis_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
-  project_analysis_info_data = relationship("Project_analysis_info_data")
-  file_tag = Column(String(120))
-  file_path = Column(String(1000), nullable=False)
-  md5 = Column(String(65))
-  size = Column(String(52))
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
-  date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
-  def __repr__(self):
-    return self.project_analysis_info_file.project_analysis_info_file_id
+# class Project_analysis_info_file(Model):
+#   __tablename__ = 'project_analysis_info_file'
+#   __table_args__ = (
+#     UniqueConstraint('file_path',),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   project_analysis_info_file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   project_analysis_info_data_id = Column(INTEGER(unsigned=True), ForeignKey("project_analysis_info_data.project_analysis_info_data_id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+#   project_analysis_info_data = relationship("Project_analysis_info_data")
+#   file_tag = Column(String(120))
+#   file_path = Column(String(1000), nullable=False)
+#   md5 = Column(String(65))
+#   size = Column(String(52))
+#   date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+#   date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+#   def __repr__(self):
+#     return self.project_analysis_info_file.project_analysis_info_file_id
 
 
 
@@ -475,19 +504,19 @@ class Project_analysis_info_file(Model):
   RDS project backup
 """
 
-class RDSProject_backup(Model):
-  __tablename__ = 'rds_project_backup'
-  __table_args__ = (
-    UniqueConstraint('project_id'),
-    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  rds_backup_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_id =  Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True)
-  project = relationship('Project')
-  status = Column(Enum("PENDING", "FAILED", "FINISHED"), nullable=False, server_default='PENDING')
-  rds_path = Column(TEXT(), nullable=False)
-  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
-  def __repr__(self):
-    return self.project.project_igf_id
+# class RDSProject_backup(Model):
+#   __tablename__ = 'rds_project_backup'
+#   __table_args__ = (
+#     UniqueConstraint('project_id'),
+#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+#   rds_backup_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+#   project_id =  Column(INTEGER(unsigned=True), ForeignKey("project.project_id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True)
+#   project = relationship('Project')
+#   status = Column(Enum("PENDING", "FAILED", "FINISHED"), nullable=False, server_default='PENDING')
+#   rds_path = Column(TEXT(), nullable=False)
+#   date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+#   def __repr__(self):
+#     return self.project.project_igf_id
 
 class RawProject(Model):
 
@@ -572,6 +601,54 @@ class RawPipeline(Model):
     Display RawPipeline entry
     '''
     return self.pipeline_name
+
+class Raw_cosmx_slide(Model):
+  """
+  A table for loading Raw COSMX slide information
+
+  :param cosmx_slide_id: An integer id for cosmx_slide table
+  :param cosmx_slide_igf_id: A required string as COSMX slide id specific to IGF team, allowed length 200
+  :param cosmx_slide_name: An optional string to specify COSMX slide name, allowed length 200
+  """
+
+  __tablename__ = 'raw_cosmx_slide'
+  __table_args__ = (
+    UniqueConstraint('cosmx_slide_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_slide_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_slide_igf_id = Column(String(200), nullable=False)
+  cosmx_slide_name = Column(String(200), nullable=True)
+
+
+  def __repr__(self):
+    '''
+    Display Raw_cosmx_slide entry
+    '''
+    return \
+      f"cosmx_slide_igf_id = '{self.cosmx_slide_igf_id}'"
+
+
+class Raw_cosmx_slide_annotation(Model):
+  """
+  A table for loading Raw COSMX slide annotation information
+  """
+  __tablename__ = 'raw_cosmx_slide_annotation'
+  __table_args__ = (
+    UniqueConstraint('cosmx_slide_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_slide_annotation_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_slide_id = Column(INTEGER(unsigned=True), ForeignKey('raw_cosmx_slide.cosmx_slide_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_slide = relationship('Raw_cosmx_slide')
+  annotation = Column(LONGTEXTType())
+
+  def __repr__(self):
+    '''
+    Display Raw_cosmx_slide_annotation entry
+    '''
+    return \
+      f"cosmx_slide_id = '{self.cosmx_slide_id}'"
 
 
 """
@@ -1602,8 +1679,8 @@ class Cosmx_platform(Model):
   A table for loading COSMX platform information
 
   :param cosmx_platform_id: An integer id for cosmx_platform table
-  :param cosmx_platform_igf_id: A required string as COSMX platform id specific to IGF team, allowed length 20
-  :param cosmx_platform_name: An optional string to specify COSMX platform name, allowed length 20
+  :param cosmx_platform_igf_id: A required string as COSMX platform id specific to IGF team, allowed length 50
+  :param cosmx_platform_name: An optional string to specify COSMX platform name, allowed length 100
   :param date_created: An optional timestamp column to record entry creation or modification time, default current timestamp
   """
 
@@ -1613,8 +1690,8 @@ class Cosmx_platform(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
   cosmx_platform_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_platform_igf_id = Column(String(20), nullable=False)
-  cosmx_platform_name = Column(String(20), nullable=True)
+  cosmx_platform_igf_id = Column(String(50), nullable=False)
+  cosmx_platform_name = Column(String(100), nullable=True)
   date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
 
   def __repr__(self):
@@ -1629,8 +1706,8 @@ class Cosmx_run(Model):
   A table for loading COSMX run information
 
   :param cosmx_run_id: An integer id for cosmx_run table
-  :param cosmx_run_igf_id: A required string as COSMX run id specific to IGF team, allowed length 100
-  :param cosmx_run_name: An optional string to specify COSMX run name, allowed length 100
+  :param cosmx_run_igf_id: A required string as COSMX run id specific to IGF team, allowed length 200
+  :param cosmx_run_name: An optional string to specify COSMX run name, allowed length 200
   """
 
   __tablename__ = 'cosmx_run'
@@ -1639,8 +1716,8 @@ class Cosmx_run(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
   cosmx_run_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_run_igf_id = Column(String(100), nullable=False)
-  cosmx_run_name = Column(String(100), nullable=True)
+  cosmx_run_igf_id = Column(String(200), nullable=False)
+  cosmx_run_name = Column(String(200), nullable=True)
   project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
   project = relationship('Project')
 
@@ -1657,11 +1734,11 @@ class Cosmx_slide(Model):
   A table for loading COSMX slide information
 
   :param cosmx_slide_id: An integer id for cosmx_slide table
-  :param cosmx_slide_igf_id: A required string as COSMX slide id specific to IGF team, allowed length 100
-  :param cosmx_slide_name: An optional string to specify COSMX slide name, allowed length 100
+  :param cosmx_slide_igf_id: A required string as COSMX slide id specific to IGF team, allowed length 200
+  :param cosmx_slide_name: An optional string to specify COSMX slide name, allowed length 200
   :param cosmx_run_id: A required integer id from cosmx_run table (foreign key)
-  :param panel_info: A required string to specify panel information, allowed length 100
-  :param assay_type: A required string to specify assay type, allowed length 100
+  :param panel_info: A required string to specify panel information, allowed length 200
+  :param assay_type: A required string to specify assay type, allowed length 200
   :param date_created: An optional timestamp column to record entry creation or modification time, default current timestamp
   """
 
@@ -1671,12 +1748,12 @@ class Cosmx_slide(Model):
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
   cosmx_slide_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_slide_igf_id = Column(String(100), nullable=False)
-  cosmx_slide_name = Column(String(100), nullable=True)
+  cosmx_slide_igf_id = Column(String(200), nullable=False)
+  cosmx_slide_name = Column(String(200), nullable=True)
   cosmx_run_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_run.cosmx_run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
   cosmx_run = relationship('Cosmx_run')
-  panel_info = Column(String(100), nullable=True)
-  assay_type = Column(String(100), nullable=True)
+  panel_info = Column(String(200), nullable=True)
+  assay_type = Column(String(200), nullable=True)
   date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
 
   def __repr__(self):
@@ -1701,9 +1778,9 @@ class Cosmx_fov(Model):
   cosmx_run_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_run.cosmx_run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
   cosmx_run = relationship('Cosmx_run')
   transcript_per_cell_count = Column(INTEGER(unsigned=True), nullable=True)
-  tissue_annotation = Column(String(100), nullable=True)
-  tissue_ontology = Column(String(100), nullable=True)
-  tissue_condition = Column(String(100), nullable=True)
+  tissue_annotation = Column(String(200), nullable=True)
+  tissue_ontology = Column(String(200), nullable=True)
+  tissue_condition = Column(String(50), nullable=True)
 
   def __repr__(self):
     '''
