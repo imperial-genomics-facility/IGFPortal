@@ -45,7 +45,13 @@ class RawCosmxMetadataSubmitView(ModelView):
         "report",
         "status",
         "update_time"]
-    base_permissions = ["can_list", "can_show"]
+    add_columns = [
+        "cosmx_metadata_tag",
+        "formatted_csv_data"]
+    edit_columns = [
+        "cosmx_metadata_tag",
+        "formatted_csv_data"]
+    base_permissions = ["can_add", "can_edit", "can_list", "can_show"]
     base_order = ("raw_cosmx_metadata_id", "desc")
     base_filters = [
         ["status", FilterInFunction, lambda: ["READY", "VALIDATED"]]]
