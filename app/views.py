@@ -54,6 +54,8 @@ from .project_cleanup_view import (
 from .raw_cosmx_metadata_view import RawCosmxMetadataSubmitView
 from .cosmx_slide_qc_data_view import CosmxSlideQCDataView
 from .analyses_qc_data_view import AnalysesQCDataView
+from .cosmx_slide_annotation_view import RawCosmxSlideAnnotationView
+from .raw_mgi_seqrun_view import RawMgiSeqrunView
 
 """
     Application wide 404 error handler
@@ -152,6 +154,13 @@ appbuilder.\
         category_icon="fa-database",
         icon="fa-pencil-square-o",
         category="Sequencing runs")
+appbuilder.\
+    add_view(
+        RawMgiSeqrunView,
+        "MGI runs",
+        category_icon="fa-database",
+        icon="fa-th-list",
+        category="Sequencing runs")
 """
     Metadata upload
 """
@@ -184,6 +193,13 @@ appbuilder.\
         "Register COSMX metadata",
         category_icon="fa-folder-open-o",
         icon="fa-th",
+        category="Metadata")
+appbuilder.\
+    add_view(
+        RawCosmxSlideAnnotationView,
+        "Annotate COSMX slides",
+        category_icon="fa-folder-open-o",
+        icon="fa-file-text-o",
         category="Metadata")
 """
     Raw analysis view

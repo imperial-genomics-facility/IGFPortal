@@ -655,6 +655,7 @@ class Raw_cosmx_slide_annotation(Model):
   cosmx_slide_annotation_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   cosmx_slide_id = Column(INTEGER(unsigned=True), ForeignKey('raw_cosmx_slide.cosmx_slide_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
   cosmx_slide = relationship('Raw_cosmx_slide')
+  status = Column(Enum("PIPELINE_TRIGGERED", "UNKNOWN", "ANNOTATED"), nullable=False, server_default='UNKNOWN')
   annotation = Column(LONGTEXTType())
 
   def __repr__(self):
