@@ -1,4 +1,5 @@
 run_metadata:
   cosmx_run_id: IGF_PROJECT_ID_AND_RUN_ID
+  export_directory_path: PATH_OF_DATA_EXPORT
 analysis_metadata:
   run_type: RNA / PROTEIN

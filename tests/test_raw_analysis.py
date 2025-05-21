@@ -1129,6 +1129,7 @@ def test_validate_analysis_design(db):
     design_6 = """
     run_metadata:
         cosmx_run_id: IGF_TEST
+        export_directory_path: PATH
     analysis_metadata:
         run_type: RNA
     """

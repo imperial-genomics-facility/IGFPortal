@@ -13,9 +13,12 @@
                 "cosmx_run_id": {
                     "type": "string",
                     "pattern": "^IGF"
+                },
+                "export_directory_path": {
+                    "type": "string"
                 }
             },
-            "required": ["cosmx_run_id"]
+            "required": ["cosmx_run_id", "export_directory_path"]
         },
         "analysis_metadata": {
             "type": "object",
