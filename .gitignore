@@ -33,3 +33,4 @@ migration_docker_db.sh
 static/*
 celery_tmp/*
 mysqlappdb/*
+db_backup_*.sql
