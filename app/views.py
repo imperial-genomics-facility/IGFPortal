@@ -129,7 +129,7 @@ appbuilder.\
 appbuilder.\
     add_view(
         IlluminaInteropDataView,
-        "InterOp SAV reports",
+        "Illumina SAV reports",
         category_icon="fa-database",
         icon="fa-bar-chart",
         category="Sequencing runs")
@@ -143,14 +143,14 @@ appbuilder.\
 appbuilder.\
     add_view(
         SampleSheetView,
-        "SampleSheets",
+        "Illumina samplesheets",
         category_icon="fa-database",
         icon="fa-th-list",
         category="Sequencing runs")
 appbuilder.\
     add_view(
         RawSeqrunView,
-        "Assign samplesheet to run",
+        "Illumina runs",
         category_icon="fa-database",
         icon="fa-pencil-square-o",
         category="Sequencing runs")
@@ -187,20 +187,20 @@ appbuilder.\
         category_icon="fa-table",
         icon="fa-list-ol",
         category="Metadata")
-appbuilder.\
-    add_view(
-        RawCosmxMetadataSubmitView,
-        "Register COSMX metadata",
-        category_icon="fa-folder-open-o",
-        icon="fa-th",
-        category="Metadata")
-appbuilder.\
-    add_view(
-        RawCosmxSlideAnnotationView,
-        "Annotate COSMX slides",
-        category_icon="fa-folder-open-o",
-        icon="fa-file-text-o",
-        category="Metadata")
+# appbuilder.\
+#     add_view(
+#         RawCosmxMetadataSubmitView,
+#         "Register COSMX metadata",
+#         category_icon="fa-folder-open-o",
+#         icon="fa-th",
+#         category="Metadata")
+# appbuilder.\
+#     add_view(
+#         RawCosmxSlideAnnotationView,
+#         "Annotate COSMX slides",
+#         category_icon="fa-folder-open-o",
+#         icon="fa-file-text-o",
+#         category="Metadata")
 """
     Raw analysis view
 """
@@ -247,13 +247,13 @@ appbuilder.\
         category_icon="fa-flask",
         icon="fa fa-magic",
         category="Analysis")
-appbuilder.\
-    add_view(
-        CosmxSlideQCDataView,
-        "COSMX QC",
-        category_icon="fa-flask",
-        icon="fa-line-chart",
-        category="Analysis")
+# appbuilder.\
+#     add_view(
+#         CosmxSlideQCDataView,
+#         "COSMX QC",
+#         category_icon="fa-flask",
+#         icon="fa-line-chart",
+#         category="Analysis")
 appbuilder.\
     add_view(
         AnalysesQCDataView,
@@ -261,6 +261,32 @@ appbuilder.\
         category_icon="fa-flask",
         icon="fa-line-chart",
         category="Analysis")
+
+
+"""
+    COSMX
+"""
+appbuilder.\
+    add_view(
+        RawCosmxMetadataSubmitView,
+        "Register COSMX metadata",
+        category_icon="fa-flask",
+        icon="fa-th",
+        category="CosMX")
+appbuilder.\
+    add_view(
+        RawCosmxSlideAnnotationView,
+        "Annotate COSMX slides",
+        category_icon="fa-flask",
+        icon="fa-file-text-o",
+        category="CosMX")
+appbuilder.\
+    add_view(
+        CosmxSlideQCDataView,
+        "COSMX QC",
+        category_icon="fa-flask",
+        icon="fa-line-chart",
+        category="CosMX")
 
 """
     Data cleanup
