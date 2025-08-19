@@ -3,3 +3,8 @@ run_metadata:
     export_directory_path: PATH_OF_DATA_EXPORT
 analysis_metadata:
   run_type: RNA / PROTEIN
+  annotation:
+    - cosmx_slide_id: COSMX_SLIDE_ID
+      tissue_annotation: TISSUE_ANNOTATION
+      tissue_ontology: TISSUE_ONTOLOGY
+      tissue_condition: TISSUE_CONDITION

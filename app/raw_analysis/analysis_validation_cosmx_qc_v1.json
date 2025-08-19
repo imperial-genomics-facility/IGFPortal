@@ -18,7 +18,13 @@
                     "type": "string"
                 }
             },
-            "required": ["cosmx_run_id", "export_directory_path"]
+            "required": [
+                "cosmx_run_id",
+                "export_directory_path",
+                "tissue_annotation",
+                "tissue_ontology",
+                "tissue_condition"
+            ]
         },
         "analysis_metadata": {
             "type": "object",
@@ -26,9 +32,24 @@
                 "run_type": {
                     "type": "string",
                     "enum": ["RNA", "PROTEIN"]
+                },
+                "annotation": {
+                    "type": "object",
+                    "properties": {
+                        "tissue_annotation": {
+                            "type": "string"},
+                        "tissue_ontology": {
+                            "type": "string"},
+                        "tissue_condition": {
+                            "type": "string",
+                            "enum": ["HEALTHY", "DISEASE", "TUMOR"]}
+                    },
+                    "required": [
+                        "tissue_annotation",
+                        "tissue_condition"]
                 }
             },
-            "required": ["run_type"]
+            "required": ["run_type", "annotation"]
         }
     },
     "required": ["run_metadata", "analysis_metadata"]
