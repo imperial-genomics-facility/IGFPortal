@@ -330,6 +330,7 @@ class RawAnalysisTemplate(Model):
   template_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   template_tag = Column(String(80), nullable=False)
   template_data = Column(LONGTEXTType(), nullable=False)
+
   def __repr__(self):
     return self.template_tag
 
@@ -457,6 +458,7 @@ class RawAnalysisValidationSchemaV2(Model):
   def __repr__(self):
     return self.pipeline.pipeline_name
 
+
 class RawAnalysisTemplateV2(Model):
   __tablename__ = 'raw_analysis_template_v2'
   __table_args__ = (
@@ -488,6 +490,50 @@ class RawCosMxMetadataModel(Model):
 
   def __repr__(self):
     return self.cosmx_metadata_tag
+
+
+"""
+  QC reports view tables
+"""
+
+
+class CosmxSlideQCData(Model):
+    __tablename__ = 'cosmx_slide_qc_data'
+    __table_args__ = (
+        UniqueConstraint('cosmx_slide_igf_id', 'qc_tag', 'date_stamp'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+    cosmx_slide_igf_id = Column(String(200), nullable=False)
+    qc_tag = Column(String(200), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='ACTIVE')
+    date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+
+    def __repr__(self):
+        return self.cosmx_slide_igf_id
+
+    # def report(self):
+    #     return Markup('<a href="'+url_for('IFrameView.view_cosmx_qc_report', id=self.qc_id)+'">report</a>')
+
+
+class AnalysesQCData(Model):
+    __tablename__ = 'analyses_qc_data'
+    __table_args__ = (
+        UniqueConstraint('analysis_name', 'analysis_type', 'qc_tag', 'date_stamp'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+    analysis_name = Column(String(120), nullable=False)
+    analysis_type = Column(String(120), nullable=False)
+    qc_tag = Column(String(200), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    status = Column(Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"), nullable=False, server_default='ACTIVE')
+    date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+
+    def __repr__(self):
+        return self.analysis_name
+
+    # def report(self):
+    #     return Markup('<a href="'+url_for('IFrameView.view_analyses_qc_report', id=self.qc_id)+'">report</a>')
 
 
 """
