@@ -2,6 +2,8 @@ import datetime, json
 from . import db
 from flask import Markup, url_for
 from flask_appbuilder import Model
+from sqlalchemy.dialects import mysql
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, text, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
 from sqlalchemy.orm import relationship
@@ -54,7 +56,7 @@ class JSONType(TypeDecorator):
       return value
 
 """
-  Custom LONGTEXT type for BD
+  Custom LONGTEXT type for DB
 """
 class LONGTEXTType(TypeDecorator):
   '''
@@ -90,6 +92,46 @@ class LONGTEXTType(TypeDecorator):
       # TO DO: Check if this is correct
       return value
 
+"""
+  Custom DECIMAL type for DB
+"""
+
+class DECIMALType(TypeDecorator):
+  impl = UnicodeText
+  cache_ok = True
+  def __init__(self, precision=10, scale=2, **kwargs):
+        self.precision = precision
+        self.scale = scale
+        super().__init__(**kwargs)
+
+  def load_dialect_impl(self, dialect):
+    if dialect.name == 'mysql':
+      return dialect.type_descriptor(
+        mysql.DECIMAL(
+          precision=self.precision,
+          scale=self.scale))
+    elif dialect.name == 'postgresql':
+      return dialect.type_descriptor(
+        postgresql.NUMERIC(
+          precision=self.precision,
+          scale=self.scale
+        ))
+    else:
+      return dialect.type_descriptor(self.impl)
+
+  def process_bind_param(self, value, dialect):
+    if dialect.name == 'mysql' or \
+       dialect.name == 'postgresql':
+      return value
+    if value is not None:
+      return str(value)
+
+  def process_result_value(self, value, dialect):
+    if dialect.name == 'mysql' or \
+       dialect.name == 'postgresql':
+      return value
+    if value is not None:
+      return str(value)
 
 """
   InterOp data
@@ -469,6 +511,7 @@ class Project(Model):
     * FASTQ
     * ALIGNMENT
     * ANALYSIS
+    * COSMX
 
   :param status: An enum list for project status, default ACTIVE, allowed entries are
 
@@ -487,7 +530,7 @@ class Project(Model):
   start_timestamp = Column(TIMESTAMP(), nullable=True, server_default=current_timestamp())
   description = Column(TEXT())
   status = Column(Enum('ACTIVE', 'FINISHED', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
-  deliverable = Column(Enum('FASTQ', 'ALIGNMENT', 'ANALYSIS'), server_default='FASTQ')
+  deliverable = Column(Enum('FASTQ', 'ALIGNMENT', 'ANALYSIS', 'COSMX'), server_default='FASTQ')
 
   def __repr__(self):
     '''
@@ -530,7 +573,6 @@ class IgfUser(Model):
   '''
   __tablename__ = 'user'
   __table_args__ = (
-    UniqueConstraint('name'),
     UniqueConstraint('username'),
     UniqueConstraint('email_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
@@ -538,7 +580,7 @@ class IgfUser(Model):
   user_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
   user_igf_id = Column(String(10))
   name = Column(String(30), nullable=False)
-  email_id = Column(String(40), nullable=False)
+  email_id = Column(String(80), nullable=False)
   username = Column(String(20))
   hpc_username = Column(String(20))
   twitter_user = Column(String(20))
@@ -1469,3 +1511,261 @@ class File_attribute(Model):
     Display File_attribute entry
     '''
     return self.file_attribute_id
+
+
+## COSMX TABLES
+class Cosmx_platform(Model):
+  """
+  A table for loading COSMX platform information
+
+  :param cosmx_platform_id: An integer id for cosmx_platform table
+  :param cosmx_platform_igf_id: A required string as COSMX platform id specific to IGF team, allowed length 20
+  :param cosmx_platform_name: An optional string to specify COSMX platform name, allowed length 20
+  :param date_created: An optional timestamp column to record entry creation or modification time, default current timestamp
+  """
+
+  __tablename__ = 'cosmx_platform'
+  __table_args__ = (
+    UniqueConstraint('cosmx_platform_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_platform_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_platform_igf_id = Column(String(20), nullable=False)
+  cosmx_platform_name = Column(String(20), nullable=True)
+  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+
+  def __repr__(self):
+    '''
+    Display Cosmx_platform entry
+    '''
+    return \
+      f"cosmx_platform_igf_id = '{self.cosmx_platform_igf_id}'"
+
+
+class Cosmx_run(Model):
+  """
+  A table for loading COSMX run information
+
+  :param cosmx_run_id: An integer id for cosmx_run table
+  :param cosmx_run_igf_id: A required string as COSMX run id specific to IGF team, allowed length 100
+  :param cosmx_run_name: An optional string to specify COSMX run name, allowed length 100
+  """
+
+  __tablename__ = 'cosmx_run'
+  __table_args__ = (
+    UniqueConstraint('cosmx_run_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_run_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_run_igf_id = Column(String(200), nullable=False)
+  cosmx_run_name = Column(String(100), nullable=True)
+  project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  project = relationship('Project')
+
+
+  def __repr__(self):
+    '''
+    Display Cosmx_run entry
+    '''
+    return \
+      f"cosmx_run_igf_id = '{self.cosmx_run_igf_id}'"
+
+
+class Cosmx_slide(Model):
+  """
+  A table for loading COSMX slide information
+
+  :param cosmx_slide_id: An integer id for cosmx_slide table
+  :param cosmx_slide_igf_id: A required string as COSMX slide id specific to IGF team, allowed length 100
+  :param cosmx_slide_name: An optional string to specify COSMX slide name, allowed length 100
+  :param cosmx_run_id: A required integer id from cosmx_run table (foreign key)
+  :param panel_info: A required string to specify panel information, allowed length 100
+  :param assay_type: A required string to specify assay type, allowed length 100
+  :param version: Version info string, optional
+  :param slide_run_date: A datestamp for slide run date, required
+  :param slide_metadata: A JSON object containing all slide metadata, optional
+  :param date_created: An optional timestamp column to record entry creation or modification time, default current timestamp
+  """
+
+  __tablename__ = 'cosmx_slide'
+  __table_args__ = (
+    UniqueConstraint('cosmx_slide_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_slide_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_slide_igf_id = Column(String(100), nullable=False)
+  cosmx_slide_name = Column(String(100), nullable=True)
+  cosmx_run_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_run.cosmx_run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_run = relationship('Cosmx_run')
+  cosmx_platform_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_platform.cosmx_platform_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_platform = relationship('Cosmx_platform')
+  panel_info = Column(String(200), nullable=True)
+  assay_type = Column(String(100), nullable=True)
+  version = Column(String(10), nullable=True)
+  slide_run_date = Column(DATETIME(), nullable=False, server_default=current_timestamp())
+  slide_metadata = Column(JSONType(), nullable=True)
+  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+
+  def __repr__(self):
+    '''
+    Display Cosmx_slide entry
+    '''
+    return \
+      f"cosmx_slide_igf_id = '{self.cosmx_slide_igf_id}'"
+
+
+class Cosmx_fov(Model):
+  """
+  """
+  __tablename__ = 'cosmx_fov'
+  __table_args__ = (
+    UniqueConstraint('cosmx_fov_name', 'cosmx_slide_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_fov_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_fov_name = Column(String(10), nullable=False)
+  cosmx_slide_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_slide.cosmx_slide_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_slide = relationship('Cosmx_slide')
+  slide_type = Column(Enum('RNA', 'PROTEIN', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
+  # cosmx_run_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_run.cosmx_run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  # cosmx_run = relationship('Cosmx_run')
+
+  def __repr__(self):
+    '''
+    Display Cosmx_fov entry
+    '''
+    return \
+      f"cosmx_fov_name = '{self.cosmx_fov_name}'"
+
+
+class Cosmx_fov_annotation(Model):
+  """
+  """
+  __tablename__ = 'cosmx_fov_annotation'
+  __table_args__ = (
+    UniqueConstraint('cosmx_fov_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_fov_annotation_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov = relationship('Cosmx_fov')
+  tissue_species = Column(Enum('HUMAN', 'MOUSE', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
+  tissue_annotation = Column(String(200), nullable=True)
+  tissue_ontology = Column(String(200), nullable=True)
+  tissue_condition = Column(String(200), nullable=True)
+
+  def __repr__(self):
+    '''
+    Display Cosmx_fov_annotation entry
+    '''
+    return \
+      f"cosmx_fov_id = '{self.cosmx_fov_id}'"
+
+
+class Cosmx_fov_rna_qc(Model):
+  """
+  """
+  __tablename__ = 'cosmx_fov_rna_qc'
+  __table_args__ = (
+    UniqueConstraint('cosmx_fov_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_fov_rna_qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov = relationship('Cosmx_fov')
+  mean_transcript_per_cell = Column(DECIMALType(10, 2), nullable=True)
+  mean_unique_genes_per_cell = Column(DECIMALType(10, 2), nullable=True)
+  number_non_empty_cells = Column(INTEGER(unsigned=True), nullable=True)
+  pct_non_empty_cells = Column(DECIMALType(10, 2), nullable=True)
+  percentile_90_transcript_per_cell = Column(DECIMALType(10, 2), nullable=True)
+  percentile_10_transcript_per_cell = Column(DECIMALType(10, 2), nullable=True)
+  mean_negprobe_counts_per_cell = Column(DECIMALType(10, 3), nullable=True)
+
+  def __repr__(self):
+    '''
+    Display Cosmx_fov_rna_qc entry
+    '''
+    return \
+      f"cosmx_fov_id = '{self.cosmx_fov_id}'"
+
+
+class Cosmx_fov_protein_qc(Model):
+  """
+  """
+  __tablename__ = 'cosmx_fov_protein_qc'
+  __table_args__ = (
+    UniqueConstraint('cosmx_fov_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_fov_protein_qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov = relationship('Cosmx_fov')
+  mean_fluorescence_intensity = Column(INTEGER, nullable=True)
+  mean_unique_genes_per_cell = Column(INTEGER, nullable=True)
+  number_non_empty_cells = Column(INTEGER, nullable=True)
+  pct_non_empty_cells = Column(DECIMALType(10, 2), nullable=True)
+  percentile_10_fluorescence_intensity = Column(DECIMALType(10, 2), nullable=True)
+  percentile_90_fluorescence_intensity = Column(DECIMALType(10, 2), nullable=True)
+  fluorescence_intensity_mean_igg_control_intensity = Column(DECIMALType(10, 3), nullable=True)
+
+  def __repr__(self):
+    '''
+    Display Cosmx_fov_protein_qc entry
+    '''
+    return \
+      f"cosmx_fov_igf_id = '{self.cosmx_fov_id}'"
+
+
+class Cosmx_slide_attribute(Model):
+  """
+  A table for loading COSMX slide attributes
+
+  :param cosmx_slide_attribute_id: An integer id for cosmx_slide_attribute table
+  :param attribute_name: An optional string attribute name, allowed length 200
+  :param attribute_value: An optional json attribute value
+  :param cosmx_slide_id: An integer id from cosmx_slide table (foreign key)
+  """
+  __tablename__ = 'cosmx_slide_attribute'
+  __table_args__ = (
+    UniqueConstraint('cosmx_slide_id', 'attribute_name'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_slide_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  attribute_name = Column(String(200), nullable=False)
+  attribute_value = Column(JSONType(), nullable=True)
+  cosmx_slide_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_slide.cosmx_slide_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_slide = relationship('Cosmx_slide')
+
+  def __repr__(self):
+    '''
+    Display Cosmx_slide_attribute entry
+    '''
+    return \
+      f"attribute_name = '{self.attribute_name}'"
+
+class Cosmx_fov_attribute(Model):
+  """
+  A table for loading COSMX fov attributes
+
+  :param cosmx_fov_attribute_id: An integer id for cosmx_fov_attribute table
+  :param attribute_name: An optional string attribute name, allowed length 200
+  :param attribute_value: An optional json attribute value
+  :param cosmx_fov_id: An integer id from cosmx_fov table (foreign key)
+  """
+  __tablename__ = 'cosmx_fov_attribute'
+  __table_args__ = (
+    UniqueConstraint('cosmx_fov_id', 'attribute_name'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+
+  cosmx_fov_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  attribute_name = Column(String(200), nullable=False)
+  attribute_value = Column(JSONType(), nullable=True)
+  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov = relationship('Cosmx_fov')
+
+  def __repr__(self):
+    '''
+    Display Cosmx_fov_attribute entry
+    '''
+    return \
+      f"attribute_name = '{self.attribute_name}'"
