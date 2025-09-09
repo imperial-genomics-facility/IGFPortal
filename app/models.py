@@ -442,6 +442,34 @@ class RawAnalysisV2(Model):
     return self.analysis_name
 
 
+class RawAnalysisValidationSchemaV2(Model):
+  __tablename__ = 'raw_analysis_validation_schema_v2'
+  __table_args__ = (
+    UniqueConstraint('pipeline_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  raw_analysis_schema_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('raw_pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  pipeline = relationship('RawPipeline')
+  json_schema = Column(JSONType)
+  status = Column(Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"), nullable=False, server_default='UNKNOWN')
+  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+
+  def __repr__(self):
+    return self.pipeline.pipeline_name
+
+class RawAnalysisTemplateV2(Model):
+  __tablename__ = 'raw_analysis_template_v2'
+  __table_args__ = (
+    UniqueConstraint('pipeline_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  template_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('raw_pipeline.pipeline_id', onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+  pipeline = relationship('RawPipeline')
+  template_data = Column(LONGTEXTType(), nullable=False)
+
+  def __repr__(self):
+    return self.pipeline.pipeline_name
+
 """
   Raw COSMX metadata registration
 """
