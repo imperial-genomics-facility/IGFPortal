@@ -5,7 +5,7 @@ from flask_appbuilder import Model
 from sqlalchemy.dialects import mysql
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.mysql import INTEGER
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, text, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, text, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint, DATETIME
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText
