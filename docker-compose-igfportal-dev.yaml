@@ -23,7 +23,7 @@ x-webserver-volume: &webserver-volume
   - ../IGFPortal:/github/IGFPortal:ro
   - ../ssl_cert:/SSL:ro
   - ../static:/data/static:rw
-  - ../secret/airflow_conf.json:/secret/airflow_conf.json:ro
+  - ../secret/:/secret:ro
   - ../celery_tmp:/TMP_WORK_DIR:rw
 
 x-nginx-volume: &nginx-volume
