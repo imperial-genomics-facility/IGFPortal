@@ -37,8 +37,12 @@ x-portal-links: &portal-links
   - portal_db
 
 x-portal-depends-on: &portal-depends-on
-  - redis_db
-  - portal_db
+  redis_db:
+    condition: service_healthy
+    restart: true
+  portal_db:
+    condition: service_healthy
+    restart: true
 
 networks:
     portal_network:
@@ -97,7 +101,9 @@ services:
     links:
       - webserver
     depends_on:
-      - webserver
+      webserver:
+        condition: service_healthy
+        restart: true
     volumes: *nginx-volume
     container_name: nginx
     restart: unless-stopped
