@@ -120,7 +120,6 @@ services:
     command: ["celery -A app.celery worker --loglevel=WARNING"]
     healthcheck:
       test: "celery -A app.celery status"
-      interval: 10s
       timeout: 20s
       retries: 5
     networks:
