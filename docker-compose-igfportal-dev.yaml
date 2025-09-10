@@ -85,7 +85,7 @@ services:
     depends_on: *portal-depends-on
     volumes: *webserver-volume
     container_name: webserver
-    command: ["gunicorn", "-b", "0.0.0.0:8080", "--threads", "4", "server:app"]
+    command: ["gunicorn -b 0.0.0.0:8080 --threads 4 server:app"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       timeout: 20s
@@ -96,8 +96,8 @@ services:
     image: *nginx_image
     logging: *common-logging
     ports:
-      - "80:80"
-      - "443:443"
+      - "8082:80"
+      - "8083:443"
     links:
       - webserver
     depends_on:
