@@ -117,7 +117,7 @@ services:
     restart: unless-stopped
     volumes: *webserver-volume
     container_name: celery_worker1
-    command: ["celery",  "-A", "app.celery", "worker", "--loglevel=WARNING"]
+    command: ["celery -A app.celery worker --loglevel=WARNING"]
     networks:
       - portal_network
   celery_flower:
@@ -133,7 +133,7 @@ services:
     volumes:
       - ../IGFPortal:/github/IGFPortal:ro
     container_name: celery_flower
-    command: ["celery", "-A", "app.celery", "flower", "--basic_auth=$${BASIC_AUTH}"]
+    command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
     healthcheck:
       test: ["CMD", "python", "-c", "\"import requests; requests.get('http://localhost:5555')\""]
       timeout: 20s
