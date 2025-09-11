@@ -1,9 +1,10 @@
-FROM python:3.13
+FROM python:3.13.7-slim
 LABEL version="v1.0"
 LABEL description="Docker image for running IGFPortal server"
-RUN apt-get -y update && \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install --no-install-recommends --fix-missing -y git tzdata curl \
+    apt-get install --no-install-recommends --fix-missing -y git tzdata curl && \
     apt-get purge -y --auto-remove && \
     apt-get clean && \
     rm -f /tmp/* && \
