@@ -1,6 +1,7 @@
 import datetime, json
 from . import db
-from flask import Markup, url_for
+from markupsafe import Markup
+from flask import url_for
 from flask_appbuilder import Model
 from sqlalchemy.dialects import mysql
 from sqlalchemy.dialects import postgresql

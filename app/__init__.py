@@ -2,10 +2,12 @@ import os
 import logging
 from flask import Flask, request
 from flask_appbuilder import AppBuilder, SQLA
+#from flask_appbuilder.models.sqla.base import SQLA
 from .index import CustomIndexView
 from celery import Celery
 from flask_caching import Cache
 from flask_migrate import Migrate
+
 
 """
  Logging configuration
@@ -19,7 +21,9 @@ app.config.from_object("config")
 db = SQLA(app)
 migrate = Migrate(app, db)
 appbuilder = AppBuilder(app, db.session, indexview=CustomIndexView)
-
+# appbuilder = AppBuilder()
+# with app.app_context():
+  #  appbuilder.init_app(app, db.session)
 
 """
 from sqlalchemy.engine import Engine

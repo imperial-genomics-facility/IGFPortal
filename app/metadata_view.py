@@ -5,7 +5,8 @@ import gviz_api
 from app import db
 from app import cache
 import pandas as pd
-from flask import abort, render_template, url_for, Markup
+from markupsafe import Markup
+from flask import abort, render_template, url_for
 from flask_appbuilder import ModelView
 from flask_appbuilder.views import MasterDetailView
 from .models import Project, IgfUser, Seqrun, Analysis, Sample
