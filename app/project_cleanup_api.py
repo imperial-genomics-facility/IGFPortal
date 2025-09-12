@@ -1,8 +1,7 @@
 import json, logging, gzip
-from yaml import load, Loader
 from flask_appbuilder import ModelRestApi
 from flask import request, send_file
-from flask_appbuilder.api import expose, rison
+from flask_appbuilder.api import expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.security.decorators import protect
 from . import db

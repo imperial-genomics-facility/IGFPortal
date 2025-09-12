@@ -1,6 +1,4 @@
 from flask_appbuilder import BaseView, expose, has_access
-import pandas as pd
-from . import appbuilder
 
 class PipelineTriggerView(BaseView):
     route_base = "/"

@@ -6,17 +6,12 @@ from flask_appbuilder import Model
 from sqlalchemy.dialects import mysql
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.mysql import INTEGER
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, text, Table, Enum, TIMESTAMP, TEXT, UniqueConstraint, DATETIME
+from sqlalchemy import Column, ForeignKey, String, Enum, TIMESTAMP, TEXT, UniqueConstraint, DATETIME
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText
 from sqlalchemy.types import TypeDecorator
 from flask_appbuilder.models.mixins import AuditMixin
-from flask_appbuilder.models.decorators import renders
-from sqlalchemy.orm import column_property
-from sqlalchemy import select, func, literal
-from sqlalchemy.sql.functions import coalesce
-from sqlalchemy.orm import object_session
 
 
 """

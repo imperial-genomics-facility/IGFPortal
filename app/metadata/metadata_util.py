@@ -1,44 +1,29 @@
 import os
 import json
-import typing
 import tempfile
 from typing import Tuple
 import pandas as pd
-from datetime import datetime
 from dateutil.parser import parse
 from ..models import (
     Project,
     IgfUser,
     ProjectUser,
-    Project_attribute,
     Sample,
-    Sample_attribute,
     Experiment,
-    Experiment_attribute,
     Run,
     Run_attribute,
     Platform,
     Flowcell_barcode_rule,
     Seqrun,
-    Seqrun_attribute,
-    Seqrun_stats,
     Collection,
-    Collection_attribute,
     Collection_group,
     File,
-    File_attribute,
     Pipeline,
     Pipeline_seed,
     Analysis,
     RawAnalysis,
     RawAnalysisValidationSchema,
-    RawAnalysisTemplate,
-    Project_info_data,
-    Project_seqrun_info_data,
-    Project_seqrun_info_file,
-    Project_analysis_info_data,
-    Project_analysis_info_file,
-    RDSProject_backup)
+    RawAnalysisTemplate)
 from .. import db
 
 def backup_specific_portal_tables(json_file: str) -> str:

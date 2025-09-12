@@ -1,10 +1,8 @@
-import json
-import base64
 import logging
 from flask import url_for
 from app import cache
 from flask_appbuilder.baseviews import BaseView, expose
-from flask_appbuilder.security.decorators import protect, has_access
+from flask_appbuilder.security.decorators import has_access
 from app import db
 from .models import (
     Project_analysis_info_file,

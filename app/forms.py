@@ -1,9 +1,7 @@
-from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
+from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_appbuilder.forms import DynamicForm
-from wtforms.fields import StringField,SubmitField,IntegerField,RadioField,DecimalField
-from wtforms.validators import DataRequired,InputRequired,NumberRange
 from wtforms_sqlalchemy.fields import QuerySelectField
-from . import appbuilder, db
+from . import db
 from .models import IlluminaInteropData
 
 def run_list_query():

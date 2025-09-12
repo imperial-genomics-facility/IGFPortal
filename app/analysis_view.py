@@ -6,7 +6,7 @@ from .models import Pipeline_seed
 from .models import Pipeline
 from .airflow.airflow_api_utils import trigger_airflow_pipeline
 from flask_appbuilder import ModelView
-from flask import redirect, flash, url_for, send_file
+from flask import redirect, flash, url_for
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from . import celery

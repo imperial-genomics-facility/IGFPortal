@@ -1,6 +1,6 @@
 import logging
 from flask_appbuilder.baseviews import BaseView, expose
-from flask_appbuilder.security.decorators import protect, has_access
+from flask_appbuilder.security.decorators import has_access
 from . import db
 from app import cache
 from .models import AdminHomeData
