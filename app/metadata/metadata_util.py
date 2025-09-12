@@ -4,6 +4,7 @@ import typing
 import tempfile
 from typing import Tuple
 import pandas as pd
+from datetime import datetime
 from dateutil.parser import parse
 from ..models import (
     Project,
@@ -60,7 +61,13 @@ def backup_specific_portal_tables(json_file: str) -> str:
                 result = db.session.query(table_name).all()
                 rows = []
                 for row in result:
-                    row_dict = dict(row._mapping)  # Convert row to dictionary
+                    # print(row.__dict__)
+                    # columns = [c.name for c in table_name.__table__.columns]
+                    # print({ k:v for k,v in row.__dict__.items() if not k.startswith("_")})
+                    row_dict = \
+                        { k:v for k,v in row.__dict__.items() \
+                            if not k.startswith("_")}
+                    # row_dict = dict(row._mapping)  # Convert row to dictionary
                     rows.append(row_dict)
                 data = pd.DataFrame(rows)
                 # data = \
