@@ -1,8 +1,8 @@
 x-images:
-  portal_db_image: &portal_db_image mysql:5.7.42
-  redis_image: &redis_image redis:6.2
-  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v0.0.2.1
-  nginx_image: &nginx_image nginx:1.23.3
+  portal_db_image: &portal_db_image mysql:9.4
+  redis_image: &redis_image redis:8.2
+  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v2.0.1
+  nginx_image: &nginx_image nginx:1.29.1
   adminer_image: &adminer_image adminer:latest
 
 x-common-logging: &common-logging
