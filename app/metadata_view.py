@@ -5,17 +5,15 @@ import gviz_api
 from app import db
 from app import cache
 import pandas as pd
-from flask import abort, render_template, url_for, Markup
+from flask import abort, url_for
 from flask_appbuilder import ModelView
 from flask_appbuilder.views import MasterDetailView
 from .models import Project, IgfUser, Seqrun, Analysis, Sample
 from .models import Project_info_data, Project_seqrun_info_data, Project_seqrun_info_file
 from .models import Project_analysis_info_data, Project_analysis_info_file
-from flask import redirect, flash
-from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_appbuilder.baseviews import BaseView, expose
-from flask_appbuilder.security.decorators import protect, has_access
+from flask_appbuilder.baseviews import expose
+from flask_appbuilder.security.decorators import has_access
 
 log = logging.getLogger(__name__)
 

@@ -1,6 +1,5 @@
 import os
 import json
-import typing
 import tempfile
 from typing import Tuple
 import pandas as pd
@@ -9,35 +8,22 @@ from ..models import (
     Project,
     IgfUser,
     ProjectUser,
-    Project_attribute,
     Sample,
-    Sample_attribute,
     Experiment,
-    Experiment_attribute,
     Run,
     Run_attribute,
     Platform,
     Flowcell_barcode_rule,
     Seqrun,
-    Seqrun_attribute,
-    Seqrun_stats,
     Collection,
-    Collection_attribute,
     Collection_group,
     File,
-    File_attribute,
     Pipeline,
     Pipeline_seed,
     Analysis,
     RawAnalysis,
     RawAnalysisValidationSchema,
-    RawAnalysisTemplate,
-    Project_info_data,
-    Project_seqrun_info_data,
-    Project_seqrun_info_file,
-    Project_analysis_info_data,
-    Project_analysis_info_file,
-    RDSProject_backup)
+    RawAnalysisTemplate)
 from .. import db
 
 def backup_specific_portal_tables(json_file: str) -> str:
@@ -46,72 +32,58 @@ def backup_specific_portal_tables(json_file: str) -> str:
             RawAnalysis,
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
-            Project_info_data,
-            Project_seqrun_info_data,
-            Project_seqrun_info_file,
-            Project_analysis_info_data,
-            Project_analysis_info_file,
-            RDSProject_backup
+            # Project_info_data,
+            # Project_seqrun_info_data,
+            # Project_seqrun_info_file,
+            # Project_analysis_info_data,
+            # Project_analysis_info_file,
+            # RDSProject_backup
         ]
         db_data = dict()
-        for table_name in backup_order:
-            data = \
-                pd.read_sql(
-                    table_name.__tablename__,
-                    db.session.bind)
-            if table_name.__tablename__=='raw_analysis':
-                data['date_stamp'] = \
-                    data['date_stamp'].astype(str)
-            if table_name.__tablename__=='raw_analysis_validation_schema':
-                data['date_stamp'] = \
-                    data['date_stamp'].astype(str)
-            if table_name.__tablename__=='project_seqrun_info_file':
-                data['date_created'] = \
-                    data['date_created'].astype(str)
-            if table_name.__tablename__=='project_seqrun_info_file':
-                data['date_updated'] = \
-                    data['date_updated'].astype(str)
-            if table_name.__tablename__=='project_analysis_info_file':
-                data['date_created'] = \
-                    data['date_created'].astype(str)
-            if table_name.__tablename__=='project_analysis_info_file':
-                data['date_updated'] = \
-                    data['date_updated'].astype(str)
-            if table_name.__tablename__=='rds_project_backup':
-                data['date_stamp'] = \
-                    data['date_stamp'].astype(str)
-            # if table_name.__tablename__=='raw_analysis':
-            #     data = \
-            #         pd.read_sql(
-            #             table_name.__tablename__,
-            #             db.session.bind,
-            #             parse_dates=["date_stamp"])
-            # if table_name.__tablename__=='raw_analysis_validation_schema':
-            #     data = \
-            #         pd.read_sql(
-            #             table_name.__tablename__,
-            #             db.session.bind,
-            #             parse_dates=["date_stamp"])
-            # if table_name.__tablename__=='project_seqrun_info_file':
-            #     data = \
-            #         pd.read_sql(
-            #             table_name.__tablename__,
-            #             db.session.bind,
-            #             parse_dates=["date_created", "date_updated"])
-            # if table_name.__tablename__=='project_analysis_info_file':
-            #     data = \
-            #         pd.read_sql(
-            #             table_name.__tablename__,
-            #             db.session.bind,
-            #             parse_dates=["date_created", "date_updated"])
-            # if table_name.__tablename__=='rds_project_backup':
-            #     data = \
-            #         pd.read_sql(
-            #             table_name.__tablename__,
-            #             db.session.bind,
-            #             parse_dates=["date_stamp"])
-            db_data.update({
-                table_name.__tablename__: data.to_dict(orient="records")})
+        if True:
+        # with db.session.get_bind().connect() as conn:
+            for table_name in backup_order:
+                result = db.session.query(table_name).all()
+                rows = []
+                for row in result:
+                    # print(row.__dict__)
+                    # columns = [c.name for c in table_name.__table__.columns]
+                    # print({ k:v for k,v in row.__dict__.items() if not k.startswith("_")})
+                    row_dict = \
+                        { k:v for k,v in row.__dict__.items() \
+                            if not k.startswith("_")}
+                    # row_dict = dict(row._mapping)  # Convert row to dictionary
+                    rows.append(row_dict)
+                data = pd.DataFrame(rows)
+                # data = \
+                #     pd.read_sql(
+                #         table_name.__tablename__,
+                #         conn.connection)
+                if table_name.__tablename__=='raw_analysis':
+                    if 'date_stamp' in data.columns:
+                        data['date_stamp'] = \
+                            data['date_stamp'].astype(str)
+                if table_name.__tablename__=='raw_analysis_validation_schema':
+                    if 'date_stamp' in data.columns:
+                        data['date_stamp'] = \
+                            data['date_stamp'].astype(str)
+                # if table_name.__tablename__=='project_seqrun_info_file':
+                #     data['date_created'] = \
+                #         data['date_created'].astype(str)
+                # if table_name.__tablename__=='project_seqrun_info_file':
+                #     data['date_updated'] = \
+                #         data['date_updated'].astype(str)
+                # if table_name.__tablename__=='project_analysis_info_file':
+                #     data['date_created'] = \
+                #         data['date_created'].astype(str)
+                # if table_name.__tablename__=='project_analysis_info_file':
+                #     data['date_updated'] = \
+                #         data['date_updated'].astype(str)
+                # if table_name.__tablename__=='rds_project_backup':
+                #     data['date_stamp'] = \
+                #         data['date_stamp'].astype(str)
+                db_data.update({
+                    table_name.__tablename__: data.to_dict(orient="records")})
         with open(json_file, 'w') as fp:
             json.dump(db_data, fp)
         return json_file
@@ -174,23 +146,23 @@ def cleanup_and_load_new_data_to_metadata_tables(
             RawAnalysis,
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
-            Project_info_data,
-            Project_seqrun_info_data,
-            Project_seqrun_info_file,
-            Project_analysis_info_data,
-            Project_analysis_info_file,
-            RDSProject_backup
+            # Project_info_data,
+            # Project_seqrun_info_data,
+            # Project_seqrun_info_file,
+            # Project_analysis_info_data,
+            # Project_analysis_info_file,
+            # RDSProject_backup
         ]
         portal_delete_order = [
             RawAnalysisValidationSchema,
             RawAnalysisTemplate,
             RawAnalysis,
-            Project_seqrun_info_data,
-            Project_seqrun_info_file,
-            Project_analysis_info_data,
-            Project_analysis_info_file,
-            Project_info_data,
-            RDSProject_backup
+            # Project_seqrun_info_data,
+            # Project_seqrun_info_file,
+            # Project_analysis_info_data,
+            # Project_analysis_info_file,
+            # Project_info_data,
+            # RDSProject_backup
         ]
         try:
             ## delete main tables

@@ -12,7 +12,7 @@ from .airflow.airflow_api_utils import get_airflow_dag_id
 from datetime import datetime, timedelta
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.filters import FilterInFunction
-from flask import redirect, flash, url_for, send_file
+from flask import redirect, flash, url_for
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 

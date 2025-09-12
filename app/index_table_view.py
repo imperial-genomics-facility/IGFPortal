@@ -1,12 +1,10 @@
-import os
-import time
 import logging
 import pandas as pd
 from flask import g
 from typing import Tuple
 from datetime import datetime
 from io import BytesIO, StringIO
-from flask_appbuilder.security.decorators import protect, has_access
+from flask_appbuilder.security.decorators import has_access
 from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms.fields import SelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
@@ -17,7 +15,6 @@ from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.baseviews import expose
 from . import db
-from . import celery
 
 
 log = logging.getLogger(__name__)

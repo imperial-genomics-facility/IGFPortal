@@ -1,11 +1,8 @@
-from multiprocessing.sharedctypes import Value
-import os, json, logging, tempfile, time, typing, gzip
-from flask_appbuilder import ModelRestApi
+import json, logging, tempfile, gzip
 from flask import request
-from flask_appbuilder.api import BaseApi, expose, rison
-from flask_appbuilder.models.sqla.interface import SQLAInterface
+from flask_appbuilder.api import BaseApi, expose
 from flask_appbuilder.security.decorators import protect
-from . import app, db, celery
+from . import app, celery
 from .metadata.metadata_util import cleanup_and_load_new_data_to_metadata_tables
 
 log = logging.getLogger(__name__)

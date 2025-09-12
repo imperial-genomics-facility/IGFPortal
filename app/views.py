@@ -1,14 +1,5 @@
-import json
-import logging
-from flask_appbuilder import has_access
-from flask import render_template, redirect, flash, url_for, send_file, abort
-from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_appbuilder import ModelView, ModelRestApi, SimpleFormView
-from flask_appbuilder.baseviews import BaseView, expose
+from flask import render_template
 from . import appbuilder, db
-from .models import IlluminaInteropData, PreDeMultiplexingData
-from .forms import SeqrunInteropForm
-from .models import AdminHomeData
 from .interop_view import IlluminaInteropDataView
 from .home_view import HomeView
 from .pre_demultiplexing_view import PreDeMultiplexingDataView
@@ -16,11 +7,8 @@ from .samplesheet_view import SampleSheetView
 from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
 from .analysis_view import AnalysisView
-from .metadata_view import ProjectView, UserView, SeqrunView, SampleProjectView, SampleView
+from .metadata_view import SampleProjectView, SampleView
 from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
-from .rds_project_backup_view import RDSProjectBackupView
-from .pipeline_trigger_view import PipelineTriggerView
-from .index_table_view import ProjectIndexView, SampleIndexView
 from .iframe_view import IFrameView
 from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPendingView
 
@@ -30,7 +18,7 @@ from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPend
 
 
 @appbuilder.app.errorhandler(404)
-def page_not_found(e):
+def page_not_found_404(e):
     return (
         render_template(
             "404.html",
@@ -46,7 +34,7 @@ def page_not_found(e):
 
 
 @appbuilder.app.errorhandler(401)
-def page_not_found(e):
+def page_not_found_401(e):
     return (
         render_template(
             "401.html",
@@ -62,7 +50,7 @@ def page_not_found(e):
 
 
 @appbuilder.app.errorhandler(500)
-def page_not_found(e):
+def page_not_found_500(e):
     return (
         render_template(
             "500.html",
@@ -75,6 +63,7 @@ def page_not_found(e):
 """
     Create DB
 """
+# with app.app_context():
 db.create_all()
 
 """

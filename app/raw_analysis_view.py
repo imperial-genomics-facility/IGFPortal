@@ -12,12 +12,12 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
 from . import celery
-from .raw_analysis.raw_analysis_util import pipeline_query
-from .raw_analysis.raw_analysis_util import project_query
-from .raw_analysis.raw_analysis_util import validate_json_schema
-from .raw_analysis.raw_analysis_util import validate_analysis_design
-from .raw_analysis.raw_analysis_util import prepare_temple_for_analysis
-from .raw_analysis.raw_analysis_util import generate_analysis_template
+from .raw_analysis.raw_analysis_util import (
+    pipeline_query,
+    project_query,
+    validate_json_schema,
+    validate_analysis_design,
+    generate_analysis_template)
 
 log = logging.getLogger(__name__)
 

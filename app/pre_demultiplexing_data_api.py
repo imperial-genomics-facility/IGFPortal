@@ -1,7 +1,7 @@
-import os, json, logging, hashlib, shutil, gzip, tempfile
+import os, logging, hashlib, shutil, gzip, tempfile
 from datetime import datetime
 from flask_appbuilder import ModelRestApi
-from flask import request, jsonify
+from flask import request
 from flask_appbuilder.api import expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder.security.decorators import protect

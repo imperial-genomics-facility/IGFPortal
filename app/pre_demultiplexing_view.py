@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any
 from io import BytesIO
@@ -7,7 +6,7 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView
 from flask_appbuilder.baseviews import expose
 from flask import redirect, flash, url_for, send_file
-from flask_appbuilder.security.decorators import protect, has_access
+from flask_appbuilder.security.decorators import has_access
 from . import db
 from .models import PreDeMultiplexingData
 

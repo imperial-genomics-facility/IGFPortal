@@ -1,6 +1,6 @@
-from flask import Flask, redirect, g, url_for
+from flask import redirect, g, url_for
 from flask_appbuilder.baseviews import expose
-from flask_appbuilder import IndexView, BaseView
+from flask_appbuilder import IndexView
 
 class CustomIndexView(IndexView):
     #index_template = 'index.html'

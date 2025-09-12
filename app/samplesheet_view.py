@@ -1,9 +1,8 @@
 import logging, tempfile, os
 from app.samplesheet.samplesheet_util import SampleSheet
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask import redirect, flash, url_for, send_file, abort
+from flask import redirect, flash, url_for, send_file
 from flask_appbuilder import ModelView
-from flask_appbuilder.baseviews import expose
 from . import celery
 from io import BytesIO
 from flask_appbuilder.actions import action

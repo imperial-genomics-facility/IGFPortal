@@ -56,7 +56,7 @@ def test_async_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
     project = \
         Project(
             project_id=2,
-            project_igf_id="test1")
+            project_igf_id="test2")
     try:
         db.session.add(project)
         db.session.flush()
@@ -67,14 +67,14 @@ def test_async_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
     result = \
         db.session.\
             query(Project).\
-            filter(Project.project_igf_id=="test1").\
+            filter(Project.project_igf_id=="test2").\
             one_or_none()
     assert result is not None
     assert result.project_id == 2
     json_data = {
         "project": [{
             "project_id": 1,
-            "project_igf_id": "test1"}]}
+            "project_igf_id": "test2"}]}
     temp_json_file = \
         os.path.join(tmp_path, 'metadata_db.json')
     with open(temp_json_file, 'w') as fp:
@@ -85,7 +85,7 @@ def test_async_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
     result = \
         db.session.\
             query(Project).\
-            filter(Project.project_igf_id=="test1").\
+            filter(Project.project_igf_id=="test2").\
             one_or_none()
     assert result is not None
     assert result.project_id == 1
