@@ -5,7 +5,7 @@ from flask import render_template, redirect, flash, url_for, send_file, abort
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi, SimpleFormView
 from flask_appbuilder.baseviews import BaseView, expose
-from app import appbuilder, db, app
+from . import appbuilder, db
 from .models import IlluminaInteropData, PreDeMultiplexingData
 from .forms import SeqrunInteropForm
 from .models import AdminHomeData
@@ -29,7 +29,7 @@ from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPend
 """
 
 
-@app.errorhandler(404)
+@appbuilder.app.errorhandler(404)
 def page_not_found_404(e):
     return (
         render_template(
@@ -45,7 +45,7 @@ def page_not_found_404(e):
 """
 
 
-@app.errorhandler(401)
+@appbuilder.app.errorhandler(401)
 def page_not_found_401(e):
     return (
         render_template(
@@ -61,7 +61,7 @@ def page_not_found_401(e):
 """
 
 
-@app.errorhandler(500)
+@appbuilder.app.errorhandler(500)
 def page_not_found_500(e):
     return (
         render_template(

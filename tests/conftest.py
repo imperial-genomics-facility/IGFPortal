@@ -14,16 +14,14 @@ def db():
 def test_client(db):
     from app import app
     #with app.app_context():
-    if True:
-        app.config.update({
-            "TESTING": True,
-            "CSRF_ENABLED": False,
-            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-            "WTF_CSRF_ENABLED": False
-        })
+    app.config.update({
+        "TESTING": True,
+        "CSRF_ENABLED": False,
+        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+        "WTF_CSRF_ENABLED": False
+    })
     #db.create_all()
-    # with app.app_context():
-    if True:
+    with app.app_context():
         admin_role = \
             app.appbuilder.sm.find_role("Admin")
         if admin_role is None:
