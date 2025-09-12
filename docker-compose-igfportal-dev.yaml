@@ -20,7 +20,6 @@ x-redis-volume: &redis-volume
   - ../redis_data:/data:rw
 
 x-webserver-volume: &webserver-volume
-  - ../IGFPortal:/github/IGFPortal:ro
   - ../ssl_cert:/SSL:ro
   - ../static:/data/static:rw
   - ../secret/:/secret:ro
@@ -85,7 +84,7 @@ services:
     container_name: webserver
     command: ["gunicorn -b 0.0.0.0:8080 --threads 4 server:app"]
     healthcheck:
-      test: ["CMD", "python", "-c", "\"import requests; requests.get('http://localhost:8080')\""]
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
       timeout: 20s
       retries: 5
     networks:
@@ -139,7 +138,7 @@ services:
     container_name: celery_flower
     command: ["celery -A app.celery flower --basic_auth=$${BASIC_AUTH}"]
     healthcheck:
-      test: ["CMD", "python", "-c", "\"import requests; requests.get('http://localhost:5555')\""]
+      test: ["CMD", "curl", "-f", "http://localhost:5555"]
       timeout: 20s
       retries: 5
     networks:
