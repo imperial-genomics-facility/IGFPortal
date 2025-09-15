@@ -1,0 +1,157 @@
+x-images:
+  portal_db_image: &portal_db_image mysql:9.4
+  redis_image: &redis_image redis:8.2
+  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v2.0.1
+  nginx_image: &nginx_image nginx:1.29.1
+  adminer_image: &adminer_image adminer:latest
+
+x-common-logging: &common-logging
+  driver: "json-file"
+  options:
+    max-size: "2048m"
+
+x-igfportal-env-file: &igfportal-env-file
+    - ../env
+
+x-portal-db-volume: &portal-db-volume
+  - ../mysqlappdb:/var/lib/mysql:rw
+
+x-redis-volume: &redis-volume
+  - ../redis_data:/data:rw
+
+x-webserver-volume: &webserver-volume
+  - ../ssl_cert:/SSL:ro
+  - ../static:/data/static:rw
+  - ../secret/:/secret:ro
+  - ../celery_tmp:/TMP_WORK_DIR:rw
+
+x-nginx-volume: &nginx-volume
+  - ../ssl_cert:/SSL:ro
+  - ../nginx.conf:/etc/nginx/nginx.conf:ro
+  - ../nginx:/var/nginx/:rw
+  - ../static:/data/static:rw
+
+x-portal-links: &portal-links
+  - redis_db
+  - portal_db
+
+x-portal-depends-on: &portal-depends-on
+  redis_db:
+    condition: service_healthy
+    restart: true
+  portal_db:
+    condition: service_healthy
+    restart: true
+
+networks:
+    portal_network:
+        driver: bridge
+services:
+  portal_db:
+    image: *portal_db_image
+    env_file: *igfportal-env-file
+    restart: unless-stopped
+    logging: *common-logging
+    volumes: *portal-db-volume
+    container_name: portal_db
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 5
+    networks:
+      - portal_network
+  redis_db:
+    image: *redis_image
+    restart: unless-stopped
+    container_name: redis_db
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      timeout: 20s
+      retries: 5
+    networks:
+      - portal_network
+    volumes: *redis-volume
+  webserver:
+    image: *igfportal_image
+    env_file: *igfportal-env-file
+    user: "${PORTAL_UID}:${GID}"
+    logging: *common-logging
+    restart: unless-stopped
+    links: *portal-links
+    depends_on: *portal-depends-on
+    volumes: *webserver-volume
+    container_name: webserver
+    command: ["gunicorn", "-b", "0.0.0.0:8080", "--threads", "4", "server:app"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      timeout: 20s
+      retries: 5
+    networks:
+      - portal_network
+  nginx:
+    image: *nginx_image
+    logging: *common-logging
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - webserver
+    depends_on:
+      webserver:
+        condition: service_healthy
+        restart: true
+    volumes: *nginx-volume
+    container_name: nginx
+    restart: unless-stopped
+    networks:
+      - portal_network
+  celery_worker1:
+    image: *igfportal_image
+    env_file: *igfportal-env-file
+    user: "${PORTAL_UID}:${GID}"
+    logging: *common-logging
+    links: *portal-links
+    depends_on: *portal-depends-on
+    restart: unless-stopped
+    volumes: *webserver-volume
+    container_name: celery_worker1
+    command: ["celery", "-A", "app.celery", "worker", "--loglevel=WARNING"]
+    healthcheck:
+      test: "celery -A app.celery status"
+      timeout: 20s
+      retries: 5
+    networks:
+      - portal_network
+  celery_flower:
+    image: *igfportal_image
+    env_file: *igfportal-env-file
+    restart: unless-stopped
+    user: "${PORTAL_UID}:${GID}"
+    logging: *common-logging
+    ports:
+      - "5555:5555"
+    links: *portal-links
+    depends_on: *portal-depends-on
+    volumes:
+      - ../IGFPortal:/github/IGFPortal:ro
+    container_name: celery_flower
+    command: ["celery", "-A", "app.celery", "flower", "--basic_auth=$${BASIC_AUTH}"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5555"]
+      timeout: 20s
+      retries: 5
+    networks:
+      - portal_network
+  adminer:
+    image: *adminer_image
+    user: "${PORTAL_UID}:${GID}"
+    logging: *common-logging
+    links:
+      - portal_db
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    container_name: adminer
+    networks:
+      - portal_network

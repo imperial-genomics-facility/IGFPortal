@@ -1,0 +1,1 @@
+PORTAL_UID="$(id -u)" GID="$(id -g)"  docker compose -f docker-compose-igfportal-prod.yaml -p igfportal down
