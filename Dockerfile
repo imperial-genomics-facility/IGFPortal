@@ -22,6 +22,9 @@ RUN python -m pip install --upgrade pip && \
 FROM python:3.13.7-slim AS runner
 ENV PATH=/venv/bin:$PATH
 COPY --from=builder /venv /venv
+COPY --from=builder /usr/bin /usr/bin
+COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+COPY --from=builder /etc/timezone /etc/timezone
 WORKDIR /app
 COPY . .
 ENV PYTHONPATH=/app
