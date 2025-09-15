@@ -1,0 +1,64 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF Spaceranger count analysis validation schema",
+    "description": "Schema for validation of Spaceranger count analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "image": {
+                            "type": ["null", "string"]
+                        },
+                        "darkimage": {
+                            "type": ["null", "string"]
+                        },
+                        "colorizedimage": {
+                            "type": ["null", "string"]
+                        },
+                        "cytaimage": {
+                            "type": ["null", "string"]
+                        },
+                        "dapi-index": {
+                            "type": ["null", "string"]
+                        },
+                        "slide": {
+                            "type": "string"
+                        },
+                        "area": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "spaceranger_count_config:": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "spaceranger_aggr_config": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["spaceranger_count_config", "spaceranger_aggr_config"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}

@@ -1,0 +1,18 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
+    strandedness: auto
+{% endfor -%}
+analysis_metadata:
+  NXF_VER: 24.10.0
+  nfcore_pipeline: nf-core/rnaseq
+  nextflow_params:
+    - "-profile singularity"
+    - "-r 3.17.0"
+    - "--igenomes_base $LOCAL_IGENOME_PATH"
+    - "-c $LOCAL_IGENOME_CONF"
+    - "--genome GRCh38.Ensembl_v111"
+    - "--aligner star_salmon"
+    - "--seq_center IGF"
+    - "--skip_gtf_filter"
+    - "--trimmer trimgalore"
+    - "--extra_trimgalore_args='--illumina'"
