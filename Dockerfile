@@ -9,8 +9,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -f /tmp/* && \
     rm -rf /var/lib/apt/lists/*
-ENV TZ=Europe/London
-RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV USERNAME=portal
 RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH
@@ -21,12 +19,14 @@ RUN python -m pip install --upgrade pip && \
     rm -f requirements.txt
 FROM python:3.13.7-slim AS runner
 ENV PATH=/venv/bin:$PATH
+ENV TZ=Europe/London
+RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY --from=builder /venv /venv
 COPY --from=builder /usr/bin /usr/bin
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
-COPY --from=builder /etc/timezone /etc/timezone
 WORKDIR /app
 COPY . .
+USER nobody
 ENV PYTHONPATH=/app
 EXPOSE 8080
 EXPOSE 5555
