@@ -1,2 +1,2 @@
-docker-compose -f docker-compose-igf-lims.yaml -p igfportal up -d
-#docker-compose -f docker-compose-igfportal.yaml -p igfportal up -d
+#!/bin/bash
+PORTAL_UID="$(id -u)" GID="$(id -g)"  docker compose -f docker-compose-igfportal-prod.yaml -p igfportal up -d

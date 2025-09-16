@@ -1,5 +1,5 @@
-FROM python:3.13.7-slim
-LABEL version="v1.0"
+FROM python:3.13.7-slim AS builder
+LABEL version="v2.0"
 LABEL description="Docker image for running IGFPortal server"
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
@@ -9,17 +9,24 @@ RUN apt-get update && \
     apt-get clean && \
     rm -f /tmp/* && \
     rm -rf /var/lib/apt/lists/*
-ENV TZ=Europe/London
-RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV USERNAME=portal
-RUN adduser --disabled-password --gecos "" ${USERNAME}
-USER portal
-WORKDIR /home/${USERNAME}/
-ENV VENV_PATH=/home/${USERNAME}/.venv
-ENV PATH=${VENV_PATH}/bin:${PATH}
-RUN python -m venv ${VENV_PATH}
+RUN python -m venv /venv
+ENV PATH=/venv/bin:$PATH
+WORKDIR /tmp
 COPY requirements.txt /tmp/requirements.txt
 RUN python -m pip install --upgrade pip && \
-    pip install -r /tmp/requirements.txt
-ENTRYPOINT ["bash","-c"]
-CMD ["flask", "run"]
+    pip install -r requirements.txt && \
+    rm -f requirements.txt
+FROM python:3.13.7-slim AS runner
+ENV PATH=/venv/bin:$PATH
+ENV TZ=Europe/London
+RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+COPY --from=builder /venv /venv
+COPY --from=builder /usr/bin /usr/bin
+COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+WORKDIR /app
+COPY . .
+USER nobody
+ENV PYTHONPATH=/app
+EXPOSE 8080
+EXPOSE 5555

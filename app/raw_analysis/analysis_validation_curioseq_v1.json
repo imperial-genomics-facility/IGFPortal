@@ -1,0 +1,49 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF curioseeker analysis validation schema",
+    "description": "Schema for validation of curioseeker analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "type": ["object", "string"],
+                    "properties": {
+                        "barcode_file": {
+                            "type": "string"
+                        },
+                        "experiment_date": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["barcode_file", "experiment_date"]
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "properties": {
+                "curioseeker_config:": {
+                    "type": "object",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "properties": {
+                        "genome": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["genome"]
+                }
+            },
+            "required": ["curioseeker_config"]
+        }
+    },
+    "required": ["sample_metadata", "analysis_metadata"]
+}
