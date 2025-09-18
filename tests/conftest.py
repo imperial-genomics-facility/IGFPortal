@@ -100,6 +100,11 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_list",
+                    "RawAnalysisV2View"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_list",
                     "RDSProjectBackupView"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
