@@ -1,5 +1,5 @@
 import logging
-from app import celery
+from app import db, celery
 from flask_appbuilder.actions import action
 from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
@@ -171,6 +171,37 @@ class RawAnalysisSchemaV2View(ModelView):
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
 
 
+
+def action_reject_raw_analysis(
+    item: Union[RawAnalysisV2, List[RawAnalysisV2]],
+    reject_tag: str = 'REJECTED') -> Any:
+    try:
+        if isinstance(item, list):
+            try:
+                for i in item:
+                    db.session.\
+                        query(RawAnalysisV2).\
+                        filter(RawAnalysisV2.raw_analysis_id==i.raw_analysis_id).\
+                        update({'status': reject_tag})
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise
+        else:
+            try:
+                db.session.\
+                    query(RawAnalysisV2).\
+                    filter(RawAnalysisV2.raw_analysis_id==item.raw_analysis_id).\
+                    update({'status': reject_tag})
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise
+    except Exception as e:
+        raise ValueError(
+            f"Failed to reject raw analysis, error: {e}")
+
+
 class RawAnalysisV2View(ModelView):
     datamodel = SQLAInterface(RawAnalysisV2)
     label_columns = {
@@ -238,3 +269,19 @@ class RawAnalysisV2View(ModelView):
             widget=Select2Widget()
         )
     }
+
+    @action(
+        "reject_raw_analysis",
+        "Reject analysis",
+        confirmation="Reject analysis design?",
+        multiple=False,
+        single=True,
+        icon="fa-exclamation")
+    def reject_raw_analysis(self, item):
+        try:
+            action_reject_raw_analysis(item)
+            return redirect(url_for('RawAnalysisV2View.list'))
+        except Exception as e:
+            log.error(e)
+            flash('Failed to reject analysis design', 'danger')
+            return redirect(url_for('RawAnalysisV2View.list'))
