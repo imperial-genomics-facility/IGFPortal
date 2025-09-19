@@ -1,3 +1,7 @@
+import os
+import json
+import asyncio
+import pytest
 from app.models import (
     RawAnalysisTemplateV2,
     RawAnalysisValidationSchemaV2,
@@ -8,7 +12,8 @@ from app.raw_analysis_view_v2 import (
     RawAnalysisTemplateV2View,
     RawAnalysisSchemaV2View,
     action_validate_json_analysis_schema,
-    async_validate_analysis_schema)
+    async_validate_analysis_schema,
+    action_download_json_analysis_schema)
 from app.raw_analysis.raw_analysis_util_v2 import (
     raw_project_query,
     raw_pipeline_query,
@@ -37,7 +42,11 @@ def test_analysis_template_v2(db):
     except:
         db.session.rollback()
         raise
-    template = db.session.query(RawAnalysisTemplateV2).filter(RawAnalysisTemplateV2.template_id==1).one_or_none()
+    template = \
+        db.session.\
+            query(RawAnalysisTemplateV2).\
+            filter(RawAnalysisTemplateV2.template_id==1).\
+            one_or_none()
     assert template is not None
     assert template.pipeline_id == 1
 
@@ -236,7 +245,6 @@ def test_action_validate_json_analysis_schema(db):
     except:
         db.session.rollback()
         raise
-    print(db.session.query(RawAnalysisValidationSchemaV2).all())
     with patch("app.raw_analysis_view_v2.async_validate_analysis_schema", return_values=["AAA"]):
         pipeline_list, _ = \
             action_validate_json_analysis_schema(
@@ -249,3 +257,30 @@ def test_action_validate_json_analysis_schema(db):
                 item=schema1)
         assert len(pipeline_list) == 1
         assert pipeline1.pipeline_name in pipeline_list
+
+@pytest.mark.anyio
+def test_action_download_json_analysis_schema(db):
+    pipeline1 = \
+        RawPipeline(
+            pipeline_id=1,
+            pipeline_name="dag_test1",
+            pipeline_db="test",
+            is_active="Y",
+            pipeline_type="AIRFLOW")
+    schema1 = \
+      RawAnalysisValidationSchemaV2(
+          raw_analysis_schema_id=1,
+          pipeline_id=pipeline1.pipeline_id,
+          json_schema='{"A": "B"}')
+    try:
+        db.session.add(pipeline1)
+        db.session.add(schema1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    with patch("app.raw_analysis_view_v2.run_async", return_values=["AAA"]):
+        __annotations__, pipeline_name = \
+            action_download_json_analysis_schema(schema1)
+    assert pipeline_name == pipeline1.pipeline_name

@@ -61,6 +61,24 @@ def action_validate_json_analysis_schema(
             f"Failed to run action for json validation, error: {e}")
 
 
+def action_download_json_analysis_schema(
+    item: RawAnalysisValidationSchemaV2) \
+        -> Tuple[str, str]:
+    try:
+        json_schema = item.json_schema
+        if json_schema is None:
+            json_schema = '{}'
+        file_path = \
+            run_async(prepare_file_for_download(
+                file_data=json_schema.encode('utf-8'),
+                file_suffix=".json"))
+        pipeline_name = \
+            item.pipeline.pipeline_name.encode('utf-8').decode()
+        return file_path, pipeline_name
+    except Exception as e:
+        raise ValueError(
+            f"Failed to prepare file for download, error: {e}")
+
 class RawAnalysisTemplateV2View(ModelView):
     datamodel = SQLAInterface(RawAnalysisTemplateV2)
     label_columns = {
@@ -118,7 +136,13 @@ class RawAnalysisSchemaV2View(ModelView):
         )
     }
 
-    @action("validate_json_analysis_schema", "Validate JSON", confirmation="Run validate?", multiple=True, single=False, icon="fa-rocket")
+    @action(
+        "validate_json_analysis_schema",
+        "Validate JSON",
+        confirmation="Run validate?",
+        multiple=True,
+        single=False,
+        icon="fa-rocket")
     def validate_json_analysis_schema(self, item):
         try:
             pipeline_list, _ = action_validate_json_analysis_schema(item)
@@ -129,17 +153,16 @@ class RawAnalysisSchemaV2View(ModelView):
             flash('Failed to validate analysis schema', 'danger')
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
 
-    @action("download_json_analysis_schema", "Download JSON schema", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    @action(
+        "download_json_analysis_schema",
+        "Download JSON schema",
+        confirmation=None,
+        icon="fa-file-excel-o",
+        multiple=False, single=True)
     def download_json_analysis_schema(self, item):
         try:
-            json_schema = item.json_schema
-            if json_schema is None:
-                json_schema = '{}'
-            file_path = \
-                run_async(prepare_file_for_download(
-                    file_data=json_schema.encode('utf-8'),
-                    file_suffix=".json"))
-            pipeline_name = item.pipeline.pipeline_name.encode('utf-8').decode()
+            file_path, pipeline_name = \
+                action_download_json_analysis_schema(item)
             self.update_redirect()
             return send_file(file_path, download_name=f'{pipeline_name}_schema.json', as_attachment=True)
         except:
