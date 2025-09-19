@@ -26,6 +26,7 @@ pydantic==2.11.7
 PyMySQL==1.1.2
 pyOpenSSL==25.1.0
 pytest==8.4.2
+pytest-asyncio==1.2.0
 pytest-cov==7.0.0
 python-dateutil==2.9.0.post0
 PyYAML==6.0.2

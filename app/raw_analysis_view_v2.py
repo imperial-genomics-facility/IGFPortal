@@ -14,7 +14,9 @@ from app.raw_analysis.raw_analysis_util_v2 import (
 from typing import Union, List, Any, Dict, Tuple
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask import redirect, flash, url_for
+from flask import redirect, flash, url_for, send_file
+from app.asyncio_util import run_async
+from app.file_download_util import prepare_file_for_download
 
 log = logging.getLogger(__name__)
 
@@ -125,4 +127,21 @@ class RawAnalysisSchemaV2View(ModelView):
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
         except:
             flash('Failed to validate analysis schema', 'danger')
+            return redirect(url_for('RawAnalysisSchemaV2View.list'))
+
+    @action("download_json_analysis_schema", "Download JSON schema", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    def download_json_analysis_schema(self, item):
+        try:
+            json_schema = item.json_schema
+            if json_schema is None:
+                json_schema = '{}'
+            file_path = \
+                run_async(prepare_file_for_download(
+                    file_data=json_schema.encode('utf-8'),
+                    file_suffix=".json"))
+            pipeline_name = item.pipeline.pipeline_name.encode('utf-8').decode()
+            self.update_redirect()
+            return send_file(file_path, download_name=f'{pipeline_name}_schema.json', as_attachment=True)
+        except:
+            flash('Failed to download analysis schema', 'danger')
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
