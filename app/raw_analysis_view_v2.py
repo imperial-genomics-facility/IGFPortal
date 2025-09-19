@@ -146,7 +146,8 @@ class RawAnalysisSchemaV2View(ModelView):
         icon="fa-rocket")
     def validate_json_analysis_schema(self, item):
         try:
-            pipeline_list, _ = action_validate_json_analysis_schema(item)
+            pipeline_list, _ = \
+                action_validate_json_analysis_schema(item)
             flash("Submitted jobs for {0}".format(', '.join(pipeline_list)), "info")
             self.update_redirect()
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
@@ -200,6 +201,22 @@ def action_reject_raw_analysis(
     except Exception as e:
         raise ValueError(
             f"Failed to reject raw analysis, error: {e}")
+
+def action_download_raw_analysis_design(item: RawAnalysisV2) -> Tuple[str, str]:
+    try:
+        analysis_yaml = item.analysis_yaml
+        if analysis_yaml is None:
+            analysis_yaml = ''
+        file_path = \
+            run_async(prepare_file_for_download(
+                file_data=analysis_yaml.encode('utf-8'),
+                file_suffix=".yaml"))
+        analysis_name = \
+            item.analysis_name.encode('utf-8').decode()
+        return file_path, analysis_name
+    except Exception as e:
+        raise ValueError(
+            f"Failed to prepare raw analysis design, error: {e}")
 
 
 class RawAnalysisV2View(ModelView):
@@ -284,4 +301,23 @@ class RawAnalysisV2View(ModelView):
         except Exception as e:
             log.error(e)
             flash('Failed to reject analysis design', 'danger')
+            return redirect(url_for('RawAnalysisV2View.list'))
+
+
+    @action(
+        "download_raw_analysis_design",
+        "Download analysis yaml",
+        confirmation=None,
+        icon="fa-file-excel-o",
+        multiple=False,
+        single=True)
+    def download_raw_analysis_design(self, item):
+        try:
+            file_path, analysis_name = \
+                action_download_raw_analysis_design(item)
+            self.update_redirect()
+            return send_file(file_path, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+        except Exception as e:
+            flash('Failed to download raw analysis', 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisV2View.list'))

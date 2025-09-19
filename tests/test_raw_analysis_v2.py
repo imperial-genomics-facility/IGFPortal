@@ -14,7 +14,8 @@ from app.raw_analysis_view_v2 import (
     action_validate_json_analysis_schema,
     async_validate_analysis_schema,
     action_download_json_analysis_schema,
-    action_reject_raw_analysis)
+    action_reject_raw_analysis,
+    action_download_raw_analysis_design)
 from app.raw_analysis.raw_analysis_util_v2 import (
     raw_project_query,
     raw_pipeline_query,
@@ -281,8 +282,8 @@ def test_action_download_json_analysis_schema(db):
     except:
         db.session.rollback()
         raise
-    with patch("app.raw_analysis_view_v2.run_async", return_values=["AAA"]):
-        __annotations__, pipeline_name = \
+    with patch("app.raw_analysis_view_v2.prepare_file_for_download", return_values=["AAA"]):
+        _, pipeline_name = \
             action_download_json_analysis_schema(schema1)
     assert pipeline_name == pipeline1.pipeline_name
 
@@ -337,3 +338,38 @@ def test_action_reject_raw_analysis(db):
             filter(RawAnalysisV2.raw_analysis_id==raw_analysis2.raw_analysis_id).\
             one_or_none()
     assert raw_analysis.status == "VALIDATED"
+
+
+def test_action_download_raw_analysis_design(db):
+    pipeline1 = \
+        RawPipeline(
+            pipeline_id=1,
+            pipeline_name="dag_test1",
+            pipeline_db="test",
+            is_active="Y",
+            pipeline_type="AIRFLOW")
+    project1 = \
+        RawProject(
+            project_id=1,
+            project_igf_id="Test")
+    raw_analysis1 = \
+        RawAnalysisV2(
+            raw_analysis_id=1,
+            project_id=project1.project_id,
+            pipeline_id=pipeline1.pipeline_id,
+            analysis_name="TestAnalysis1",
+            status="VALIDATED",
+            analysis_yaml="A: a")
+    try:
+        db.session.add(pipeline1)
+        db.session.add(project1)
+        db.session.add(raw_analysis1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    with patch("app.raw_analysis_view_v2.prepare_file_for_download", return_values=["AAA"]):
+        _, analysis_name = \
+            action_download_raw_analysis_design(raw_analysis1)
+    assert analysis_name == raw_analysis1.analysis_name
