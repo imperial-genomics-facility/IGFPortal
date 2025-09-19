@@ -3,6 +3,7 @@ from app import celery
 from flask_appbuilder.actions import action
 from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
+from flask_appbuilder.models.sqla.filters import FilterInFunction
 from app.models import (
     RawAnalysisTemplateV2,
     RawAnalysisValidationSchemaV2,
@@ -168,3 +169,72 @@ class RawAnalysisSchemaV2View(ModelView):
         except:
             flash('Failed to download analysis schema', 'danger')
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
+
+
+class RawAnalysisV2View(ModelView):
+    datamodel = SQLAInterface(RawAnalysisV2)
+    label_columns = {
+        "analysis_name": "Analysis name",
+        "project.project_igf_id": "Project name",
+        "pipeline.pipeline_name": "Pipeline name",
+        "status": "Status",
+        "date_stamp": "Updated on",
+        "analysis_yaml": "Yaml",
+        "report": "Report"}
+    list_columns = [
+        "analysis_name",
+        "project.project_igf_id",
+        "pipeline.pipeline_name",
+        "status",
+        "date_stamp"]
+    show_columns = [
+        "analysis_name",
+        "project.project_igf_id",
+        "pipeline.pipeline_name",
+        "status",
+        "date_stamp",
+        "analysis_yaml", 
+        "report"]
+    add_columns = [
+        "analysis_name",
+        "project",
+        "pipeline",
+        "analysis_yaml"]
+    edit_columns = [
+        "analysis_name",
+        "project",
+        "pipeline",
+        "analysis_yaml"]
+    base_filters = [
+        ["status", FilterInFunction, lambda: ["UNKNOWN", "FAILED"]]]
+    base_order = ("raw_analysis_id", "desc")
+    base_permissions = [
+        "can_list",
+        "can_show",
+        "can_add",
+        "can_edit"]
+
+    add_form_extra_fields = {
+        "project": QuerySelectField(
+            "Project",
+            query_factory=raw_project_query,
+            widget=Select2Widget()
+        ),
+        "pipeline": QuerySelectField(
+            "Pipeline",
+            query_factory=raw_pipeline_query,
+            widget=Select2Widget()
+        ),
+    }
+    edit_form_extra_fields = {
+        "project": QuerySelectField(
+            "Project",
+            query_factory=raw_project_query,
+            widget=Select2Widget()
+        ),
+        "pipeline": QuerySelectField(
+            "Pipeline",
+            query_factory=raw_pipeline_query,
+            widget=Select2Widget()
+        )
+    }
