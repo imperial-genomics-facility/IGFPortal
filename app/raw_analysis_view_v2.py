@@ -11,7 +11,8 @@ from app.models import (
 from app.raw_analysis.raw_analysis_util_v2 import (
     raw_project_query,
     raw_pipeline_query,
-    validate_analysis_json_schema)
+    validate_analysis_json_schema,
+    validate_analysis_design)
 from typing import Union, List, Any, Dict, Tuple
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -148,7 +149,9 @@ class RawAnalysisSchemaV2View(ModelView):
         try:
             pipeline_list, _ = \
                 action_validate_json_analysis_schema(item)
-            flash("Submitted jobs for {0}".format(', '.join(pipeline_list)), "info")
+            flash(
+                f"Submitted jobs for {', '.join(pipeline_list)}",
+                "info")
             self.update_redirect()
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
         except:
@@ -166,9 +169,14 @@ class RawAnalysisSchemaV2View(ModelView):
             file_path, pipeline_name = \
                 action_download_json_analysis_schema(item)
             self.update_redirect()
-            return send_file(file_path, download_name=f'{pipeline_name}_schema.json', as_attachment=True)
+            return send_file(
+                file_path,
+                download_name=f'{pipeline_name}_schema.json',
+                as_attachment=True)
         except:
-            flash('Failed to download analysis schema', 'danger')
+            flash(
+                'Failed to download analysis schema',
+                'danger')
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
 
 
@@ -217,6 +225,45 @@ def action_download_raw_analysis_design(item: RawAnalysisV2) -> Tuple[str, str]:
     except Exception as e:
         raise ValueError(
             f"Failed to prepare raw analysis design, error: {e}")
+
+
+def action_validate_and_submit_analysis(
+    item: Union[RawAnalysisV2, List[RawAnalysisV2]]) -> \
+        Tuple[List[str], Dict[str, Any]]:
+    try:
+        analysis_list = list()
+        id_list = list()
+        if isinstance(item, list):
+            analysis_list = [i.analysis_name for i in item]
+            id_list = [i.raw_analysis_id for i in item]
+        else:
+            analysis_list = [item.analysis_name]
+            id_list = [item.raw_analysis_id]
+        response_dict = \
+            async_validate_analysis_yaml.\
+                apply_async(args=[id_list])
+        log.info(
+            "Submitted tasks for analysis validation, " + \
+            f"status: {response_dict}")
+        return analysis_list, response_dict
+    except Exception as e:
+        raise ValueError(
+            f"Failed to validate analysis design, error: {e}")
+
+
+@celery.task(bind=True)
+def async_validate_analysis_yaml(self, id_list):
+    try:
+        results = list()
+        for raw_analysis_id in id_list:
+            msg = \
+                validate_analysis_design(
+                    raw_analysis_id=raw_analysis_id)
+            results.append(msg)
+        return dict(zip(id_list, results))
+    except Exception as e:
+        log.error(
+            f"Failed to run celery job, error: {e}")
 
 
 class RawAnalysisV2View(ModelView):
@@ -300,7 +347,9 @@ class RawAnalysisV2View(ModelView):
             return redirect(url_for('RawAnalysisV2View.list'))
         except Exception as e:
             log.error(e)
-            flash('Failed to reject analysis design', 'danger')
+            flash(
+                'Failed to reject analysis design',
+                'danger')
             return redirect(url_for('RawAnalysisV2View.list'))
 
 
@@ -316,8 +365,36 @@ class RawAnalysisV2View(ModelView):
             file_path, analysis_name = \
                 action_download_raw_analysis_design(item)
             self.update_redirect()
-            return send_file(file_path, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+            return send_file(
+                file_path,
+                download_name=f"{analysis_name}_analysis.yaml",
+                as_attachment=True)
         except Exception as e:
-            flash('Failed to download raw analysis', 'danger')
+            flash(
+                'Failed to download raw analysis',
+                'danger')
             log.error(e)
+            return redirect(url_for('RawAnalysisV2View.list'))
+
+    @action(
+        "validate_and_submit_analysis",
+        "Validate and upload analysis",
+        confirmation="Validate analysis design?",
+        multiple=True,
+        single=False,
+        icon="fa-rocket")
+    def validate_and_submit_analysis(self, item):
+        try:
+            analysis_list, response_dict = \
+                action_validate_and_submit_analysis(item)
+            flash(
+                f"Submitted jobs for {', '.join(analysis_list)}",
+                "info")
+            self.update_redirect()
+            return redirect(url_for('RawAnalysisV2View.list'))
+        except Exception as e:
+            log.error(e)
+            flash(
+                'Failed to validate analysis design',
+                'danger')
             return redirect(url_for('RawAnalysisV2View.list'))
