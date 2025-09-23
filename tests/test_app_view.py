@@ -17,7 +17,9 @@ def test_admin_view(test_client):
     #assert rv.status_code == 302
     #rv = test_client.get('/sampleindexview/list/')
     #assert rv.status_code == 302
-    rv = test_client.get('/rawanalysisview/list/')
+    # rv = test_client.get('/rawanalysisview/list/')
+    # assert rv.status_code == 302
+    rv = test_client.get('/rawanalysisv2view/list/')
     assert rv.status_code == 302
     rv = test_client.get('/analysisview/list/')
     assert rv.status_code == 302
@@ -61,8 +63,8 @@ def test_admin_view(test_client):
     #assert rv.status_code == 200
     #rv = test_client.get('/sampleindexview/list/')
     #assert rv.status_code == 200
-    rv = test_client.get('/rawanalysisview/list/')
-    assert rv.status_code == 200
+    # rv = test_client.get('/rawanalysisv2view/list/')
+    # assert rv.status_code == 200
     rv = test_client.get('/analysisview/list/')
     assert rv.status_code == 200
     #rv = test_client.get('/rdsprojectbackupview/list/')

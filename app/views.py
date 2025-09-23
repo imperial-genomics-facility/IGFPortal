@@ -9,6 +9,7 @@ from .raw_seqrun_view import RawSeqrunView
 from .analysis_view import AnalysisView
 from .metadata_view import SampleProjectView, SampleView
 from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
+from .raw_analysis_view_v2 import RawAnalysisV2View, RawAnalysisSchemaV2View, RawAnalysisTemplateV2View, RawAnalysisQueueV2View
 from .iframe_view import IFrameView
 from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPendingView
 
@@ -147,16 +148,53 @@ appbuilder.\
 #        category_icon="fa-flask",
 #        icon="fa-rocket",
 #        category="Analysis")
+# --- OLD RAW ANALYSIS VIEW ---
+# appbuilder.\
+#     add_view(
+#         RawAnalysisView,
+#         "Create new analysis design",
+#         category_icon="fa-flask",
+#         icon="fa-file-text-o",
+#         category="Analysis")
+# appbuilder.\
+#     add_view(
+#         RawAnalysisQueueView,
+#         "View analysis upload queue",
+#         category_icon="fa-flask",
+#         icon="fa fa-binoculars",
+#         category="Analysis")
+# appbuilder.\
+#     add_view(
+#         AnalysisView,
+#         "Trigger analysis pipeline",
+#         category_icon="fa-flask",
+#         icon="fa-space-shuttle",
+#         category="Analysis")
+# appbuilder.\
+#     add_view(
+#         RawAnalysisSchemaView,
+#         "Validation schema",
+#         category_icon="fa-flask",
+#         icon="fa fa-check-square-o",
+#         category="Analysis")
+# appbuilder.\
+#     add_view(
+#         RawAnalysisTemplateView,
+#         "Analysis template",
+#         category_icon="fa-flask",
+#         icon="fa fa-magic",
+#         category="Analysis")
+# --- OLD RAW ANALYSIS VIEW ---
 appbuilder.\
     add_view(
-        RawAnalysisView,
+        RawAnalysisV2View,
         "Create new analysis design",
         category_icon="fa-flask",
         icon="fa-file-text-o",
         category="Analysis")
 appbuilder.\
     add_view(
-        RawAnalysisQueueView,
+        RawAnalysisQueueV2View,
         "View analysis upload queue",
         category_icon="fa-flask",
         icon="fa fa-binoculars",
@@ -170,20 +208,18 @@ appbuilder.\
         category="Analysis")
 appbuilder.\
     add_view(
-        RawAnalysisSchemaView,
+        RawAnalysisSchemaV2View,
         "Validation schema",
         category_icon="fa-flask",
         icon="fa fa-check-square-o",
         category="Analysis")
 appbuilder.\
     add_view(
-        RawAnalysisTemplateView,
+        RawAnalysisTemplateV2View,
         "Analysis template",
         category_icon="fa-flask",
         icon="fa fa-magic",
         category="Analysis")
-
-
 """
     Data cleanup
 """

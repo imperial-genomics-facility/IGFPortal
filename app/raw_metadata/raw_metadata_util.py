@@ -1,12 +1,9 @@
-from multiprocessing.sharedctypes import Value
-from numpy import isin
 import pandas as pd
-import os, json, re, tempfile, logging, typing
-from typing import Tuple
-from jsonschema import Draft4Validator, ValidationError
+import os, json, tempfile
+from typing import Optional
+from jsonschema import Draft4Validator
 from .. import db
 from ..models import RawMetadataModel
-from ..metadata.metadata_util import check_for_projects_in_metadata_db
 from ..metadata.metadata_util import check_sample_and_project_ids_in_metadata_db
 
 EXPERIMENT_TYPE_LOOKUP = \
@@ -229,8 +226,7 @@ def _run_metadata_json_validation(
         return error_list
     except Exception as e:
         raise ValueError(
-                "Failed to run json validation, error: {0}".\
-                    format(e))
+            f"Failed to run json validation, error: {e}")
 
 
 def _set_metadata_validation_status(
@@ -240,38 +236,43 @@ def _set_metadata_validation_status(
     try:
         if status.upper() == 'VALIDATED':
             try:
-                db.session.\
-                    query(RawMetadataModel).\
-                    filter(RawMetadataModel.raw_metadata_id==raw_metadata_id).\
-                    update({
-                        'status': 'VALIDATED',
-                        'report': ''})
+                db.session.query(
+                    RawMetadataModel
+                ).filter(
+                    RawMetadataModel.raw_metadata_id==raw_metadata_id
+                ).update({
+                    'status': 'VALIDATED',
+                    'report': ''
+                })
                 db.session.commit()
             except:
                 db.session.rollback()
                 raise
         elif status.upper() == 'FAILED':
             try:
-                db.session.\
-                    query(RawMetadataModel).\
-                    filter(RawMetadataModel.raw_metadata_id==raw_metadata_id).\
-                    update({
-                        'status': 'FAILED',
-                        'report': report})
+                db.session.query(
+                    RawMetadataModel
+                ).filter(
+                    RawMetadataModel.raw_metadata_id==raw_metadata_id
+                ).update({
+                    'status': 'FAILED',
+                    'report': report
+                })
                 db.session.commit()
             except:
                 db.session.rollback()
                 raise
         else:
-            db.session.\
-                query(RawMetadataModel).\
-                filter(RawMetadataModel.raw_metadata_id==raw_metadata_id).\
-                update({
-                    'status': 'UNKNOWN'})
+            db.session.query(
+                RawMetadataModel
+            ).filter(
+                RawMetadataModel.raw_metadata_id==raw_metadata_id
+            ).update({
+                'status': 'UNKNOWN'
+            })
     except Exception as e:
         raise ValueError(
-                "Failed to set metadata status for id {0}, error: {1}".\
-                    format(raw_metadata_id, e))
+            f"Failed to set metadata status for id {raw_metadata_id}, error: {e}")
 
 
 def validate_raw_metadata_and_set_db_status(
@@ -280,20 +281,18 @@ def validate_raw_metadata_and_set_db_status(
     schema_json: str=os.path.join(os.path.dirname(__file__), 'metadata_validation.json')) -> str:
     try:
         error_list = list()
-        raw_metadata = \
-            db.session.\
-                query(RawMetadataModel).\
-                filter(RawMetadataModel.raw_metadata_id==raw_metadata_id).\
-                one_or_none()
+        raw_metadata = db.session.query(
+            RawMetadataModel
+        ).filter(
+            RawMetadataModel.raw_metadata_id==raw_metadata_id
+        ).one_or_none()
         if raw_metadata is None:
             raise ValueError(
-                    "No metadata entry found for id {0}".\
-                        format(raw_metadata_id))
+                f"No metadata entry found for id {raw_metadata_id}")
         csv_data = raw_metadata.formatted_csv_data
         if csv_data is None:
             raise ValueError(
-                    "No formatted csv error found for id {0}".\
-                        format(raw_metadata_id))
+                f"No formatted csv error found for id {raw_metadata_id}")
         with tempfile.TemporaryDirectory() as temp_dir:
             metadata_file = os.path.join(temp_dir, 'metadata.csv')
             with open(metadata_file, 'w') as fp:
@@ -344,9 +343,10 @@ def validate_raw_metadata_and_set_db_status(
                 if len(existing_metadata_errors) > 0:
                     error_list.extend(existing_metadata_errors)
         if len(error_list) > 0:
-            error_list = \
-                ["{0}, {1}".format(i+1, e)
-                    for i,e in enumerate(error_list)]
+            error_list = [
+                f"{i+1}, {e}"
+                    for i,e in enumerate(error_list)
+            ]
             _set_metadata_validation_status(
                 raw_metadata_id=raw_metadata_id,
                 status='FAILED',
@@ -379,8 +379,12 @@ def compare_metadata_sample_with_db(
                 values.\
                 tolist()
         sample_projects_df = \
-            df[[sample_column, project_column, name_column, email_column]].\
-                drop_duplicates()
+            df[[
+                sample_column,
+                project_column,
+                name_column,
+                email_column
+            ]].drop_duplicates()
         sample_project_list = \
             sample_projects_df.\
                 to_dict(orient='records')
@@ -393,15 +397,14 @@ def compare_metadata_sample_with_db(
         return errors
     except Exception as e:
         raise ValueError(
-                "Failed to compare metadata with db, error: {0}".\
-                    format(e))
+            f"Failed to compare metadata with db, error: {e}")
 
 
 def _validate_metadata_library_type(
     sample_id: str,
     library_source: str,
     library_strategy: str,
-    experiment_type: str) -> str:
+    experiment_type: str) -> Optional[str]:
     '''
     A staticmethod for validating library metadata information for sample
 
@@ -415,86 +418,103 @@ def _validate_metadata_library_type(
       error_msg = None
       exp_lookup_data = pd.DataFrame(EXPERIMENT_TYPE_LOOKUP)
       if library_source == 'GENOMIC':
-        library_strategy_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC']['library_strategy'].values)
+        library_strategy_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC']\
+                ['library_strategy'].values
+        )
         library_strategy_list.append('UNKNOWN')
-        experiment_type_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC']['experiment_type'].values)
+        experiment_type_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC']\
+                ['experiment_type'].values
+        )
         experiment_type_list.append('UNKNOWN')
         if library_strategy not in library_strategy_list or \
             experiment_type not in experiment_type_list:
-          error_msg = \
-            '{0}: library_strategy {1} or experiment_type {2} is not compatible with library_source {3}'.\
-            format(sample_id,
-                   library_strategy,
-                   experiment_type,
-                   library_source)
+            error_msg = \
+                f'{sample_id}: library_strategy ' + \
+                f'{library_strategy} or experiment_type '+ \
+                f'{experiment_type} is not compatible with ' + \
+                f'library_source {library_source}'
       elif library_source == 'TRANSCRIPTOMIC':
-        library_strategy_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC']['library_strategy'].values)
+        library_strategy_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC']\
+                ['library_strategy'].values
+        )
         library_strategy_list.append('UNKNOWN')
-        experiment_type_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC']['experiment_type'].values)
+        experiment_type_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC']\
+                ['experiment_type'].values
+        )
         experiment_type_list.append('UNKNOWN')
         if library_strategy not in library_strategy_list or \
            experiment_type not in experiment_type_list:
-          error_msg = \
-            '{0}: library_strategy {1} or experiment_type {2} is not compatible with library_source {3}'.\
-            format(sample_id,
-                   library_strategy,
-                   experiment_type,
-                   library_source)
+            error_msg = \
+                f'{sample_id}: library_strategy ' + \
+                f'{library_strategy} or experiment_type ' + \
+                f'{experiment_type} is not compatible with ' + \
+                f'library_source {library_source}'
       elif library_source == 'GENOMIC_SINGLE_CELL':
-        library_strategy_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC_SINGLE_CELL']['library_strategy'].values)
+        library_strategy_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC_SINGLE_CELL']\
+                ['library_strategy'].values
+        )
         library_strategy_list.append('UNKNOWN')
-        experiment_type_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC_SINGLE_CELL']['experiment_type'].values)
+        experiment_type_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='GENOMIC_SINGLE_CELL']\
+                ['experiment_type'].values
+        )
         experiment_type_list.append('UNKNOWN')
         if library_strategy not in library_strategy_list or \
            experiment_type not in experiment_type_list:
-          error_msg = \
-            '{0}: library_strategy {1} or experiment_type {2} is not compatible with library_source {3}'.\
-            format(sample_id,
-                   library_strategy,
-                   experiment_type,
-                   library_source)
+            error_msg = \
+                f'{sample_id}: library_strategy ' + \
+                f'{library_strategy} or experiment_type ' + \
+                f'{experiment_type} is not compatible with ' + \
+                f'library_source {library_source}'
       elif library_source == 'TRANSCRIPTOMIC_SINGLE_CELL':
-        library_strategy_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC_SINGLE_CELL']['library_strategy'].values)
+        library_strategy_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC_SINGLE_CELL']\
+                ['library_strategy'].values
+        )
         library_strategy_list.append('UNKNOWN')
-        experiment_type_list = \
-          list(exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC_SINGLE_CELL']['experiment_type'].values)
+        experiment_type_list = list(
+            exp_lookup_data[exp_lookup_data['library_source']=='TRANSCRIPTOMIC_SINGLE_CELL']\
+                ['experiment_type'].values
+        )
         experiment_type_list.append('UNKNOWN')
         if library_strategy not in library_strategy_list or \
            experiment_type not in experiment_type_list:
-          error_msg = \
-            '{0}: library_strategy {1} or experiment_type {2} is not compatible with library_source {3}'.\
-            format(sample_id,
-                   library_strategy,
-                   experiment_type,
-                   library_source)
-
+            error_msg = \
+                f'{sample_id}: library_strategy ' + \
+                f'{library_strategy} or experiment_type ' + \
+                f'{experiment_type} is not compatible with ' + \
+                f'library_source {library_source}'
       return error_msg
     except Exception as e:
       raise ValueError(
-                "Failed to validate library type, error: {0}".\
-                    format(e))
+            f"Failed to validate library type, error: {e}")
 
 def mark_raw_metadata_as_ready(id_list: list) -> None:
     try:
         try:
-            db.session.\
-                query(RawMetadataModel).\
-                filter(RawMetadataModel.raw_metadata_id.in_(id_list)).\
-                filter(RawMetadataModel.status=="VALIDATED").\
-                update({'status': 'READY'}, synchronize_session='fetch')
+            db.session.query(
+                RawMetadataModel
+            ).filter(
+                RawMetadataModel.raw_metadata_id.in_(id_list)
+            ).filter(
+                RawMetadataModel.status=="VALIDATED"
+            ).update(
+                {'status': 'READY'},
+                synchronize_session='fetch'
+            )
             db.session.commit()
         except:
             db.session.rollback()
             raise
     except Exception as e:
-        raise ValueError("Failed to mark metadata as ready, error: {0}".format(e))
+        raise ValueError(
+            f"Failed to mark metadata as ready, error: {e}")
+
 
 def search_metadata_table_and_get_new_projects(data):
     try:
@@ -506,20 +526,22 @@ def search_metadata_table_and_get_new_projects(data):
            not isinstance(data.get('project_list'), list):
             raise ValueError("Missing project list")
         project_list = data.get('project_list')
-        existing_projects = \
-            db.session.\
-                query(RawMetadataModel.metadata_tag).\
-                filter(RawMetadataModel.metadata_tag.in_(project_list)).\
-                all()
-        existing_projects = [i[0] for i in existing_projects]
-        new_projects = \
-            list(
-                set(project_list).\
-                    difference(set(existing_projects)))
+        existing_projects = db.session.query(
+            RawMetadataModel.metadata_tag
+        ).filter(
+            RawMetadataModel.metadata_tag.in_(project_list)
+        ).all()
+        existing_projects = [
+            i[0] for i in existing_projects
+        ]
+        new_projects = list(
+            set(project_list).\
+                difference(set(existing_projects))
+        )
         return new_projects
     except Exception as e:
         raise ValueError(
-                "Failed to search for new metadata, error: {0}".format(e))
+            f"Failed to search for new metadata, error: {e}")
 
 def parse_and_add_new_raw_metadata(data):
     try:
@@ -540,17 +562,21 @@ def parse_and_add_new_raw_metadata(data):
                    raw_csv_data is None or \
                    formatted_csv_data is None:
                     raise KeyError("Missing metadata info")
-                exists = \
-                    db.session.\
-                        query(RawMetadataModel).\
-                        filter(RawMetadataModel.metadata_tag==metadata_tag).\
-                        one_or_none()
+                exists = db.session.query(
+                    RawMetadataModel
+                ).filter(
+                    RawMetadataModel.metadata_tag==metadata_tag
+                ).one_or_none()
                 if isinstance(raw_csv_data, str):
                     raw_csv_data = json.loads(raw_csv_data)
                 if isinstance(formatted_csv_data, str):
                     formatted_csv_data = json.loads(formatted_csv_data)
-                raw_csv_data = pd.DataFrame(raw_csv_data).to_csv(index=False)
-                formatted_csv_data = pd.DataFrame(formatted_csv_data).to_csv(index=False)
+                raw_csv_data = \
+                    pd.DataFrame(raw_csv_data).\
+                        to_csv(index=False)
+                formatted_csv_data = \
+                    pd.DataFrame(formatted_csv_data).\
+                        to_csv(index=False)
                 if exists is None:
                     metadata = \
                         RawMetadataModel(
@@ -565,4 +591,4 @@ def parse_and_add_new_raw_metadata(data):
             raise
     except Exception as e:
         raise ValueError(
-                "Failed to add new metadata, error: {0}".format(e))
+            f"Failed to add new metadata, error: {e}")

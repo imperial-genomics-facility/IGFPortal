@@ -1,0 +1,10 @@
+run_metadata:
+  - cosmx_run_id: RUN_ID_NAME
+    export_directory_path: EXPORT_PATH_NAME
+analysis_metadata:
+  run_type: RNA
+  annotation:
+    - cosmx_slide_id: SLIDE_ID
+      tissue_ontology: UNKNOWN
+      tissue_condition: UNKNOWN
+      tissue_annotation: UNKNOWN
