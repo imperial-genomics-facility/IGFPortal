@@ -423,7 +423,7 @@ def test_get_validation_status_for_analysis_design():
             analysis_yaml=design_1,
             validation_schema=schema_data_2)
     assert len(error_list) == 1
-    assert 'Failed to load validation schema. Invalid format.' in error_list
+    assert 'Failed to load validation schema. Invalid format.' in error_list[0]
     ## invalid design
     design_2 = """
     sample_metadata1:
