@@ -1492,3 +1492,74 @@ def test_fetch_all_samples_for_project(db):
         _fetch_all_samples_for_project(
             project_igf_id='project2')
     assert len(sample_ids) == 0
+
+def test_fetch_analysis_template_for_raw_analysis_id(db):
+    raw_project1 = \
+        RawProject(
+            project_igf_id='project1',
+            deliverable="COSMX")
+    raw_project2 = \
+        RawProject(
+            project_igf_id='project2',
+            deliverable="FASTQ")
+    pipeline1 = \
+        RawPipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    pipeline2 = \
+        RawPipeline(
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_analysis1 = \
+        RawAnalysisV2(
+            raw_analysis_id=1,
+            analysis_name='analysis1',
+            project=raw_project1,
+            pipeline=pipeline1,
+            status="UNKNOWN",
+            analysis_yaml="a: b")
+    raw_analysis2 = \
+        RawAnalysisV2(
+            raw_analysis_id=2,
+            analysis_name='analysis2',
+            project=raw_project1,
+            pipeline=pipeline2,
+            status="UNKNOWN",
+            analysis_yaml="a: b")
+    template = \
+        """sample_metadata:
+        {% for SAMPLE_ID in SAMPLE_ID_LIST %}
+        {{ SAMPLE_ID }}:
+            condition: CONDITION_NAME
+            strandedness: reverse
+        {% endfor %}analysis_metadata:
+            pipeline_name: xyz
+        """
+    template1 = \
+        RawAnalysisTemplateV2(
+            template_tag="template1",
+            template_data=template,
+            pipeline=pipeline1)
+    try:
+        db.session.add(raw_project1)
+        db.session.add(raw_project2)
+        db.session.add(pipeline1)
+        db.session.add(pipeline2)
+        db.session.add(raw_analysis1)
+        db.session.add(raw_analysis2)
+        db.session.add(template1)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    template_data = \
+        _fetch_analysis_template_for_raw_analysis_id(
+            raw_analysis_id=raw_analysis1.raw_analysis_id)
+    assert "CONDITION_NAME" in template_data
+    template_data = \
+        _fetch_analysis_template_for_raw_analysis_id(
+            raw_analysis_id=raw_analysis2.raw_analysis_id)
+    assert "CONDITION_NAME" not in template_data
