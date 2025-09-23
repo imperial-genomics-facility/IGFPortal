@@ -155,7 +155,7 @@ class RawAnalysisSchemaV2View(ModelView):
                 "info")
             self.update_redirect()
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
-        except:
+        except Exception:
             flash('Failed to validate analysis schema', 'danger')
             return redirect(url_for('RawAnalysisSchemaV2View.list'))
 
@@ -174,7 +174,7 @@ class RawAnalysisSchemaV2View(ModelView):
                 file_path,
                 download_name=f'{pipeline_name}_schema.json',
                 as_attachment=True)
-        except:
+        except Exception:
             flash(
                 'Failed to download analysis schema',
                 'danger')
@@ -194,7 +194,7 @@ def action_reject_raw_analysis(
                         filter(RawAnalysisV2.raw_analysis_id==i.raw_analysis_id).\
                         update({'status': reject_tag})
                 db.session.commit()
-            except:
+            except Exception:
                 db.session.rollback()
                 raise
         else:
@@ -204,7 +204,7 @@ def action_reject_raw_analysis(
                     filter(RawAnalysisV2.raw_analysis_id==item.raw_analysis_id).\
                     update({'status': reject_tag})
                 db.session.commit()
-            except:
+            except Exception:
                 db.session.rollback()
                 raise
     except Exception as e:

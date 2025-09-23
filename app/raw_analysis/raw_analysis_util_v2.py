@@ -3,7 +3,7 @@ import os
 import json
 import logging
 from jinja2 import Template
-from typing import List, Tuple
+from typing import Tuple, List
 from app.models import (
     Sample,
     Experiment,
@@ -121,7 +121,7 @@ def _get_validation_status_for_analysis_design(
                 Draft202012Validator(schema)
             for error in sorted(schema_validator.iter_errors(json_data), key=str):
                 error_list.append(error.message)
-        except:
+        except Exception:
             error_list.append(
                 'Failed to check validation schema')
         return error_list
@@ -235,7 +235,7 @@ def _get_sample_metadata_checks_for_analysis(
             f"Failed to check sample metadata, error: {e}")
 
 
-def _get_validation_errors_for_analysis_design(raw_analysis_id: int) -> list:
+def _get_validation_errors_for_analysis_design(raw_analysis_id: int) -> List[str]:
     try:
         error_list = list()
         project_igf_id = ''
