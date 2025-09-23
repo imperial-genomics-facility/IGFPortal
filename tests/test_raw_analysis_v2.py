@@ -1455,3 +1455,40 @@ def test_fetch_project_igf_id_and_deliverable_for_raw_analysis_id(db):
             raw_analysis_id=raw_analysis1.raw_analysis_id)
     assert project_igf_id == raw_project1.project_igf_id
     assert deliverable == raw_project1.deliverable
+
+def test_fetch_all_samples_for_project(db):
+    ## setup metadata
+    project1 = \
+        Project(
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_igf_id='project2')
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    try:
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    sample_ids = \
+        _fetch_all_samples_for_project(
+            project_igf_id='project1')
+    assert len(sample_ids) == 2
+    assert 'IGF111' in sample_ids
+    assert 'IGF112' in sample_ids
+    sample_ids = \
+        _fetch_all_samples_for_project(
+            project_igf_id='project2')
+    assert len(sample_ids) == 0
