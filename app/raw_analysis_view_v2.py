@@ -97,6 +97,21 @@ class RawAnalysisTemplateV2View(ModelView):
         "can_delete"]
     base_order = ("template_id", "desc")
 
+    add_form_extra_fields = {
+        "pipeline": QuerySelectField(
+            "Pipeline",
+            query_factory=raw_pipeline_query,
+            widget=Select2Widget()
+        ),
+    }
+    edit_form_extra_fields = {
+        "pipeline": QuerySelectField(
+            "Pipeline",
+            query_factory=raw_pipeline_query,
+            widget=Select2Widget()
+        )
+    }
+
 
 class RawAnalysisSchemaV2View(ModelView):
     datamodel = SQLAInterface(RawAnalysisValidationSchemaV2)
