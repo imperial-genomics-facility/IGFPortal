@@ -24,13 +24,13 @@ log = logging.getLogger(__name__)
 
 def raw_project_query():
     try:
-        results = \
-            db.session.\
-                query(RawProject).\
-                filter(RawProject.status=='ACTIVE').\
-                order_by(RawProject.project_id.desc()).\
-                limit(100).\
-                all()
+        results = db.session.query(
+            RawProject
+        ).filter(
+            RawProject.status=='ACTIVE'
+        ).order_by(
+            RawProject.project_id.desc()
+        ).limit(100).all()
         return results
     except Exception as e:
         raise ValueError(
@@ -39,15 +39,17 @@ def raw_project_query():
 
 def raw_pipeline_query():
     try:
-        results = \
-            db.session.\
-                query(RawPipeline).\
-                filter(RawPipeline.is_active=='Y').\
-                filter(RawPipeline.pipeline_type=='AIRFLOW').\
-                filter(RawPipeline.pipeline_name.like("dag%")).\
-                order_by(RawPipeline.pipeline_id.desc()).\
-                limit(100).\
-                all()
+        results = db.session.query(
+            RawPipeline
+        ).filter(
+            RawPipeline.is_active=='Y'
+        ).filter(
+                RawPipeline.pipeline_type=='AIRFLOW'
+        ).filter(
+                RawPipeline.pipeline_name.like("dag%")
+        ).order_by(
+                RawPipeline.pipeline_id.desc()
+        ).limit(100).all()
         return results
     except Exception as e:
         raise ValueError(
@@ -60,12 +62,12 @@ def validate_analysis_json_schema(
     failed_tag: str = 'FAILED') -> str:
     try:
         status = failed_tag
-        raw_analysis_schema = \
-            db.session.\
-                query(RawAnalysisValidationSchemaV2).\
-                filter(RawAnalysisValidationSchemaV2.\
-                       raw_analysis_schema_id==raw_analysis_schema_id).\
-                one_or_none()
+        raw_analysis_schema = db.session.query(
+            RawAnalysisValidationSchemaV2
+        ).filter(
+            RawAnalysisValidationSchemaV2.\
+                raw_analysis_schema_id==raw_analysis_schema_id
+        ).one_or_none()
         if raw_analysis_schema is None:
             raise ValueError(
                 f"No metadata entry found for id {raw_analysis_schema_id}")
@@ -80,11 +82,12 @@ def validate_analysis_json_schema(
                 status = failed_tag
         ## update db status
         try:
-            db.session.\
-                query(RawAnalysisValidationSchemaV2).\
-                filter(RawAnalysisValidationSchemaV2.\
-                       raw_analysis_schema_id==raw_analysis_schema_id).\
-                update({'status': status})
+            db.session.query(
+                RawAnalysisValidationSchemaV2
+            ).filter(
+                RawAnalysisValidationSchemaV2.\
+                       raw_analysis_schema_id==raw_analysis_schema_id
+            ).update({'status': status})
             db.session.commit()
         except:
             db.session.rollback()
@@ -134,15 +137,18 @@ def _get_project_id_for_samples(
         sample_igf_id_list: list) -> list:
     try:
         project_list = list()
-        results = \
-            db.session.\
-                query(Project).\
-                distinct(Project.project_igf_id).\
-                join(Sample, Project.project_id==Sample.project_id).\
-                filter(Sample.sample_igf_id.in_(sample_igf_id_list)).\
-                all()
+        results = db.session.query(
+            Project
+        ).distinct(
+            Project.project_igf_id
+        ).join(
+            Sample, Project.project_id==Sample.project_id
+        ).filter(
+            Sample.sample_igf_id.in_(sample_igf_id_list)
+        ).all()
         project_list = [
-            p.project_igf_id for p in list(results)]
+            p.project_igf_id for p in list(results)
+        ]
         return project_list
     except Exception as e:
         raise ValueError(
@@ -163,21 +169,32 @@ def _get_file_collection_for_samples(
   """
   try:
     sample_with_files = list()
-    results = \
-      db.session.\
-        query(Sample.sample_igf_id).\
-        distinct(Sample.sample_igf_id).\
-        join(Experiment, Sample.sample_id==Experiment.sample_id).\
-        join(Run, Experiment.experiment_id==Run.experiment_id).\
-        join(Collection, Collection.name==Run.run_igf_id).\
-        join(Collection_group, Collection.collection_id==Collection_group.collection_id).\
-        join(File, File.file_id==Collection_group.file_id).\
-        filter(Run.status==active_status).\
-        filter(Experiment.status==active_status).\
-        filter(File.status==active_status).\
-        filter(Collection.type.in_(fastq_collection_type_list)).\
-        filter(Sample.sample_igf_id.in_(sample_igf_id_list)).\
-        all()
+    results = db.session.query(
+        Sample.sample_igf_id
+    ).distinct(
+        Sample.sample_igf_id
+    ).join(
+        Experiment, Sample.sample_id==Experiment.sample_id
+    ).join(
+        Run, Experiment.experiment_id==Run.experiment_id
+    ).join(
+        Collection, Collection.name==Run.run_igf_id
+    ).join(
+        Collection_group, \
+            Collection.collection_id==Collection_group.collection_id
+    ).join(
+        File, File.file_id==Collection_group.file_id
+    ).filter(
+        Run.status==active_status
+    ).filter(
+        Experiment.status==active_status
+    ).filter(
+        File.status==active_status
+    ).filter(
+        Collection.type.in_(fastq_collection_type_list)
+    ).filter(
+        Sample.sample_igf_id.in_(sample_igf_id_list)
+    ).all()
     if results is not None:
         sample_with_files = [
             s.sample_igf_id
@@ -241,11 +258,11 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) -> List[str
         project_igf_id = ''
         deliverable = ''
         # get raw analysis design
-        raw_analysis_design = \
-            db.session.\
-                query(RawAnalysisV2).\
-                filter(RawAnalysisV2.raw_analysis_id==raw_analysis_id).\
-                one_or_none()
+        raw_analysis_design = db.session.query(
+            RawAnalysisV2
+        ).filter(
+            RawAnalysisV2.raw_analysis_id==raw_analysis_id
+        ).one_or_none()
         if raw_analysis_design is None:
             error_list.append(
                 f"No metadata entry found for id {raw_analysis_id}")
@@ -271,11 +288,11 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) -> List[str
                 deliverable = \
                     raw_analysis_design.project.deliverable
             # get validation schema
-            raw_analysis_schema = \
-                db.session.\
-                    query(RawAnalysisValidationSchemaV2).\
-                    filter(RawAnalysisValidationSchemaV2.pipeline_id==pipeline_id).\
-                    one_or_none()
+            raw_analysis_schema = db.session.query(
+                RawAnalysisValidationSchemaV2
+            ).filter(
+                RawAnalysisValidationSchemaV2.pipeline_id==pipeline_id
+            ).one_or_none()
             if raw_analysis_schema is None:
                 error_list.append(
                     "No analysis schema found")
@@ -340,10 +357,14 @@ def validate_analysis_design(
                 formatted_errors.append(f"{i+1}. {e}")
             errors = '\n'.join(formatted_errors)
         try:
-            db.session.\
-                query(RawAnalysisV2).\
-                filter(RawAnalysisV2.raw_analysis_id==raw_analysis_id).\
-                update({'status': status, 'report': errors})
+            db.session.query(
+                RawAnalysisV2
+            ).filter(
+                RawAnalysisV2.raw_analysis_id==raw_analysis_id
+            ).update({
+                'status': status,
+                'report': errors
+            })
             db.session.commit()
         except:
             db.session.rollback()
@@ -358,14 +379,15 @@ def _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
     raw_analysis_id: int) -> \
         Tuple[str, str]:
     try:
-        project_records = \
-            db.session.\
-                query(
-                    RawProject.project_igf_id,
-                    RawProject.deliverable).\
-                join(RawAnalysisV2, RawProject.project_id==RawAnalysisV2.project_id).\
-                filter(RawAnalysisV2.raw_analysis_id==raw_analysis_id).\
-                one_or_none()
+        project_records = db.session.query(
+            RawProject.project_igf_id,
+            RawProject.deliverable
+        ).join(
+            RawAnalysisV2, \
+                RawProject.project_id==RawAnalysisV2.project_id
+        ).filter(
+            RawAnalysisV2.raw_analysis_id==raw_analysis_id
+        ).one_or_none()
         if project_records is None:
             raise ValueError(
                 f"No project entry found for raw analysis {raw_analysis_id}")
@@ -379,14 +401,16 @@ def _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
 def _fetch_all_samples_for_project(project_igf_id: str) -> list:
     try:
         sample_ids = list()
-        samples = \
-            db.session.\
-                query(Sample.sample_igf_id).\
-                join(Project, Project.project_id==Sample.project_id).\
-                filter(Project.project_igf_id==project_igf_id).\
-                all()
+        samples = db.session.query(
+            Sample.sample_igf_id
+        ).join(
+            Project, Project.project_id==Sample.project_id
+        ).filter(
+            Project.project_igf_id==project_igf_id
+        ).all()
         sample_ids = [
-            sample_id for (sample_id,) in samples]
+            sample_id for (sample_id,) in samples
+        ]
         return sample_ids
     except Exception as e:
         raise ValueError(
@@ -398,23 +422,25 @@ def _fetch_analysis_template_for_raw_analysis_id(
         default_template_path: str = os.path.join(os.path.dirname(__file__), 'default_analysis_template.txt')) \
             -> str:
     try:
-        pipeline_records = \
-            db.session.\
-                query(RawPipeline.pipeline_id).\
-                join(RawAnalysisV2, RawPipeline.pipeline_id==RawAnalysisV2.pipeline_id).\
-                filter(RawAnalysisV2.raw_analysis_id==raw_analysis_id).\
-                one_or_none()
+        pipeline_records = db.session.query(
+            RawPipeline.pipeline_id
+        ).join(
+            RawAnalysisV2, \
+                RawPipeline.pipeline_id==RawAnalysisV2.pipeline_id
+        ).filter(
+            RawAnalysisV2.raw_analysis_id==raw_analysis_id
+        ).one_or_none()
         if pipeline_records is None or pipeline_records == '':
             raise ValueError(
                 f"No pipeline entry found for raw analysis {raw_analysis_id}")
         (pipeline_id,) = pipeline_records
         with open(default_template_path, 'r') as fp:
             default_template = fp.read()
-        template_records = \
-            db.session.\
-                query(RawAnalysisTemplateV2.template_data).\
-                filter(RawAnalysisTemplateV2.pipeline_id==pipeline_id).\
-                one_or_none()
+        template_records = db.session.query(
+            RawAnalysisTemplateV2.template_data
+        ).filter(
+            RawAnalysisTemplateV2.pipeline_id==pipeline_id
+        ).one_or_none()
         if template_records is None:
             return default_template
         else:
