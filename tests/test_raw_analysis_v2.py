@@ -36,7 +36,11 @@ from app.raw_analysis.raw_analysis_util_v2 import (
     _get_file_collection_for_samples,
     _get_sample_metadata_checks_for_analysis,
     _get_validation_errors_for_analysis_design,
-    validate_analysis_design)
+    validate_analysis_design,
+    _fetch_project_igf_id_and_deliverable_for_raw_analysis_id,
+    _fetch_all_samples_for_project,
+    _fetch_analysis_template_for_raw_analysis_id,
+    generate_analysis_template_for_analysis)
 from unittest.mock import patch
 
 
@@ -1413,3 +1417,41 @@ def test_async_validate_analysis_yaml(db):
             id_list=[raw_analysis1.raw_analysis_id])
     assert raw_analysis1.raw_analysis_id in results
     assert results.get(raw_analysis1.raw_analysis_id) == 'VALIDATED'
+
+
+def test_fetch_project_igf_id_and_deliverable_for_raw_analysis_id(db):
+    raw_project1 = \
+        RawProject(
+            project_igf_id='project1',
+            deliverable="COSMX")
+    raw_project2 = \
+        RawProject(
+            project_igf_id='project2',
+            deliverable="FASTQ")
+    pipeline1 = \
+        RawPipeline(
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_analysis1 = \
+        RawAnalysisV2(
+            raw_analysis_id=1,
+            analysis_name='analysis1',
+            project=raw_project1,
+            pipeline=pipeline1,
+            status="UNKNOWN",
+            analysis_yaml="a: b")
+    try:
+        db.session.add(raw_project1)
+        db.session.add(raw_project2)
+        db.session.add(pipeline1)
+        db.session.add(raw_analysis1)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    (project_igf_id, deliverable) = \
+        _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
+            raw_analysis_id=raw_analysis1.raw_analysis_id)
+    assert project_igf_id == raw_project1.project_igf_id
+    assert deliverable == raw_project1.deliverable
