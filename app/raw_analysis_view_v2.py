@@ -446,3 +446,35 @@ class RawAnalysisV2View(ModelView):
             flash(f"Failed to generate template", 'danger')
             log.error(e)
             return redirect(url_for('RawAnalysisV2View.list'))
+
+class RawAnalysisQueueV2View(ModelView):
+    datamodel = SQLAInterface(RawAnalysisV2)
+    label_columns = {
+        "analysis_name": "Analysis name",
+        "project.project_igf_id": "Project name",
+        "pipeline.pipeline_name": "Pipeline name",
+        "status": "Status",
+        "date_stamp": "Updated on",
+        "analysis_yaml": "Yaml",
+        "report": "Report"
+    }
+    list_columns = [
+        "analysis_name",
+        "project.project_igf_id",
+        "pipeline.pipeline_name",
+        "status",
+        "date_stamp"]
+    show_columns = [
+        "analysis_name",
+        "project.project_igf_id",
+        "pipeline.pipeline_name",
+        "status",
+        "date_stamp",
+        "analysis_yaml", 
+        "report"]
+    base_filters = [
+        ["status", FilterInFunction, lambda: ["VALIDATED",]]]
+    base_order = ("raw_analysis_id", "desc")
+    base_permissions = [
+        "can_list",
+        "can_show"]
