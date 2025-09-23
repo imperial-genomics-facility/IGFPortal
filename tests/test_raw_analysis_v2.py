@@ -1540,7 +1540,6 @@ def test_fetch_analysis_template_for_raw_analysis_id(db):
         """
     template1 = \
         RawAnalysisTemplateV2(
-            template_tag="template1",
             template_data=template,
             pipeline=pipeline1)
     try:
