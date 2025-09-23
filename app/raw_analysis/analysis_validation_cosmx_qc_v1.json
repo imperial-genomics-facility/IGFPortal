@@ -1,0 +1,35 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF COSMX QC analysis validation schema",
+    "description": "Schema for validation of COSMX QC analysis yaml file",
+    "type" : "object",
+    "version": "0.0.1",
+    "properties": {
+        "run_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "properties": {
+                "cosmx_run_id": {
+                    "type": "string",
+                    "pattern": "^IGF"
+                },
+                "export_directory_path": {
+                    "type": "string"
+                }
+            },
+            "required": ["cosmx_run_id", "export_directory_path"]
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "run_type": {
+                    "type": "string",
+                    "enum": ["RNA", "PROTEIN"]
+                }
+            },
+            "required": ["run_type"]
+        }
+    },
+    "required": ["run_metadata", "analysis_metadata"]
+}
