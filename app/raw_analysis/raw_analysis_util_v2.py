@@ -104,16 +104,16 @@ def _get_validation_status_for_analysis_design(
         try:
             json_data = \
                 load(analysis_yaml, Loader=SafeLoader)
-        except:
+        except Exception as e:
             error_list.append(
-                'Failed to load yaml data. Invalid format.')
+                f'Failed to load yaml data. Invalid format., error: {e}')
             return error_list
         try:
             schema = \
                 json.loads(validation_schema)
-        except:
+        except Exception as e:
             error_list.append(
-                'Failed to load validation schema. Invalid format.')
+                f'Failed to load validation schema. Invalid format., error: {e}')
             return error_list
         try:
             # validation can fail if inputs are not correct
@@ -152,7 +152,7 @@ def _get_project_id_for_samples(
 def _get_file_collection_for_samples(
       sample_igf_id_list: list,
       active_status: str = 'ACTIVE',
-      fastq_collection_type_list: List[str] = ['demultiplexed_fastq',]) -> list:
+      fastq_collection_type_list: Tuple[str] = ('demultiplexed_fastq',)) -> list:
   """
   A function for fetching fastq and run_igf_id for a list od samples
 
@@ -373,7 +373,7 @@ def _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
         return (project_igf_id, deliverable)
     except Exception as e:
         raise ValueError(
-            f"No project_igf_id for raw analysis {raw_analysis_id}")
+            f"No project_igf_id for raw analysis {raw_analysis_id}, error: {e}")
 
 
 def _fetch_all_samples_for_project(project_igf_id: str) -> list:

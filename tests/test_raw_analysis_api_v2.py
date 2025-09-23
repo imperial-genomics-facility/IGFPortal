@@ -7,7 +7,6 @@ from app.models import (
 from flask_appbuilder.const import (
     API_SECURITY_PASSWORD_KEY,
     API_SECURITY_PROVIDER_KEY,
-    API_SECURITY_REFRESH_KEY,
     API_SECURITY_USERNAME_KEY)
 
 def test_raw_analysis_api1(db, test_client, tmp_path):
@@ -67,7 +66,7 @@ def test_raw_analysis_api1(db, test_client, tmp_path):
         db.session.add(raw_analysis2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     res = \

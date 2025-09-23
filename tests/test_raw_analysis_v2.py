@@ -1,6 +1,3 @@
-import os
-import json
-import asyncio
 import pytest
 from app.models import (
     RawAnalysisTemplateV2,
@@ -18,8 +15,6 @@ from app.models import (
     File,
     Sample)
 from app.raw_analysis_view_v2 import (
-    RawAnalysisTemplateV2View,
-    RawAnalysisSchemaV2View,
     action_validate_json_analysis_schema,
     async_validate_analysis_schema,
     action_download_json_analysis_schema,
@@ -172,7 +167,7 @@ def test_validate_analysis_json_schema(db):
         db.session.add(schema2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     status = \
@@ -217,7 +212,7 @@ def test_async_validate_analysis_schema(db):
         db.session.add(schema2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     results = \
@@ -266,7 +261,7 @@ def test_action_validate_json_analysis_schema(db):
         db.session.add(schema2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     with patch("app.raw_analysis_view_v2.async_validate_analysis_schema", return_values=["AAA"]):
@@ -301,7 +296,7 @@ def test_action_download_json_analysis_schema(db):
         db.session.add(schema1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     with patch("app.raw_analysis_view_v2.prepare_file_for_download", return_values=["AAA"]):
@@ -344,7 +339,7 @@ def test_action_reject_raw_analysis(db):
         db.session.add(raw_analysis2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     action_reject_raw_analysis(raw_analysis1)
@@ -388,7 +383,7 @@ def test_action_download_raw_analysis_design(db):
         db.session.add(raw_analysis1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     with patch("app.raw_analysis_view_v2.prepare_file_for_download", return_values=["AAA"]):
@@ -584,7 +579,7 @@ def test_get_validation_status_for_analysis_design():
 def test_get_project_id_for_samples(db):
     project1 = \
         Project(project_igf_id='project1')
-    project2 = \
+    _ = \
         Project(project_igf_id='project2')
     sample1 = \
         Sample(
@@ -604,7 +599,7 @@ def test_get_project_id_for_samples(db):
         db.session.add(sample2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     project_list = \
@@ -677,7 +672,7 @@ def test_get_file_collection_for_samples(db):
         db.session.add(collection_group1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     sample_with_files = \
@@ -760,7 +755,7 @@ def test_get_sample_metadata_checks_for_analysis(db):
         db.session.add(collection_group1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     ## valid input
@@ -902,7 +897,7 @@ def test_get_validation_errors_for_analysis_design(db):
         db.session.add(collection_group1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     ## setup design schema
@@ -1158,7 +1153,7 @@ def test_validate_analysis_design(db):
         db.session.add(collection_group1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     ## setup design schema
@@ -1270,7 +1265,7 @@ def test_action_validate_and_submit_analysis(db):
         db.session.add(raw_analysis1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     with patch("app.raw_analysis_view_v2.async_validate_analysis_yaml", return_values={"AAA": "BBB"}):
@@ -1361,7 +1356,7 @@ def test_async_validate_analysis_yaml(db):
         db.session.add(collection_group1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     ## setup design schema
@@ -1448,7 +1443,7 @@ def test_fetch_project_igf_id_and_deliverable_for_raw_analysis_id(db):
         db.session.add(pipeline1)
         db.session.add(raw_analysis1)
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     (project_igf_id, deliverable) = \
@@ -1480,7 +1475,7 @@ def test_fetch_all_samples_for_project(db):
         db.session.add(sample2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     sample_ids = \
@@ -1552,7 +1547,7 @@ def test_fetch_analysis_template_for_raw_analysis_id(db):
         db.session.add(template1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     template_data = \
@@ -1648,7 +1643,7 @@ def test_generate_analysis_template_for_analysis(db):
         db.session.add(sample2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     formatted_template = \
@@ -1746,7 +1741,7 @@ def test_action_download_analysis_template(db):
         db.session.add(sample2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     with patch("app.raw_analysis_view_v2.prepare_file_for_download", return_values=["AAA"]):

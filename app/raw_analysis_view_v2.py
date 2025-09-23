@@ -46,7 +46,7 @@ def action_validate_json_analysis_schema(
         id_list = list()
         pipeline_list = list()
         if item is None:
-            raise ValueError(f"No item found")
+            raise ValueError("No item found")
         if isinstance(item, list):
             id_list = [i.raw_analysis_schema_id for i in item]
             pipeline_list = [i.pipeline.pipeline_name for i in item]
@@ -443,7 +443,7 @@ class RawAnalysisV2View(ModelView):
                 self.update_redirect()
                 return send_file(file_path, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
         except Exception as e:
-            flash(f"Failed to generate template", 'danger')
+            flash("Failed to generate template", 'danger')
             log.error(e)
             return redirect(url_for('RawAnalysisV2View.list'))
 

@@ -1,5 +1,4 @@
 import os
-import asyncio
 import pytest
 from app.file_download_util import prepare_file_for_download
 
