@@ -12,7 +12,8 @@ from app.raw_analysis.raw_analysis_util_v2 import (
     raw_project_query,
     raw_pipeline_query,
     validate_analysis_json_schema,
-    validate_analysis_design)
+    validate_analysis_design,
+    generate_analysis_template_for_analysis_id)
 from typing import Union, List, Any, Dict, Tuple
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -266,6 +267,28 @@ def async_validate_analysis_yaml(self, id_list):
             f"Failed to run celery job, error: {e}")
 
 
+def action_download_analysis_template(
+        item: RawAnalysisV2) -> Tuple[str, str]:
+    try:
+        if item.project_id is not None and \
+           item.pipeline_id is not None:
+            formatted_template = \
+                generate_analysis_template_for_analysis_id(
+                    raw_analysis_id=item.raw_analysis_id)
+            file_path = \
+                run_async(prepare_file_for_download(
+                    file_data=formatted_template.encode('utf-8'),
+                    file_suffix=".yaml"))
+            analysis_name = item.analysis_name
+            return file_path, analysis_name
+        else:
+            raise ValueError(
+                f"Missing metadata for analysis {item.raw_analysis_id}")
+    except Exception as e:
+        raise ValueError(
+            f"Failed to generate template, error: {e}")
+
+
 class RawAnalysisV2View(ModelView):
     datamodel = SQLAInterface(RawAnalysisV2)
     label_columns = {
@@ -381,7 +404,7 @@ class RawAnalysisV2View(ModelView):
         "Validate and upload analysis",
         confirmation="Validate analysis design?",
         multiple=True,
-        single=False,
+        single=True,
         icon="fa-rocket")
     def validate_and_submit_analysis(self, item):
         try:
@@ -397,4 +420,29 @@ class RawAnalysisV2View(ModelView):
             flash(
                 'Failed to validate analysis design',
                 'danger')
+            return redirect(url_for('RawAnalysisV2View.list'))
+
+    @action(
+        "template_download",
+        "Analysis template",
+        confirmation="Download file?",
+        icon="fa-file-excel-o",
+        multiple=False,
+        single=True)
+    def template_download(self, item):
+        try:
+            if item.pipeline_id is None or \
+               item.project_id is None:
+                flash(
+                    "Failed to generate template, no project or pipeline info",
+                    "danger")
+                return redirect(url_for('RawAnalysisV2View.list'))
+            else:
+                file_path, analysis_name = \
+                    action_download_analysis_template(item)
+                self.update_redirect()
+                return send_file(file_path, download_name=f"{analysis_name}_analysis.yaml", as_attachment=True)
+        except Exception as e:
+            flash(f"Failed to generate template", 'danger')
+            log.error(e)
             return redirect(url_for('RawAnalysisV2View.list'))
