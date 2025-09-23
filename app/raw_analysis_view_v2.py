@@ -440,7 +440,7 @@ class RawAnalysisV2View(ModelView):
     @action(
         "template_download",
         "Analysis template",
-        confirmation="Download file?",
+        confirmation=None,
         icon="fa-file-excel-o",
         multiple=False,
         single=True)
