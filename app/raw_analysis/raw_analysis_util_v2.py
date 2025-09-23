@@ -1,7 +1,9 @@
 from app import db
+import os
 import json
 import logging
-from typing import List
+from jinja2 import Template
+from typing import List, Tuple
 from app.models import (
     Sample,
     Experiment,
@@ -350,3 +352,99 @@ def validate_analysis_design(
     except Exception as e:
         raise ValueError(
             f"Failed to validate analysis design, error; {e}")
+
+
+def _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
+    raw_analysis_id: int) -> \
+        Tuple[str, str]:
+    try:
+        project_records = \
+            db.session.\
+                query(
+                    RawProject.project_igf_id,
+                    RawProject.deliverable).\
+                join(RawAnalysisV2, RawProject.project_id==RawAnalysisV2.project_id).\
+                filter(RawAnalysisV2.raw_analysis_id==raw_analysis_id).\
+                one_or_none()
+        if project_records is None:
+            raise ValueError(
+                f"No project entry found for raw analysis {raw_analysis_id}")
+        (project_igf_id, deliverable) = project_records
+        return (project_igf_id, deliverable)
+    except Exception as e:
+        raise ValueError(
+            f"No project_igf_id for raw analysis {raw_analysis_id}")
+
+
+def _fetch_all_samples_for_project(project_igf_id: str) -> list:
+    try:
+        sample_ids = list()
+        samples = \
+            db.session.\
+                query(Sample.sample_igf_id).\
+                join(Project, Project.project_id==Sample.project_id).\
+                filter(Project.project_igf_id==project_igf_id).\
+                all()
+        sample_ids = [
+            sample_id for (sample_id,) in samples]
+        return sample_ids
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get sample list for project {project_igf_id}, error; {e}")
+
+
+def _fetch_analysis_template_for_raw_analysis_id(
+        raw_analysis_id: int,
+        default_template_path: str = os.path.join(os.path.dirname(__file__), 'default_analysis_template.txt')) \
+            -> str:
+    try:
+        pipeline_records = \
+            db.session.\
+                query(RawPipeline.pipeline_id).\
+                join(RawAnalysisV2, RawPipeline.pipeline_id==RawAnalysisV2.pipeline_id).\
+                filter(RawAnalysisV2.raw_analysis_id==raw_analysis_id).\
+                one_or_none()
+        if pipeline_records is None or pipeline_records == '':
+            raise ValueError(
+                f"No pipeline entry found for raw analysis {raw_analysis_id}")
+        (pipeline_id,) = pipeline_records
+        with open(default_template_path, 'r') as fp:
+            default_template = fp.read()
+        template_records = \
+            db.session.\
+                query(RawAnalysisTemplateV2.template_data).\
+                filter(RawAnalysisTemplateV2.pipeline_id==pipeline_id).\
+                one_or_none()
+        if template_records is None:
+            return default_template
+        else:
+            (template_data,) = template_records
+            return template_data
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get template for analysis id {raw_analysis_id}, error; {e}")
+
+
+def generate_analysis_template_for_analysis_id(raw_analysis_id: int) -> str:
+    try:
+        (project_igf_id, deliverable) = \
+            _fetch_project_igf_id_and_deliverable_for_raw_analysis_id(
+                raw_analysis_id)
+        template_data = \
+            _fetch_analysis_template_for_raw_analysis_id(
+                raw_analysis_id)
+        if deliverable == 'COSMX':
+            sample_id_list = []
+        else:
+            sample_id_list = \
+                _fetch_all_samples_for_project(
+                    project_igf_id=project_igf_id)
+        template = \
+            Template(template_data, keep_trailing_newline=True)
+        ## cosmx export will work with this function
+        formatted_template = \
+            template.render(SAMPLE_ID_LIST=sample_id_list)
+        return formatted_template
+    except Exception as e:
+        raise ValueError(
+            f"Failed to generate template for analysis {raw_analysis_id}, error; {e}")

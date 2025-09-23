@@ -40,7 +40,7 @@ from app.raw_analysis.raw_analysis_util_v2 import (
     _fetch_project_igf_id_and_deliverable_for_raw_analysis_id,
     _fetch_all_samples_for_project,
     _fetch_analysis_template_for_raw_analysis_id,
-    generate_analysis_template_for_analysis)
+    generate_analysis_template_for_analysis_id)
 from unittest.mock import patch
 
 
@@ -1563,3 +1563,102 @@ def test_fetch_analysis_template_for_raw_analysis_id(db):
         _fetch_analysis_template_for_raw_analysis_id(
             raw_analysis_id=raw_analysis2.raw_analysis_id)
     assert "CONDITION_NAME" not in template_data
+
+
+def test_generate_analysis_template_for_analysis(db):
+    raw_project1 = \
+        RawProject(
+            project_id=1,
+            project_igf_id='project1',
+            deliverable="FASTQ")
+    raw_project2 = \
+        RawProject(
+            project_id=2,
+            project_igf_id='project2',
+            deliverable="COSMX")
+    raw_pipeline1 = \
+        RawPipeline(
+            pipeline_id=1,
+            pipeline_name='pipeline1',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_pipeline2 = \
+        RawPipeline(
+            pipeline_id=2,
+            pipeline_name='pipeline2',
+            pipeline_db='test',
+            pipeline_type='AIRFLOW')
+    raw_analysis1 = \
+        RawAnalysisV2(
+            raw_analysis_id=1,
+            analysis_name='analysis1',
+            project=raw_project1,
+            pipeline=raw_pipeline1,
+            status="UNKNOWN",
+            analysis_yaml="")
+    raw_analysis2 = \
+        RawAnalysisV2(
+            raw_analysis_id=2,
+            analysis_name='analysis2',
+            project=raw_project2,
+            pipeline=raw_pipeline2,
+            status="UNKNOWN",
+            analysis_yaml="")
+    template_data = \
+        """sample_metadata:
+        {% for SAMPLE_ID in SAMPLE_ID_LIST %}
+        {{ SAMPLE_ID }}:
+            condition: CONDITION_NAME
+            strandedness: reverse
+        {% endfor %}analysis_metadata:
+            pipeline_name: xyz
+        """
+    raw_template1 = \
+        RawAnalysisTemplateV2(
+            template_data=template_data,
+            pipeline=raw_pipeline1)
+    project1 = \
+        Project(
+            project_id=1,
+            project_igf_id='project1')
+    project2 = \
+        Project(
+            project_id=2,
+            project_igf_id='project2',
+            deliverable="COSMX")
+    sample1 = \
+        Sample(
+            sample_igf_id='IGF111',
+            project=project1)
+    sample2 = \
+        Sample(
+            sample_igf_id='IGF112',
+            project=project1)
+    try:
+        db.session.add(raw_project1)
+        db.session.add(raw_project2)
+        db.session.add(raw_pipeline1)
+        db.session.add(raw_pipeline2)
+        db.session.add(raw_analysis1)
+        db.session.add(raw_analysis2)
+        db.session.add(raw_template1)
+        db.session.add(project1)
+        db.session.add(project2)
+        db.session.add(sample1)
+        db.session.add(sample2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    formatted_template = \
+        generate_analysis_template_for_analysis_id(
+            raw_analysis_id=raw_pipeline1.pipeline_id)
+    assert "CONDITION_NAME" in formatted_template
+    assert "IGF111:" in formatted_template
+    formatted_template = \
+        generate_analysis_template_for_analysis_id(
+            raw_analysis_id=raw_pipeline2.pipeline_id)
+    assert "CONDITION_NAME" not in formatted_template
+    assert "IGF111:" not in formatted_template
+    assert "sample_metadata:\nanalysis_metadata:" in formatted_template
