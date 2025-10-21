@@ -28,6 +28,9 @@ x-webserver-volume: &webserver-volume
   - ../secret/:/secret:ro
   - ../celery_tmp:/TMP_WORK_DIR:rw
 
+x-celery-flower-volume: &celery-flower-volume
+  - ../mysqlappdb/SSL:/DBSSL:ro
+
 x-nginx-volume: &nginx-volume
   - ../ssl_cert:/SSL:ro
   - ../nginx.conf:/etc/nginx/nginx.conf:ro
@@ -138,8 +141,7 @@ services:
       - "5555:5555"
     links: *portal-links
     depends_on: *portal-depends-on
-    volumes:
-      - ../IGFPortal:/github/IGFPortal:ro
+    volumes: *celery-flower-volume
     container_name: celery_flower
     command: ["celery", "-A", "app.celery", "flower", "--basic_auth=$${BASIC_AUTH}"]
     healthcheck:
