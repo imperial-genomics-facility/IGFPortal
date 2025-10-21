@@ -14,13 +14,16 @@ x-igfportal-env-file: &igfportal-env-file
     - ../env
 
 x-portal-db-volume: &portal-db-volume
-  - ../mysqlappdb:/var/lib/mysql:rw
+  - ../mysqlappdb/db:/var/lib/mysql:rw
+  - ../mysqlappdb/SSL:/SSL:ro
+  - ../mysqlappdb/mysql.conf.d:/etc/mysql/conf.d:ro
 
 x-redis-volume: &redis-volume
   - ../redis_data:/data:rw
 
 x-webserver-volume: &webserver-volume
   - ../ssl_cert:/SSL:ro
+  - ../mysqlappdb/SSL:/DBSSL:ro
   - ../static:/data/static:rw
   - ../secret/:/secret:ro
   - ../celery_tmp:/TMP_WORK_DIR:rw
@@ -58,6 +61,8 @@ services:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 5
+    ports:
+      - 3306:3306
     networks:
       - portal_network
   redis_db:
