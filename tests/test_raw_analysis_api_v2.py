@@ -76,7 +76,7 @@ def test_raw_analysis_api1(db, test_client, tmp_path):
     assert res.status_code == 200
     assert json.loads(res.data.decode("utf-8")).get('new_analysis') == [2]
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_analysis_v2/get_raw_analysis_data/2',
             headers={"Authorization": f"Bearer {token}"})
     json_file = \
@@ -92,7 +92,7 @@ def test_raw_analysis_api1(db, test_client, tmp_path):
     assert 'pipeline_id' in json_data
     assert json_data.get('pipeline_id') == pipeline1.pipeline_id
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_analysis_v2/get_raw_analysis_data/1',
             headers={"Authorization": f"Bearer {token}"})
     json_file = \
@@ -106,7 +106,7 @@ def test_raw_analysis_api1(db, test_client, tmp_path):
     assert json_data.get('analysis_name') == ''
     assert json_data.get('project_id') == ''
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_analysis_v2/get_raw_analysis_data/3',
             headers={"Authorization": f"Bearer {token}"})
     json_file = \
