@@ -1408,11 +1408,16 @@ def test_async_validate_analysis_yaml(db):
         db.session.rollback()
         raise
     ## valid design status
-    results = \
-        async_validate_analysis_yaml(
-            id_list=[raw_analysis1.raw_analysis_id])
-    assert raw_analysis1.raw_analysis_id in results
-    assert results.get(raw_analysis1.raw_analysis_id) == 'VALIDATED'
+    with patch('app.raw_analysis_view_v2.get_airflow_dag_id') as  mock_get_airflow_dag_id:
+        with patch('app.raw_analysis_view_v2.trigger_airflow_pipeline') as mock_trigger_airflow_pipeline:
+            with patch.dict('os.environ', {'AIRFLOW_CONF_FILE': 'test_conf'}):
+                results = \
+                    async_validate_analysis_yaml(
+                        id_list=[raw_analysis1.raw_analysis_id])
+                assert raw_analysis1.raw_analysis_id in results
+                assert results.get(raw_analysis1.raw_analysis_id) == 'VALIDATED'
+                mock_get_airflow_dag_id.assert_called_once()
+                mock_trigger_airflow_pipeline.assert_called_once()
 
 
 def test_fetch_project_igf_id_and_deliverable_for_raw_analysis_id(db):
