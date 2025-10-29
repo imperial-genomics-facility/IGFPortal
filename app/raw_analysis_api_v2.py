@@ -31,7 +31,7 @@ class RawAnalysisV2Api(ModelRestApi):
             log.error(e)
 
 
-    @expose('/get_raw_analysis_data/<raw_analysis_id>',  methods=['POST'])
+    @expose('/get_raw_analysis_data/<raw_analysis_id>',  methods=['GET'])
     @protect()
     def get_raw_analysis_data(self, raw_analysis_id):
         try:
