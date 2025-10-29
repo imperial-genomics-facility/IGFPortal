@@ -1,3 +1,4 @@
+import os
 import logging
 from app import db, celery
 from flask_appbuilder.actions import action
@@ -20,9 +21,12 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import redirect, flash, url_for, send_file
 from app.asyncio_util import run_async
 from app.file_download_util import prepare_file_for_download
+from .airflow.airflow_api_utils import trigger_airflow_pipeline
+from .airflow.airflow_api_utils import get_airflow_dag_id
 
 log = logging.getLogger(__name__)
 
+ANALYSIS_REGISTRATION_DAG_TAG = 'analysis_registration_dag'
 
 @celery.task(bind=True)
 def async_validate_analysis_schema(self, id_list):
@@ -275,6 +279,23 @@ def async_validate_analysis_yaml(self, id_list):
             msg = \
                 validate_analysis_design(
                     raw_analysis_id=raw_analysis_id)
+            if msg == 'VALIDATED':
+                airflow_dag_id = \
+                    get_airflow_dag_id(
+                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
+                        dag_tag=ANALYSIS_REGISTRATION_DAG_TAG)
+                if airflow_dag_id is None:
+                    log.error(
+                        f"Failed to get airflow dag id for {ANALYSIS_REGISTRATION_DAG_TAG}")
+                else:
+                    res = \
+                        trigger_airflow_pipeline(
+                            dag_id=airflow_dag_id,
+                            conf_data={"raw_analysis_id": raw_analysis_id},
+                            airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'])
+                    log.info(
+                        "Triggered analysis registration for " + \
+                        f"{raw_analysis_id} with res {res}")
             results.append(msg)
         return dict(zip(id_list, results))
     except Exception as e:
@@ -493,3 +514,26 @@ class RawAnalysisQueueV2View(ModelView):
     base_permissions = [
         "can_list",
         "can_show"]
+
+    @action(
+        "resubmit_pipeline",
+        "Re-submit pipeline",
+        confirmation="Re-submit pipeline?",
+        multiple=True,
+        single=True,
+        icon="fa-rocket")
+    def validate_and_submit_analysis(self, item):
+        try:
+            analysis_list, response_dict = \
+                action_validate_and_submit_analysis(item)
+            flash(
+                f"Submitted jobs for {', '.join(analysis_list)}",
+                "info")
+            self.update_redirect()
+            return redirect(url_for('RawAnalysisQueueV2View.list'))
+        except Exception as e:
+            log.error(e)
+            flash(
+                'Failed to validate analysis design',
+                'danger')
+            return redirect(url_for('RawAnalysisQueueV2View.list'))
