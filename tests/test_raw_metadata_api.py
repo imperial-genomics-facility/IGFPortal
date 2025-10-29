@@ -35,12 +35,12 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
         json.loads(res.data.decode("utf-8")).\
             get("access_token")
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 400
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test1", "test3", "test4", "test5"]}'), 'test.json')),
@@ -53,7 +53,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert 'test5' in json.loads(res.data.decode('utf-8')).get('new_projects').split(",")
     assert len(json.loads(res.data.decode('utf-8')).get('new_projects').split(",")) == 3
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test1"]}'), 'test.json')),
@@ -63,7 +63,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert 'new_projects' in res.data.decode('utf-8')
     assert json.loads(res.data.decode('utf-8')).get('new_projects') == ""
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test2"]}'), 'test.json')),
@@ -83,7 +83,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
             follow_redirects=True)
     assert res.status_code == 200
     res = \
-        test_client.post(
+        test_client.get(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test2"]}'), 'test.json')),
@@ -133,3 +133,41 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
             one_or_none()
     assert records is not None
     assert records[0] == 'SYNCHED'
+    metadata4 = \
+        RawMetadataModel(
+            raw_metadata_id=4,
+            metadata_tag='test4',
+            raw_csv_data='[{"project_id": "c","sample_id": "d"}]',
+            formatted_csv_data='[{"project_id": "c","sample_id": "d"}]',
+            status='READY',
+            report='')
+    try:
+        db.session.add(metadata4)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    assert res.status_code == 200
+    res = \
+        test_client.get(
+            '/api/v1/raw_metadata/get_raw_metadata/4',
+            headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    json_data = \
+        json.loads(res.data.decode('utf-8'))
+    assert 'test4' in json_data
+    assert json_data.get('test4') == '[{"project_id": "c","sample_id": "d"}]'
+    res = \
+        test_client.get(
+            f'/api/v1/raw_metadata/mark_ready_metadata_as_synced/4',
+            headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    records = \
+        db.session.\
+            query(RawMetadataModel.status).\
+            filter(RawMetadataModel.raw_metadata_id==4).\
+            one_or_none()
+    assert records is not None
+    assert records[0] == 'SYNCHED'
+

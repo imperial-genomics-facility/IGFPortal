@@ -221,6 +221,14 @@ def test_client(db):
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
+                    "can_get_raw_metadata", "RawMetadataDataApi"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_mark_raw_metadata_as_synced", "RawMetadataDataApi"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
                     "can_add_new_seqrun", "RawSeqrunApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
