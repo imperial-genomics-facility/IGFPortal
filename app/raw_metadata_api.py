@@ -62,14 +62,15 @@ class RawMetadataDataApi(ModelRestApi):
     @protect()
     def get_raw_metadata(self, raw_metadata_id: int):
         try:
-            result = \
-                db.session.\
-                    query(
-                        RawMetadataModel.metadata_tag,
-                        RawMetadataModel.formatted_csv_data).\
-                    filter(RawMetadataModel.status=='READY').\
-                    filter(RawMetadataModel.raw_metadata_id==raw_metadata_id).\
-                    one_or_none()
+            result = (
+                db.session
+                .query(
+                    RawMetadataModel.metadata_tag,
+                    RawMetadataModel.formatted_csv_data)
+                .filter(RawMetadataModel.status=='READY')
+                .filter(RawMetadataModel.raw_metadata_id==raw_metadata_id)
+                .one_or_none()
+            )
             if result is None:
                 entry = {'': ''}
             else:
@@ -86,13 +87,14 @@ class RawMetadataDataApi(ModelRestApi):
     @protect()
     def download_ready_metadata(self):
         try:
-            results = \
-                db.session.\
-                    query(
-                        RawMetadataModel.metadata_tag,
-                        RawMetadataModel.formatted_csv_data).\
-                    filter(RawMetadataModel.status=='READY').\
-                    all()
+            results = (
+                db.session
+                .query(
+                    RawMetadataModel.metadata_tag,
+                    RawMetadataModel.formatted_csv_data)
+                .filter(RawMetadataModel.status=='READY')
+                .all()
+            )
             if len(results)==0:
                 return self.response(200)
             else:
@@ -111,11 +113,12 @@ class RawMetadataDataApi(ModelRestApi):
     def mark_raw_metadata_as_synced(self, raw_metadata_id: int):
         try:
             try:
-                db.session.\
-                    query(RawMetadataModel).\
-                    filter(RawMetadataModel.status=='READY').\
-                    filter(RawMetadataModel.raw_metadata_id==raw_metadata_id).\
-                    update({'status':'SYNCHED'})
+                (db.session
+                .query(RawMetadataModel)
+                .filter(RawMetadataModel.status=='READY')
+                .filter(RawMetadataModel.raw_metadata_id==raw_metadata_id)
+                .update({'status':'SYNCHED'})
+                )
                 db.session.commit()
                 return self.response(200, message='metadata synced')
             except:
@@ -130,10 +133,11 @@ class RawMetadataDataApi(ModelRestApi):
     def mark_ready_metadata_as_synced(self):
         try:
             try:
-                db.session.\
-                    query(RawMetadataModel).\
-                    filter(RawMetadataModel.status=='READY').\
-                    update({'status':'SYNCHED'})
+                (db.session
+                .query(RawMetadataModel)
+                .filter(RawMetadataModel.status=='READY')
+                .update({'status':'SYNCHED'})
+                )
                 db.session.commit()
                 return self.response(200, message='all metadata synced')
             except:
