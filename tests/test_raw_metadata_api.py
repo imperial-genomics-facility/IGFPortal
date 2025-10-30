@@ -160,7 +160,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert json_data.get('test4') == '[{"project_id": "c","sample_id": "d"}]'
     res = \
         test_client.get(
-            f'/api/v1/raw_metadata/mark_ready_metadata_as_synced/4',
+            '/api/v1/raw_metadata/mark_ready_metadata_as_synced/4',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
     records = \
