@@ -43,7 +43,10 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
         test_client.get(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
-            data=dict(file=(BytesIO(b'{"project_list":["test1", "test3", "test4", "test5"]}'), 'test.json')),
+            data=dict(
+                file=(
+                    BytesIO(b'{"project_list":["test1", "test3", "test4", "test5"]}'),
+                    'test.json')),
             content_type='multipart/form-data',
             follow_redirects=True)
     assert res.status_code == 200
@@ -73,7 +76,8 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert 'new_projects' in res.data.decode('utf-8')
     assert json.loads(res.data.decode('utf-8')).get('new_projects') == "test2"
     metadata_file_data = \
-        BytesIO(b'[{"metadata_tag": "test2", "raw_csv_data": [{"project_id": "c","sample_id": "d"}], "formatted_csv_data": [{"project_id": "c","sample_id": "d"}]}]')
+        BytesIO(
+            b'[{"metadata_tag": "test2", "raw_csv_data": [{"project_id": "c","sample_id": "d"}], "formatted_csv_data": [{"project_id": "c","sample_id": "d"}]}]')
     res = \
         test_client.post(
             '/api/v1/raw_metadata/add_metadata',
