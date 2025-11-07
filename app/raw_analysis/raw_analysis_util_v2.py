@@ -100,37 +100,51 @@ def validate_analysis_json_schema(
 
 def _get_validation_status_for_analysis_design(
         analysis_yaml: str,
-        validation_schema: str) -> list:
+        validation_schema: str) \
+            -> list[str]:
     try:
         error_list = list()
         # load yaml
         try:
             json_data = \
-                load(analysis_yaml, Loader=SafeLoader)
+                load(
+                    analysis_yaml,
+                    Loader=SafeLoader)
         except Exception as e:
             error_list.append(
-                f'Failed to load yaml data. Invalid format., error: {e}')
+                "Failed to load yaml data. " + \
+                f"Invalid format., error: {e}")
             return error_list
         try:
             schema = \
                 json.loads(validation_schema)
         except Exception as e:
             error_list.append(
-                f'Failed to load validation schema. Invalid format., error: {e}')
+                "Failed to load validation schema. " + \
+                f"Invalid format., error: {e}")
             return error_list
         try:
             # validation can fail if inputs are not correct
             schema_validator = \
                 Draft202012Validator(schema)
-            for error in sorted(schema_validator.iter_errors(json_data), key=str):
-                error_list.append(error.message)
+            sorted_errors = \
+                sorted(
+                    schema_validator
+                    .iter_errors(json_data),
+                    key=str)
+            for error in sorted_errors:
+                error_list.append(
+                    json.dumps({
+                        'schema': error.schema,
+                        'message': error.message}))
         except Exception:
             error_list.append(
                 'Failed to check validation schema')
         return error_list
     except Exception as e:
         raise ValueError(
-            f"Failed to get schema validation for analysis design, error: {e}")
+            "Failed to get schema validation for " + \
+            f"analysis design, error: {e}")
 
 
 def _get_project_id_for_samples(
