@@ -1,0 +1,151 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF Cellranger Multi analysis validation schema for GEX-VDJ analysis",
+    "description": "Schema for validation of Cellranger multi for GEX-VDJ analysis yaml file",
+    "type": "object",
+    "version": "0.0.2",
+    "$defs": {
+        "featureTypes": {
+            "type": "string",
+            "enum": [
+                "Gene Expression",
+                "VDJ-B",
+                "VDJ-T",
+                "VDJ-T-GD"
+            ]
+        },
+        "cellrangerGroup": {
+            "type": "string",
+            "pattern": "^[A-Z0-9-_]+$"
+        },
+        "sampleEntry": {
+            "type": ["object", "string"],
+            "properties": {
+                "feature_types": {
+                    "$ref": "#/$defs/featureTypes"
+                },
+                "cellranger_group": {
+                    "$ref": "#/$defs/cellrangerGroup"
+                }
+            }
+        },
+        "scanpyConfig": {
+            "type": "object",
+            "properties": {
+                "TEMPLATE_FILE": {
+                    "type": "string"
+                },
+                "IMAGE_FILE": {
+                    "type": "string"
+                },
+                "MITO_PREFIX": {
+                    "type": "string"
+                },
+                "RUN_SCRUBLET": {
+                    "type": "boolean"
+                },
+                "RUN_CELLCYCLE_SCORE": {
+                    "type": "boolean"
+                },
+                "CELL_MARKER_LIST": {
+                    "type": "string"
+                },
+                "CELL_MARKER_SPECIES": {
+                    "type": "string"
+                },
+                "S_GENES": {
+                    "type": "string"
+                },
+                "G2M_GENES": {
+                    "type": "string"
+                },
+                "CELL_MARKER_MODE": {
+                    "type": "string",
+                    "enum": [
+                        "NON-VDJ"
+                    ]
+                }
+            },
+            "required": [
+                "TEMPLATE_FILE",
+                "IMAGE_FILE",
+                "MITO_PREFIX",
+                "RUN_SCRUBLET",
+                "RUN_CELLCYCLE_SCORE",
+                "CELL_MARKER_LIST",
+                "CELL_MARKER_SPECIES",
+                "S_GENES",
+                "G2M_GENES",
+                "CELL_MARKER_MODE"
+            ]
+        },
+        "referencePattern": {
+            "contains": {
+                "pattern": "^\\s?reference"
+            },
+            "minContains": 2
+        },
+        "geneExpressionSection": {
+            "contains": {
+                "pattern": "^\\[gene-expression\\]$"
+            }
+        },
+        "createBamPattern": {
+            "contains": {
+                "pattern": "^create-bam"
+            }
+        },
+        "vdjSection": {
+            "contains": {
+                "pattern": "^\\[vdj\\]$"
+            }
+        }
+    },
+    "properties": {
+        "sample_metadata": {
+            "type": "object",
+            "uniqueItems": true,
+            "minItems": 1,
+            "patternProperties": {
+                "^IGF[a-zA-Z0-9-_]+$": {
+                    "$ref": "#/$defs/sampleEntry"
+                }
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "scanpy_config": {
+                    "$ref": "#/$defs/scanpyConfig"
+                },
+                "cellranger_multi_config": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/referencePattern"
+                        },
+                        {
+                            "$ref": "#/$defs/geneExpressionSection"
+                        },
+                        {
+                            "$ref": "#/$defs/createBamPattern"
+                        },
+                        {
+                            "$ref": "#/$defs/vdjSection"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "cellranger_multi_config",
+                "scanpy_config"]
+        }
+    },
+    "required": [
+        "sample_metadata",
+        "analysis_metadata"]
+}
