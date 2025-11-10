@@ -8,8 +8,16 @@ from . import celery
 from io import BytesIO, StringIO
 from flask_appbuilder.actions import action
 from .models import RawMetadataModel
-from .raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status, mark_raw_metadata_as_ready
+from .airflow.airflow_api_utils import trigger_airflow_pipeline
+from .airflow.airflow_api_utils import get_airflow_dag_id
+from .raw_metadata.raw_metadata_util import (
+    validate_raw_metadata_and_set_db_status,
+    mark_raw_metadata_as_ready)
 from . import db
+
+log = logging.getLogger(__name__)
+
+METADATA_REGISTRATION_DAG_TAG = 'metadata_registration_dag'
 
 @celery.task(bind=True)
 def async_validate_metadata(self, id_list):
@@ -22,7 +30,7 @@ def async_validate_metadata(self, id_list):
             results.append(msg)
         return dict(zip(id_list, results))
     except Exception as e:
-        logging.error(
+        log.error(
             "Failed to run celery job for metadata validation, error: {0}".\
                 format(e))
 
@@ -50,18 +58,19 @@ class RawMetadataSubmitView(ModelView):
     base_filters = [
         ["status", FilterInFunction, lambda: ["READY", "VALIDATED"]]]
 
-    @action("download_validated_metadata_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    @action(
+        "download_validated_metadata_csv",
+        "Download csv",
+        confirmation=None,
+        icon="fa-file-excel-o",
+        multiple=False,
+        single=True)
     def download_validated_metadata_csv(self, item):
         output = BytesIO()
         tag = 'Empty'
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
             data_list = item.formatted_csv_data.split("\n")
-            #columns = data_list.pop(0)
-            #df = pd.DataFrame([
-            #        i.split(",")
-            #            for i in data_list],
-            #        columns=columns.split(","))
             cvsStringIO = StringIO(item.formatted_csv_data)
             df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
@@ -73,7 +82,11 @@ class RawMetadataSubmitView(ModelView):
         self.update_redirect()
         return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
-    @action("upload_raw_metadata", "Mark for upload", confirmation="Change metadata status?", icon="fa-rocket")
+    @action(
+        "upload_raw_metadata",
+        "Mark for upload",
+        confirmation="Change metadata status?",
+        icon="fa-rocket")
     def upload_raw_metadata_csv(self, item):
         id_list = list()
         tag_list = list()
@@ -85,10 +98,14 @@ class RawMetadataSubmitView(ModelView):
             tag_list = [item.metadata_tag]
         try:
             mark_raw_metadata_as_ready(id_list=id_list)
-            flash("Marked metadata ready for {0}".format(', '.join(tag_list)), "info")
+            flash(
+                f"Marked metadata ready for {', '.join(tag_list)}",
+                "info")
         except Exception as e:
             logging.error(e)
-            flash("Error in upload {0}".format(', '.join(tag_list)), "danger")
+            flash(
+                f"Error in upload {', '.join(tag_list)}",
+                "danger")
         self.update_redirect()
         return redirect(self.get_redirect())
 
@@ -122,18 +139,18 @@ class RawMetadataValidationView(ModelView):
     base_filters = [
         ["status", FilterInFunction, lambda: ["UNKNOWN", "FAILED"]]]
 
-    @action("download_raw_metadata_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    @action(
+        "download_raw_metadata_csv",
+        "Download csv",
+        confirmation=None,
+        icon="fa-file-excel-o",
+        multiple=False,
+        single=True)
     def download_raw_metadata_csv(self, item):
         output = BytesIO()
         tag = 'Empty'
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
-            #data_list = item.formatted_csv_data.split("\n")
-            #columns = data_list.pop(0)
-            #df = pd.DataFrame([
-            #        i.split(",")
-            #            for i in data_list],
-            #        columns=columns.split(","))
             cvsStringIO = StringIO(item.formatted_csv_data)
             df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
@@ -145,7 +162,13 @@ class RawMetadataValidationView(ModelView):
         self.update_redirect()
         return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
-    @action("mark_raw_metadata_as_rejected", "Reject raw metadata", confirmation="Mark metadata as rejected ?", icon="fa-exclamation", multiple=False, single=True)
+    @action(
+        "mark_raw_metadata_as_rejected",
+        "Reject raw metadata",
+        confirmation="Mark metadata as rejected ?",
+        icon="fa-exclamation",
+        multiple=False,
+        single=True)
     def mark_raw_metadata_as_rejected(self, item):
         try:
             db.session.\
@@ -161,7 +184,12 @@ class RawMetadataValidationView(ModelView):
             self.update_redirect()
             return redirect(url_for('RawMetadataValidationView.list'))
 
-    @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket", multiple=True, single=False)
+    @action(
+        "validate_raw_metadata",
+        "Validate metadata",
+        confirmation="Run validation?",
+        icon="fa-rocket",
+        multiple=True, single=False)
     def validate_metadata(self, item):
         id_list = list()
         tag_list = list()
@@ -174,6 +202,8 @@ class RawMetadataValidationView(ModelView):
         _ = \
             async_validate_metadata.\
                 apply_async(args=[id_list])
-        flash("Submitted jobs for {0}".format(', '.join(tag_list)), "info")
+        flash(
+            f"Submitted jobs for {', '.join(tag_list)}",
+            "info")
         self.update_redirect()
         return redirect(self.get_redirect())
