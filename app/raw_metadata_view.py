@@ -1,3 +1,4 @@
+import os
 import logging
 import pandas as pd
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -8,8 +9,16 @@ from . import celery
 from io import BytesIO, StringIO
 from flask_appbuilder.actions import action
 from .models import RawMetadataModel
-from .raw_metadata.raw_metadata_util import validate_raw_metadata_and_set_db_status, mark_raw_metadata_as_ready
+from .airflow.airflow_api_utils import trigger_airflow_pipeline
+from .airflow.airflow_api_utils import get_airflow_dag_id
+from .raw_metadata.raw_metadata_util import (
+    validate_raw_metadata_and_set_db_status,
+    mark_raw_metadata_as_ready)
 from . import db
+
+log = logging.getLogger(__name__)
+
+METADATA_REGISTRATION_DAG_TAG = 'metadata_registration_dag'
 
 @celery.task(bind=True)
 def async_validate_metadata(self, id_list):
@@ -19,12 +28,32 @@ def async_validate_metadata(self, id_list):
             msg = \
                 validate_raw_metadata_and_set_db_status(
                     raw_metadata_id=raw_metadata_id)
+            if msg == 'VALIDATED':
+                mark_raw_metadata_as_ready(
+                    id_list=[raw_metadata_id])
+                airflow_dag_id = \
+                    get_airflow_dag_id(
+                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
+                        dag_tag=METADATA_REGISTRATION_DAG_TAG)
+                if airflow_dag_id is None:
+                    log.error(
+                        "Failed to get airflow dag id for " +
+                        METADATA_REGISTRATION_DAG_TAG)
+                else:
+                    res = \
+                        trigger_airflow_pipeline(
+                            dag_id=airflow_dag_id,
+                            conf_data={"raw_metadata_id": raw_metadata_id},
+                            airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'])
+                    log.info(
+                        "Triggered metadata registration for " + \
+                        f"{raw_metadata_id} with res {res}")
             results.append(msg)
         return dict(zip(id_list, results))
     except Exception as e:
-        logging.error(
-            "Failed to run celery job for metadata validation, error: {0}".\
-                format(e))
+        log.error(
+            "Failed to run celery job for metadata validation, " + \
+            f"error: {e}")
 
 
 class RawMetadataSubmitView(ModelView):
@@ -50,18 +79,18 @@ class RawMetadataSubmitView(ModelView):
     base_filters = [
         ["status", FilterInFunction, lambda: ["READY", "VALIDATED"]]]
 
-    @action("download_validated_metadata_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    @action(
+        "download_validated_metadata_csv",
+        "Download csv",
+        confirmation=None,
+        icon="fa-file-excel-o",
+        multiple=False,
+        single=True)
     def download_validated_metadata_csv(self, item):
         output = BytesIO()
         tag = 'Empty'
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
-            data_list = item.formatted_csv_data.split("\n")
-            #columns = data_list.pop(0)
-            #df = pd.DataFrame([
-            #        i.split(",")
-            #            for i in data_list],
-            #        columns=columns.split(","))
             cvsStringIO = StringIO(item.formatted_csv_data)
             df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
@@ -73,7 +102,11 @@ class RawMetadataSubmitView(ModelView):
         self.update_redirect()
         return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
-    @action("upload_raw_metadata", "Mark for upload", confirmation="Change metadata status?", icon="fa-rocket")
+    @action(
+        "resubmit_metadata",
+        "Re-upload metadata",
+        confirmation="Trigger pipeline again?",
+        icon="fa-rocket")
     def upload_raw_metadata_csv(self, item):
         id_list = list()
         tag_list = list()
@@ -84,11 +117,17 @@ class RawMetadataSubmitView(ModelView):
             id_list = [item.raw_metadata_id]
             tag_list = [item.metadata_tag]
         try:
-            mark_raw_metadata_as_ready(id_list=id_list)
-            flash("Marked metadata ready for {0}".format(', '.join(tag_list)), "info")
+            _ = \
+                async_validate_metadata\
+                .apply_async(args=[id_list])
+            flash(
+                f"Submitted jobs for {', '.join(tag_list)}",
+                "info")
         except Exception as e:
-            logging.error(e)
-            flash("Error in upload {0}".format(', '.join(tag_list)), "danger")
+            flash(
+                f"Failed to submit jobs for {', '.join(tag_list)}",
+                "danger")
+            log.error(e)
         self.update_redirect()
         return redirect(self.get_redirect())
 
@@ -122,18 +161,18 @@ class RawMetadataValidationView(ModelView):
     base_filters = [
         ["status", FilterInFunction, lambda: ["UNKNOWN", "FAILED"]]]
 
-    @action("download_raw_metadata_csv", "Download csv", confirmation=None, icon="fa-file-excel-o", multiple=False, single=True)
+    @action(
+        "download_raw_metadata_csv",
+        "Download csv",
+        confirmation=None,
+        icon="fa-file-excel-o",
+        multiple=False,
+        single=True)
     def download_raw_metadata_csv(self, item):
         output = BytesIO()
         tag = 'Empty'
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
-            #data_list = item.formatted_csv_data.split("\n")
-            #columns = data_list.pop(0)
-            #df = pd.DataFrame([
-            #        i.split(",")
-            #            for i in data_list],
-            #        columns=columns.split(","))
             cvsStringIO = StringIO(item.formatted_csv_data)
             df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
@@ -145,23 +184,34 @@ class RawMetadataValidationView(ModelView):
         self.update_redirect()
         return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
-    @action("mark_raw_metadata_as_rejected", "Reject raw metadata", confirmation="Mark metadata as rejected ?", icon="fa-exclamation", multiple=False, single=True)
+    @action(
+        "mark_raw_metadata_as_rejected",
+        "Reject raw metadata",
+        confirmation="Mark metadata as rejected ?",
+        icon="fa-exclamation",
+        multiple=False,
+        single=True)
     def mark_raw_metadata_as_rejected(self, item):
         try:
-            db.session.\
-                query(RawMetadataModel).\
-                filter(RawMetadataModel.raw_metadata_id==item.raw_metadata_id).\
-                update({'status': 'REJECTED'})
+            (db.session
+             .query(RawMetadataModel)
+             .filter(RawMetadataModel.raw_metadata_id==item.raw_metadata_id)
+             .update({'status': 'REJECTED'}))
             db.session.commit()
-            flash("Rejected metadata  {0}".format(item.metadata_tag), "info")
+            flash("Rejected metadata  {item.metadata_tag}", "info")
         except Exception as e:
             db.session.rollback()
-            logging.error(e)
+            log.error(e)
         finally:
             self.update_redirect()
             return redirect(url_for('RawMetadataValidationView.list'))
 
-    @action("validate_raw_metadata", "Validate metadata", confirmation="Run validation?", icon="fa-rocket", multiple=True, single=False)
+    @action(
+        "validate_raw_metadata",
+        "Validate and submit metadata",
+        confirmation="Run validation and trigger pipeline?",
+        icon="fa-rocket",
+        multiple=True, single=False)
     def validate_metadata(self, item):
         id_list = list()
         tag_list = list()
@@ -171,9 +221,17 @@ class RawMetadataValidationView(ModelView):
         else:
             id_list = [item.raw_metadata_id]
             tag_list = [item.metadata_tag]
-        _ = \
-            async_validate_metadata.\
-                apply_async(args=[id_list])
-        flash("Submitted jobs for {0}".format(', '.join(tag_list)), "info")
+        try:
+            _ = \
+                async_validate_metadata\
+                .apply_async(args=[id_list])
+            flash(
+                f"Submitted jobs for {', '.join(tag_list)}",
+                "info")
+        except Exception as e:
+            log.error(e)
+            flash(
+                f"Failed to submit jobs for {', '.join(tag_list)}",
+                "danger")
         self.update_redirect()
         return redirect(self.get_redirect())

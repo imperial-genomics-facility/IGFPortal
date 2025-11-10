@@ -1,0 +1,44 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
+    feature_types: Gene Expression/Antibody Capture
+    cellranger_group: {{ SAMPLE_ID }} OR GROUP_NAME
+{% endfor -%}
+analysis_metadata:
+  cellranger_multi_config:
+    - "[gene-expression]"
+    - "## FOR HUMAN GEX REF - UNCOMMENT NEXT TWO LINES"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_REF/GRCH38/refdata-gex-GRCh38-2024-A"
+    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/CELLRANGER/cellranger-9.0.1/probe_sets/Chromium_Human_Transcriptome_Probe_Set_v1.1.0_GRCh38-2024-A.csv"
+    - "## FOR MOUSE GEX REF - UNCOMMENT NEXT TWO LINES"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_REF/GRCM39/refdata-gex-GRCm39-2024-A"
+    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/CELLRANGER/cellranger-9.0.1/probe_sets/Chromium_Mouse_Transcriptome_Probe_Set_v1.1.1_GRCm39-2024-A.csv"
+    - "create-bam,true"
+    - "# filter-probes,<true|false>"
+    - "# r1-length,<int>"
+    - "# r2-length,<int>"
+    - "# chemistry,<auto>"
+    - "# expect-cells,<int>"
+    - "# force-cells,<int>"
+    - "# no-secondary,<true|false>"
+    - "# check-library-compatibility,<true|false>"
+    - "# include-introns,<true|false>"
+    - "[feature]"
+    - "reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/CELLRANGER_FEATURE_BARCODES/TotalSeqC_feature_ref.csv"
+    - "# r1-length,<int> # feature R1 length"
+    - "# r2-length,<int> # feature R2 length"
+    - "[samples]"
+    - "sample_id,probe_barcode_ids,description"
+    - "TEST_SMAPLE,BC00X+AB00Y OR BC00X|BC00Y,CASE OR CONTROL"
+  scanpy_config:
+    TEMPLATE_FILE: /rds/general/project/genomics-facility-archive-2019/live/tgu/software/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.3.ipynb
+    IMAGE_FILE: /rds/general/project/genomics-facility-archive-2019/live/tgu/resources/pipeline_resource/singularity_images/scanpy-notebook-image/scanpy-notebook-image_v0.0.4.sif
+    "# SET MT- FOR HUMAN and mt- FOR MOUSE": ""
+    MITO_PREFIX: MT-
+    RUN_SCRUBLET: false
+    RUN_CELLCYCLE_SCORE: true
+    CELL_MARKER_LIST: /rds/general/project/genomics-facility-archive-2019/live/tgu/resources/pipeline_resource/cell_markers/PangaloDB/PanglaoDB_markers_27_Mar_2020.tsv
+    "# SET HG38 FOR HUMAN and MM10 FOR MOUSE": ""
+    CELL_MARKER_SPECIES: HG38
+    S_GENES: ""
+    G2M_GENES: ""
+    CELL_MARKER_MODE: NON-VDJ

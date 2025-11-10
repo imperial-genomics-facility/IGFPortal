@@ -16,7 +16,7 @@ class RawMetadataDataApi(ModelRestApi):
     resource_name = "raw_metadata"
     datamodel = SQLAInterface(RawMetadataModel)
 
-    @expose('/search_new_metadata',  methods=['POST'])
+    @expose('/search_new_metadata',  methods=['GET'])
     @protect()
     def search_metadata(self):
         try:
@@ -36,7 +36,7 @@ class RawMetadataDataApi(ModelRestApi):
                 new_projects = ""
             return self.response(200, new_projects=new_projects)
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
     @expose('/add_metadata',  methods=['POST'])
     @protect()
@@ -56,19 +56,45 @@ class RawMetadataDataApi(ModelRestApi):
             parse_and_add_new_raw_metadata(data=json_data)
             return self.response(200, message='loaded new metadata')
         except Exception as e:
-            logging.error(e)
+            log.error(e)
+
+    @expose('/get_raw_metadata/<raw_metadata_id>',  methods=['GET'])
+    @protect()
+    def get_raw_metadata(self, raw_metadata_id: int):
+        try:
+            result = (
+                db.session
+                .query(
+                    RawMetadataModel.metadata_tag,
+                    RawMetadataModel.formatted_csv_data)
+                .filter(RawMetadataModel.status=='READY')
+                .filter(RawMetadataModel.raw_metadata_id==raw_metadata_id)
+                .one_or_none()
+            )
+            if result is None:
+                entry = {'': ''}
+            else:
+                entry = {result[0]: result[1]}
+            data = json.dumps(entry)
+            output = BytesIO(data.encode())
+            output.seek(0)
+            return send_file(output, download_name='metadata.json', as_attachment=True)
+        except Exception as e:
+            log.error(e)
+
 
     @expose('/download_ready_metadata',  methods=['GET'])
     @protect()
     def download_ready_metadata(self):
         try:
-            results = \
-                db.session.\
-                    query(
-                        RawMetadataModel.metadata_tag,
-                        RawMetadataModel.formatted_csv_data).\
-                    filter(RawMetadataModel.status=='READY').\
-                    all()
+            results = (
+                db.session
+                .query(
+                    RawMetadataModel.metadata_tag,
+                    RawMetadataModel.formatted_csv_data)
+                .filter(RawMetadataModel.status=='READY')
+                .all()
+            )
             if len(results)==0:
                 return self.response(200)
             else:
@@ -80,21 +106,42 @@ class RawMetadataDataApi(ModelRestApi):
                 output.seek(0)
                 return send_file(output, download_name='metadata.json', as_attachment=True)
         except Exception as e:
-            logging.error(e)
+            log.error(e)
+
+    @expose('/mark_ready_metadata_as_synced/<raw_metadata_id>',  methods=['GET'])
+    @protect()
+    def mark_raw_metadata_as_synced(self, raw_metadata_id: int):
+        try:
+            try:
+                (db.session
+                .query(RawMetadataModel)
+                .filter(RawMetadataModel.status=='READY')
+                .filter(RawMetadataModel.raw_metadata_id==raw_metadata_id)
+                .update({'status':'SYNCHED'})
+                )
+                db.session.commit()
+                return self.response(200, message='metadata synced')
+            except:
+                db.session.rollback()
+                raise
+        except Exception as e:
+            log.error(e)
+
 
     @expose('/mark_ready_metadata_as_synced',  methods=['GET'])
     @protect()
     def mark_ready_metadata_as_synced(self):
         try:
             try:
-                db.session.\
-                    query(RawMetadataModel).\
-                    filter(RawMetadataModel.status=='READY').\
-                    update({'status':'SYNCHED'})
+                (db.session
+                .query(RawMetadataModel)
+                .filter(RawMetadataModel.status=='READY')
+                .update({'status':'SYNCHED'})
+                )
                 db.session.commit()
                 return self.response(200, message='all metadata synced')
             except:
                 db.session.rollback()
                 raise
         except Exception as e:
-            logging.error(e)
+            log.error(e)
