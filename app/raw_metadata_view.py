@@ -1,3 +1,4 @@
+import os
 import logging
 import pandas as pd
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -27,12 +28,31 @@ def async_validate_metadata(self, id_list):
             msg = \
                 validate_raw_metadata_and_set_db_status(
                     raw_metadata_id=raw_metadata_id)
+            if msg == 'VALIDATED':
+                mark_raw_metadata_as_ready(id_list=[raw_metadata_id])
+                airflow_dag_id = \
+                    get_airflow_dag_id(
+                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
+                        dag_tag=METADATA_REGISTRATION_DAG_TAG)
+                if airflow_dag_id is None:
+                    log.error(
+                        "Failed to get airflow dag id for " +
+                        METADATA_REGISTRATION_DAG_TAG)
+                else:
+                    res = \
+                        trigger_airflow_pipeline(
+                            dag_id=airflow_dag_id,
+                            conf_data={"raw_metadata_id": raw_metadata_id},
+                            airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'])
+                    log.info(
+                        "Triggered metadata registration for " + \
+                        f"{raw_metadata_id} with res {res}")
             results.append(msg)
         return dict(zip(id_list, results))
     except Exception as e:
         log.error(
-            "Failed to run celery job for metadata validation, error: {0}".\
-                format(e))
+            "Failed to run celery job for metadata validation, " + \
+            f"error: {e}")
 
 
 class RawMetadataSubmitView(ModelView):
@@ -83,9 +103,9 @@ class RawMetadataSubmitView(ModelView):
         return send_file(output, download_name=f"{tag}_formatted.csv", as_attachment=True)
 
     @action(
-        "upload_raw_metadata",
-        "Mark for upload",
-        confirmation="Change metadata status?",
+        "resubmit_metadata",
+        "Re-upload metadata",
+        confirmation="Trigger pipeline again?",
         icon="fa-rocket")
     def upload_raw_metadata_csv(self, item):
         id_list = list()
@@ -97,15 +117,17 @@ class RawMetadataSubmitView(ModelView):
             id_list = [item.raw_metadata_id]
             tag_list = [item.metadata_tag]
         try:
-            mark_raw_metadata_as_ready(id_list=id_list)
+            _ = \
+                async_validate_metadata.\
+                    apply_async(args=[id_list])
             flash(
-                f"Marked metadata ready for {', '.join(tag_list)}",
+                f"Submitted jobs for {', '.join(tag_list)}",
                 "info")
         except Exception as e:
-            logging.error(e)
             flash(
-                f"Error in upload {', '.join(tag_list)}",
+                f"Failed to submit jobs for {', '.join(tag_list)}",
                 "danger")
+            log.error(e)
         self.update_redirect()
         return redirect(self.get_redirect())
 
@@ -186,8 +208,8 @@ class RawMetadataValidationView(ModelView):
 
     @action(
         "validate_raw_metadata",
-        "Validate metadata",
-        confirmation="Run validation?",
+        "Validate and submit metadata",
+        confirmation="Run validation and trigger pipeline?",
         icon="fa-rocket",
         multiple=True, single=False)
     def validate_metadata(self, item):
@@ -199,11 +221,16 @@ class RawMetadataValidationView(ModelView):
         else:
             id_list = [item.raw_metadata_id]
             tag_list = [item.metadata_tag]
-        _ = \
-            async_validate_metadata.\
-                apply_async(args=[id_list])
-        flash(
-            f"Submitted jobs for {', '.join(tag_list)}",
-            "info")
+        try:
+            _ = \
+                async_validate_metadata.\
+                    apply_async(args=[id_list])
+            flash(
+                f"Submitted jobs for {', '.join(tag_list)}",
+                "info")
+        except Exception as e:
+            flash(
+                f"Failed to submit jobs for {', '.join(tag_list)}",
+                "danger")
         self.update_redirect()
         return redirect(self.get_redirect())
