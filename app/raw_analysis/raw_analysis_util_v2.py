@@ -30,7 +30,7 @@ def raw_project_query():
             RawProject.status=='ACTIVE'
         ).order_by(
             RawProject.project_id.desc()
-        ).limit(100).all()
+        ).limit(200).all()
         return results
     except Exception as e:
         raise ValueError(
@@ -49,7 +49,7 @@ def raw_pipeline_query():
                 RawPipeline.pipeline_name.like("dag%")
         ).order_by(
                 RawPipeline.pipeline_id.desc()
-        ).limit(100).all()
+        ).limit(200).all()
         return results
     except Exception as e:
         raise ValueError(
