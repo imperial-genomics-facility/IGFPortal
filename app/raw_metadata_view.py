@@ -29,7 +29,8 @@ def async_validate_metadata(self, id_list):
                 validate_raw_metadata_and_set_db_status(
                     raw_metadata_id=raw_metadata_id)
             if msg == 'VALIDATED':
-                mark_raw_metadata_as_ready(id_list=[raw_metadata_id])
+                mark_raw_metadata_as_ready(
+                    id_list=[raw_metadata_id])
                 airflow_dag_id = \
                     get_airflow_dag_id(
                         airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
@@ -90,7 +91,6 @@ class RawMetadataSubmitView(ModelView):
         tag = 'Empty'
         if isinstance(item.formatted_csv_data, str) and \
            len(item.formatted_csv_data.split("\n")) > 0:
-            data_list = item.formatted_csv_data.split("\n")
             cvsStringIO = StringIO(item.formatted_csv_data)
             df = pd.read_csv(cvsStringIO, header=0)
             df.to_csv(output, index=False)
@@ -118,8 +118,8 @@ class RawMetadataSubmitView(ModelView):
             tag_list = [item.metadata_tag]
         try:
             _ = \
-                async_validate_metadata.\
-                    apply_async(args=[id_list])
+                async_validate_metadata\
+                .apply_async(args=[id_list])
             flash(
                 f"Submitted jobs for {', '.join(tag_list)}",
                 "info")
@@ -193,15 +193,15 @@ class RawMetadataValidationView(ModelView):
         single=True)
     def mark_raw_metadata_as_rejected(self, item):
         try:
-            db.session.\
-                query(RawMetadataModel).\
-                filter(RawMetadataModel.raw_metadata_id==item.raw_metadata_id).\
-                update({'status': 'REJECTED'})
+            (db.session
+             .query(RawMetadataModel)
+             .filter(RawMetadataModel.raw_metadata_id==item.raw_metadata_id)
+             .update({'status': 'REJECTED'}))
             db.session.commit()
-            flash("Rejected metadata  {0}".format(item.metadata_tag), "info")
+            flash("Rejected metadata  {item.metadata_tag}", "info")
         except Exception as e:
             db.session.rollback()
-            logging.error(e)
+            log.error(e)
         finally:
             self.update_redirect()
             return redirect(url_for('RawMetadataValidationView.list'))
@@ -223,12 +223,13 @@ class RawMetadataValidationView(ModelView):
             tag_list = [item.metadata_tag]
         try:
             _ = \
-                async_validate_metadata.\
-                    apply_async(args=[id_list])
+                async_validate_metadata\
+                .apply_async(args=[id_list])
             flash(
                 f"Submitted jobs for {', '.join(tag_list)}",
                 "info")
         except Exception as e:
+            log.error(e)
             flash(
                 f"Failed to submit jobs for {', '.join(tag_list)}",
                 "danger")

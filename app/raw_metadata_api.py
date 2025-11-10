@@ -36,7 +36,7 @@ class RawMetadataDataApi(ModelRestApi):
                 new_projects = ""
             return self.response(200, new_projects=new_projects)
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
     @expose('/add_metadata',  methods=['POST'])
     @protect()
@@ -56,7 +56,7 @@ class RawMetadataDataApi(ModelRestApi):
             parse_and_add_new_raw_metadata(data=json_data)
             return self.response(200, message='loaded new metadata')
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
     @expose('/get_raw_metadata/<raw_metadata_id>',  methods=['GET'])
     @protect()
@@ -80,7 +80,7 @@ class RawMetadataDataApi(ModelRestApi):
             output.seek(0)
             return send_file(output, download_name='metadata.json', as_attachment=True)
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
 
     @expose('/download_ready_metadata',  methods=['GET'])
@@ -106,7 +106,7 @@ class RawMetadataDataApi(ModelRestApi):
                 output.seek(0)
                 return send_file(output, download_name='metadata.json', as_attachment=True)
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
     @expose('/mark_ready_metadata_as_synced/<raw_metadata_id>',  methods=['GET'])
     @protect()
@@ -125,7 +125,7 @@ class RawMetadataDataApi(ModelRestApi):
                 db.session.rollback()
                 raise
         except Exception as e:
-            logging.error(e)
+            log.error(e)
 
 
     @expose('/mark_ready_metadata_as_synced',  methods=['GET'])
@@ -144,4 +144,4 @@ class RawMetadataDataApi(ModelRestApi):
                 db.session.rollback()
                 raise
         except Exception as e:
-            logging.error(e)
+            log.error(e)

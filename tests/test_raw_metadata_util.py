@@ -1,6 +1,6 @@
 from app.models import (
-    RawMetadataModel, 
-    Project, 
+    RawMetadataModel,
+    Project,
     Sample)
 from unittest.mock import patch
 from app.raw_metadata.raw_metadata_util import (

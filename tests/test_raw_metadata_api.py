@@ -77,7 +77,8 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert json.loads(res.data.decode('utf-8')).get('new_projects') == "test2"
     metadata_file_data = \
         BytesIO(
-            b'[{"metadata_tag": "test2", "raw_csv_data": [{"project_id": "c","sample_id": "d"}], "formatted_csv_data": [{"project_id": "c","sample_id": "d"}]}]')
+            b'[{"metadata_tag": "test2", "raw_csv_data": [{"project_id": "c","sample_id": "d"}], '
+            b'"formatted_csv_data": [{"project_id": "c","sample_id": "d"}]}]')
     res = \
         test_client.post(
             '/api/v1/raw_metadata/add_metadata',
