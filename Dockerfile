@@ -1,5 +1,5 @@
 FROM python:3.13.7-slim AS builder
-LABEL version="v2.0.4"
+LABEL version="v2.0.5"
 LABEL description="Docker image for running IGFPortal server"
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
