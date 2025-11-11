@@ -35,12 +35,12 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
         json.loads(res.data.decode("utf-8")).\
             get("access_token")
     res = \
-        test_client.get(
+        test_client.post(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 400
     res = \
-        test_client.get(
+        test_client.post(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(
@@ -56,7 +56,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert 'test5' in json.loads(res.data.decode('utf-8')).get('new_projects').split(",")
     assert len(json.loads(res.data.decode('utf-8')).get('new_projects').split(",")) == 3
     res = \
-        test_client.get(
+        test_client.post(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test1"]}'), 'test.json')),
@@ -66,7 +66,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
     assert 'new_projects' in res.data.decode('utf-8')
     assert json.loads(res.data.decode('utf-8')).get('new_projects') == ""
     res = \
-        test_client.get(
+        test_client.post(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test2"]}'), 'test.json')),
@@ -88,7 +88,7 @@ def test_raw_metadata_api1(db, test_client, tmp_path):
             follow_redirects=True)
     assert res.status_code == 200
     res = \
-        test_client.get(
+        test_client.post(
             '/api/v1/raw_metadata/search_new_metadata',
             headers={"Authorization": f"Bearer {token}"},
             data=dict(file=(BytesIO(b'{"project_list":["test2"]}'), 'test.json')),
