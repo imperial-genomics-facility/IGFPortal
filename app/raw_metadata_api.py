@@ -16,7 +16,7 @@ class RawMetadataDataApi(ModelRestApi):
     resource_name = "raw_metadata"
     datamodel = SQLAInterface(RawMetadataModel)
 
-    @expose('/search_new_metadata',  methods=['GET'])
+    @expose('/search_new_metadata',  methods=['POST'])
     @protect()
     def search_metadata(self):
         try:
