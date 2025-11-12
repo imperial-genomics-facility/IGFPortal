@@ -84,7 +84,8 @@
             "contains": {
                 "pattern": "^\\s?reference"
             },
-            "minContains": 2
+            "minContains": 2,
+            "maxContains": 2
         },
         "geneExpressionSection": {
             "contains": {
