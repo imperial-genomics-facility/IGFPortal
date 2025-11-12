@@ -84,13 +84,15 @@
             "contains": {
                 "pattern": "^\\s?reference"
             },
-            "minContains": 2
+            "minContains": 2,
+            "maxContains": 2
         },
         "probeSetPattern": {
             "contains": {
                 "pattern": "^\\s?probe-set"
             },
-            "minContains": 1
+            "minContains": 1,
+            "maxContains": 1
         },
         "geneExpressionSection": {
             "contains": {
@@ -115,6 +117,35 @@
         "sampleHeaderPattern": {
             "contains": {
                 "const": "sample_id,probe_barcode_ids,description"
+            }
+        },
+        "sampleDataPattern": {
+            "if": {
+                "type": "array",
+                "contains": {
+                    "const": "sample_id,probe_barcode_ids,description"
+                }
+            },
+            "then": {
+                "type": "array",
+                "items": {
+                    "if": {
+                        "type": "string",
+                        "pattern": "^sample_id,probe_barcode_ids,description$"
+                    },
+                    "then": true,
+                    "else": {
+                        "if": {
+                            "type": "string",
+                            "not": {
+                                "pattern": "^\\[|^#|^\\s*$|^\\s?reference|^\\s?probe-set|^\\s?create-bam|^\\s?r[12]-length|^\\s?chemistry|^\\s?expect-cells|^\\s?force-cells|^\\s?no-secondary|^\\s?check-library-compatibility|^\\s?include-introns"
+                            }
+                        },
+                        "then": {
+                            "pattern": "^[A-Za-z0-9_\\-,+|]+$"
+                        }
+                    }
+                }
             }
         }
     },
@@ -161,6 +192,9 @@
                         },
                         {
                             "$ref": "#/$defs/sampleHeaderPattern"
+                        },
+                        {
+                            "$ref": "#/$defs/sampleDataPattern"
                         }
                     ]
                 }
