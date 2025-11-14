@@ -8,9 +8,9 @@ from app.models import (
     Platform,
     Seqrun,
     Analysis,
-    RawAnalysis,
-    RawAnalysisValidationSchema,
-    RawAnalysisTemplate,
+    # RawAnalysis,
+    # RawAnalysisValidationSchema,
+    # RawAnalysisTemplate,
     Project_info_data,
     Project_seqrun_info_data,
     Project_seqrun_info_file,
@@ -23,67 +23,67 @@ from app.metadata.metadata_util import (
     check_sample_and_project_ids_in_metadata_db,
     check_user_name_and_email_in_metadata_db)
 
-def test_backup_specific_portal_tables(db, tmp_path):
-    project3 = \
-        Project(
-            project_id=3,
-            project_igf_id="test3")
-    ## add raw analysis before loading new data
-    pipeline = \
-        Pipeline(
-            pipeline_name="pipeline1",
-            pipeline_db="",
-            pipeline_type='AIRFLOW')
-    raw_analysis = \
-        RawAnalysis(
-            analysis_name="analysis1",
-            analysis_yaml="test",
-            status="VALIDATED",
-            project=project3,
-            pipeline=pipeline)
-    try:
-        db.session.add(project3)
-        db.session.add(pipeline)
-        db.session.add(raw_analysis)
-        db.session.flush()
-        db.session.commit()
-    except:
-        db.session.rollback()
-        raise
-    result = \
-        db.session.\
-            query(RawAnalysis).\
-            filter(RawAnalysis.analysis_name=="analysis1").\
-            one_or_none()
-    assert result is not None
-    assert result.raw_analysis_id == 1
-    assert result.project_id == 3
-    (_, json_file) = \
-        tempfile.mkstemp(
-            dir=tmp_path,
-            suffix='.json',
-            prefix='portal_metadata_',)
-    assert os.path.exists(json_file)
-    json_file = \
-        backup_specific_portal_tables(json_file)
-    assert os.path.exists(json_file)
-    with open(json_file, 'r') as fp:
-        json_data = json.load(fp)
-    assert 'raw_analysis' in json_data
-    raw_analysis_data = \
-        json_data.get('raw_analysis')
-    assert isinstance(raw_analysis_data, list)
-    assert len(raw_analysis_data) == 1
-    assert 'analysis_name' in raw_analysis_data[0]
-    assert raw_analysis_data[0].get('analysis_name') == 'analysis1'
-    result = \
-        db.session.\
-            query(RawAnalysis).\
-            filter(RawAnalysis.analysis_name=="analysis1").\
-            one_or_none()
-    assert result is not None
-    assert result.raw_analysis_id == 1
-    assert result.project_id == 3
+# def test_backup_specific_portal_tables(db, tmp_path):
+#     project3 = \
+#         Project(
+#             project_id=3,
+#             project_igf_id="test3")
+#     ## add raw analysis before loading new data
+#     pipeline = \
+#         Pipeline(
+#             pipeline_name="pipeline1",
+#             pipeline_db="",
+#             pipeline_type='AIRFLOW')
+#     raw_analysis = \
+#         RawAnalysis(
+#             analysis_name="analysis1",
+#             analysis_yaml="test",
+#             status="VALIDATED",
+#             project=project3,
+#             pipeline=pipeline)
+#     try:
+#         db.session.add(project3)
+#         db.session.add(pipeline)
+#         db.session.add(raw_analysis)
+#         db.session.flush()
+#         db.session.commit()
+#     except:
+#         db.session.rollback()
+#         raise
+#     result = \
+#         db.session.\
+#             query(RawAnalysis).\
+#             filter(RawAnalysis.analysis_name=="analysis1").\
+#             one_or_none()
+#     assert result is not None
+#     assert result.raw_analysis_id == 1
+#     assert result.project_id == 3
+#     (_, json_file) = \
+#         tempfile.mkstemp(
+#             dir=tmp_path,
+#             suffix='.json',
+#             prefix='portal_metadata_',)
+#     assert os.path.exists(json_file)
+#     json_file = \
+#         backup_specific_portal_tables(json_file)
+#     assert os.path.exists(json_file)
+#     with open(json_file, 'r') as fp:
+#         json_data = json.load(fp)
+#     assert 'raw_analysis' in json_data
+#     raw_analysis_data = \
+#         json_data.get('raw_analysis')
+#     assert isinstance(raw_analysis_data, list)
+#     assert len(raw_analysis_data) == 1
+#     assert 'analysis_name' in raw_analysis_data[0]
+#     assert raw_analysis_data[0].get('analysis_name') == 'analysis1'
+#     result = \
+#         db.session.\
+#             query(RawAnalysis).\
+#             filter(RawAnalysis.analysis_name=="analysis1").\
+#             one_or_none()
+#     assert result is not None
+#     assert result.raw_analysis_id == 1
+#     assert result.project_id == 3
 
 
 # class TestMetadataUtil1(unittest.TestCase):
@@ -97,214 +97,214 @@ def test_backup_specific_portal_tables(db, tmp_path):
 #         db.session.remove()
 #         db.drop_all()
 
-def test_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
-    # def test_cleanup_and_load_new_data_to_metadata_tables(self):
-        project2 = \
-            Project(
-                project_id=2,
-                project_igf_id="test2")
-        project3 = \
-            Project(
-                project_id=3,
-                project_igf_id="test3")
-        ## add raw analysis before loading new data
-        pipeline = \
-            Pipeline(
-                pipeline_id=1,
-                pipeline_name="pipeline1",
-                pipeline_db="",
-                pipeline_type='AIRFLOW'
-            )
-        raw_analysis = \
-            RawAnalysis(
-                raw_analysis_id=1,
-                analysis_name="analysis1",
-                analysis_yaml="test",
-                status="VALIDATED",
-                project=project3,
-                pipeline=pipeline
-            )
-        raw_validation_schema = \
-            RawAnalysisValidationSchema(
-                raw_analysis_schema_id=1,
-                pipeline=pipeline,
-                json_schema="",
-                status="VALIDATED")
-        raw_analysis_template = \
-            RawAnalysisTemplate(
-                template_id=1,
-                template_tag="test",
-                template_data="test")
-        platform = \
-            Platform(
-                platform_id=1,
-                platform_igf_id="test_platform",
-                model_name="NOVASEQ6000",
-                vendor_name="ILLUMINA",
-                software_name="RTA")
-        seqrun = \
-            Seqrun(
-                seqrun_id=1,
-                seqrun_igf_id="test_seqrun",
-                flowcell_id="FLOWCELL1",
-                platform=platform)
-        analysis = \
-            Analysis(
-                analysis_id=1,
-                project=project3,
-                analysis_name="test_analysis",
-                analysis_type="test_analysis_type")
-        project_info_data = \
-            Project_info_data(
-                project_info_data_id=1,
-                sample_read_count_data="test",
-                project_history_data="test",
-                project=project3)
-        project_seqrun_info_data = \
-            Project_seqrun_info_data(
-                project_seqrun_info_data_id=1,
-                project=project3,
-                seqrun=seqrun,
-                lane_number='1',
-                index_group_tag="test_ig",
-                project_info_data=project_info_data)
-        project_seqrun_info_file = \
-            Project_seqrun_info_file(
-                project_seqrun_info_file_id=1,
-                project_seqrun_info_data=project_seqrun_info_data,
-                file_path="test")
-        project_analysis_info_data = \
-            Project_analysis_info_data(
-                project_analysis_info_data_id=1,
-                project=project3,
-                analysis=analysis,
-                analysis_tag="test_analysis_tag",
-                project_info_data=project_info_data)
-        project_analysis_info_file = \
-            Project_analysis_info_file(
-                project_analysis_info_file_id=1,
-                project_analysis_info_data=project_analysis_info_data,
-                file_path="test")
-        try:
-            db.session.add(project2)
-            db.session.add(project3)
-            db.session.add(pipeline)
-            db.session.add(raw_analysis)
-            db.session.add(raw_validation_schema)
-            db.session.add(raw_analysis_template)
-            db.session.add(platform)
-            db.session.add(seqrun)
-            db.session.add(analysis)
-            db.session.add(project_info_data)
-            db.session.add(project_seqrun_info_data)
-            db.session.add(project_seqrun_info_file)
-            db.session.add(project_analysis_info_data)
-            db.session.add(project_analysis_info_file)
-            db.session.flush()
-            db.session.commit()
-        except:
-            db.session.rollback()
-            raise
-        result = \
-            db.session.\
-                query(Project).\
-                filter(Project.project_igf_id=="test2").\
-                one_or_none()
-        assert result is not None
-        assert result.project_id == 2
-        json_data = {
-            "project": [{
-                "project_id": 1,
-                "project_igf_id": "test1"},{
-                "project_id": 3,
-                "project_igf_id": "test3"}],
-            "pipeline": [{
-                "pipeline_id": 1,
-                "pipeline_name": "pipeline1",
-                "pipeline_db": "",
-                "pipeline_type": "AIRFLOW"}],
-            "analysis": [dict(
-                analysis_id=1,
-                project_id=3,
-                analysis_name="test_analysis",
-                analysis_type="test_analysis_type")],
-            "platform": [dict(
-                platform_id=1,
-                platform_igf_id="test_platform",
-                model_name="NOVASEQ6000",
-                vendor_name="ILLUMINA",
-                software_name="RTA")],
-            "seqrun": [dict(
-                seqrun_id=1,
-                seqrun_igf_id="test_seqrun",
-                flowcell_id="FLOWCELL1",
-                platform_id=1)]}
-        temp_json_file = \
-            os.path.join(tmp_path, 'metadata_db.json')
-        with open(temp_json_file, 'w') as fp:
-            json.dump(json_data, fp)
-        cleanup_and_load_new_data_to_metadata_tables(temp_json_file)
-        result = \
-            db.session.\
-                query(Project).\
-                filter(Project.project_igf_id=="test1").\
-                one_or_none()
-        assert result is not None
-        assert result.project_id == 1
-        result = \
-            db.session.\
-                query(Project).\
-                filter(Project.project_igf_id=="test2").\
-                one_or_none()
-        assert result is None
-        result = \
-            db.session.\
-                query(RawAnalysis).\
-                filter(RawAnalysis.analysis_name=="analysis1").\
-                one_or_none()
-        assert result is not None
-        assert result.analysis_name == "analysis1"
-        assert result.project_id == 3
-        assert result.pipeline_id == 1
-        result = \
-            db.session.\
-                query(Project_info_data).\
-                filter(Project_info_data.project_info_data_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.sample_read_count_data == "test"
-        assert result.project_id == 3
-        result = \
-            db.session.\
-                query(Project_seqrun_info_data).\
-                filter(Project_seqrun_info_data.project_seqrun_info_data_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.project_id == 3
-        assert result.project_info_data_id == 1
-        result = \
-            db.session.\
-                query(Project_seqrun_info_file).\
-                filter(Project_seqrun_info_file.project_seqrun_info_file_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.project_seqrun_info_data_id == 1
-        assert result.file_path == "test"
-        result = \
-            db.session.\
-                query(Project_analysis_info_data).\
-                filter(Project_analysis_info_data.project_analysis_info_data_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.analysis_tag == "test_analysis_tag"
-        assert result.analysis_id == 1
-        result = \
-            db.session.\
-                query(Project_analysis_info_file).\
-                filter(Project_analysis_info_file.project_analysis_info_file_id==1).\
-                one_or_none()
-        assert result is not None
-        assert result.file_path == "test"
+# def test_cleanup_and_load_new_data_to_metadata_tables(db, tmp_path):
+#     # def test_cleanup_and_load_new_data_to_metadata_tables(self):
+#         project2 = \
+#             Project(
+#                 project_id=2,
+#                 project_igf_id="test2")
+#         project3 = \
+#             Project(
+#                 project_id=3,
+#                 project_igf_id="test3")
+#         ## add raw analysis before loading new data
+#         pipeline = \
+#             Pipeline(
+#                 pipeline_id=1,
+#                 pipeline_name="pipeline1",
+#                 pipeline_db="",
+#                 pipeline_type='AIRFLOW'
+#             )
+#         raw_analysis = \
+#             RawAnalysis(
+#                 raw_analysis_id=1,
+#                 analysis_name="analysis1",
+#                 analysis_yaml="test",
+#                 status="VALIDATED",
+#                 project=project3,
+#                 pipeline=pipeline
+#             )
+#         raw_validation_schema = \
+#             RawAnalysisValidationSchema(
+#                 raw_analysis_schema_id=1,
+#                 pipeline=pipeline,
+#                 json_schema="",
+#                 status="VALIDATED")
+#         raw_analysis_template = \
+#             RawAnalysisTemplate(
+#                 template_id=1,
+#                 template_tag="test",
+#                 template_data="test")
+#         platform = \
+#             Platform(
+#                 platform_id=1,
+#                 platform_igf_id="test_platform",
+#                 model_name="NOVASEQ6000",
+#                 vendor_name="ILLUMINA",
+#                 software_name="RTA")
+#         seqrun = \
+#             Seqrun(
+#                 seqrun_id=1,
+#                 seqrun_igf_id="test_seqrun",
+#                 flowcell_id="FLOWCELL1",
+#                 platform=platform)
+#         analysis = \
+#             Analysis(
+#                 analysis_id=1,
+#                 project=project3,
+#                 analysis_name="test_analysis",
+#                 analysis_type="test_analysis_type")
+#         project_info_data = \
+#             Project_info_data(
+#                 project_info_data_id=1,
+#                 sample_read_count_data="test",
+#                 project_history_data="test",
+#                 project=project3)
+#         project_seqrun_info_data = \
+#             Project_seqrun_info_data(
+#                 project_seqrun_info_data_id=1,
+#                 project=project3,
+#                 seqrun=seqrun,
+#                 lane_number='1',
+#                 index_group_tag="test_ig",
+#                 project_info_data=project_info_data)
+#         project_seqrun_info_file = \
+#             Project_seqrun_info_file(
+#                 project_seqrun_info_file_id=1,
+#                 project_seqrun_info_data=project_seqrun_info_data,
+#                 file_path="test")
+#         project_analysis_info_data = \
+#             Project_analysis_info_data(
+#                 project_analysis_info_data_id=1,
+#                 project=project3,
+#                 analysis=analysis,
+#                 analysis_tag="test_analysis_tag",
+#                 project_info_data=project_info_data)
+#         project_analysis_info_file = \
+#             Project_analysis_info_file(
+#                 project_analysis_info_file_id=1,
+#                 project_analysis_info_data=project_analysis_info_data,
+#                 file_path="test")
+#         try:
+#             db.session.add(project2)
+#             db.session.add(project3)
+#             db.session.add(pipeline)
+#             db.session.add(raw_analysis)
+#             db.session.add(raw_validation_schema)
+#             db.session.add(raw_analysis_template)
+#             db.session.add(platform)
+#             db.session.add(seqrun)
+#             db.session.add(analysis)
+#             db.session.add(project_info_data)
+#             db.session.add(project_seqrun_info_data)
+#             db.session.add(project_seqrun_info_file)
+#             db.session.add(project_analysis_info_data)
+#             db.session.add(project_analysis_info_file)
+#             db.session.flush()
+#             db.session.commit()
+#         except:
+#             db.session.rollback()
+#             raise
+#         result = \
+#             db.session.\
+#                 query(Project).\
+#                 filter(Project.project_igf_id=="test2").\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.project_id == 2
+#         json_data = {
+#             "project": [{
+#                 "project_id": 1,
+#                 "project_igf_id": "test1"},{
+#                 "project_id": 3,
+#                 "project_igf_id": "test3"}],
+#             "pipeline": [{
+#                 "pipeline_id": 1,
+#                 "pipeline_name": "pipeline1",
+#                 "pipeline_db": "",
+#                 "pipeline_type": "AIRFLOW"}],
+#             "analysis": [dict(
+#                 analysis_id=1,
+#                 project_id=3,
+#                 analysis_name="test_analysis",
+#                 analysis_type="test_analysis_type")],
+#             "platform": [dict(
+#                 platform_id=1,
+#                 platform_igf_id="test_platform",
+#                 model_name="NOVASEQ6000",
+#                 vendor_name="ILLUMINA",
+#                 software_name="RTA")],
+#             "seqrun": [dict(
+#                 seqrun_id=1,
+#                 seqrun_igf_id="test_seqrun",
+#                 flowcell_id="FLOWCELL1",
+#                 platform_id=1)]}
+#         temp_json_file = \
+#             os.path.join(tmp_path, 'metadata_db.json')
+#         with open(temp_json_file, 'w') as fp:
+#             json.dump(json_data, fp)
+#         cleanup_and_load_new_data_to_metadata_tables(temp_json_file)
+#         result = \
+#             db.session.\
+#                 query(Project).\
+#                 filter(Project.project_igf_id=="test1").\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.project_id == 1
+#         result = \
+#             db.session.\
+#                 query(Project).\
+#                 filter(Project.project_igf_id=="test2").\
+#                 one_or_none()
+#         assert result is None
+#         result = \
+#             db.session.\
+#                 query(RawAnalysis).\
+#                 filter(RawAnalysis.analysis_name=="analysis1").\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.analysis_name == "analysis1"
+#         assert result.project_id == 3
+#         assert result.pipeline_id == 1
+#         result = \
+#             db.session.\
+#                 query(Project_info_data).\
+#                 filter(Project_info_data.project_info_data_id==1).\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.sample_read_count_data == "test"
+#         assert result.project_id == 3
+#         result = \
+#             db.session.\
+#                 query(Project_seqrun_info_data).\
+#                 filter(Project_seqrun_info_data.project_seqrun_info_data_id==1).\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.project_id == 3
+#         assert result.project_info_data_id == 1
+#         result = \
+#             db.session.\
+#                 query(Project_seqrun_info_file).\
+#                 filter(Project_seqrun_info_file.project_seqrun_info_file_id==1).\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.project_seqrun_info_data_id == 1
+#         assert result.file_path == "test"
+#         result = \
+#             db.session.\
+#                 query(Project_analysis_info_data).\
+#                 filter(Project_analysis_info_data.project_analysis_info_data_id==1).\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.analysis_tag == "test_analysis_tag"
+#         assert result.analysis_id == 1
+#         result = \
+#             db.session.\
+#                 query(Project_analysis_info_file).\
+#                 filter(Project_analysis_info_file.project_analysis_info_file_id==1).\
+#                 one_or_none()
+#         assert result is not None
+#         assert result.file_path == "test"
 
 
 

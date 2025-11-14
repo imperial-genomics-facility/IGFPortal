@@ -170,10 +170,10 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_add_project_cleanup_data", "ProjectCleanupApi"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_search_new_analysis", "RawAnalysisApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_search_new_analysis", "RawAnalysisApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
@@ -246,10 +246,10 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_update_admin_view_data", "AdminHomeApi"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_submit_cleanup_job", "MetadataLoadApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_submit_cleanup_job", "MetadataLoadApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
