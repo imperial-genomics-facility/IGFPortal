@@ -55,13 +55,13 @@ x-portal-links: &portal-links
 x-portal-depends-on: &portal-depends-on
   redis_db:
     condition: service_healthy
-    restart: true
+    # restart: true
   portal_db:
     condition: service_healthy
-    restart: true
+    # restart: true
   igfdb:
     condition: service_healthy
-    restart: true
+    # restart: true
 
 networks:
     portal_network:
