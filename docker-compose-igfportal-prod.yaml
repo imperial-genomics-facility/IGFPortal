@@ -13,6 +13,9 @@ x-common-logging: &common-logging
 x-igfportal-env-file: &igfportal-env-file
     - ../env
 
+x-igfdb-env-file: &igfdb-env-file
+    - ../igfdb_env
+
 x-portal-db-volume: &portal-db-volume
   - ../mysqlappdb/db:/var/lib/mysql:rw
   - ../mysqlappdb/SSL:/SSL:ro
@@ -29,12 +32,14 @@ x-redis-volume: &redis-volume
 x-webserver-volume: &webserver-volume
   - ../ssl_cert:/SSL:ro
   - ../mysqlappdb/SSL:/DBSSL:ro
+  - ../igfdb/SSL:/IGFDBSSL:ro
   - ../static:/data/static:rw
   - ../secret/:/secret:ro
   - ../celery_tmp:/TMP_WORK_DIR:rw
 
 x-celery-flower-volume: &celery-flower-volume
   - ../mysqlappdb/SSL:/DBSSL:ro
+  - ../igfdb/SSL:/IGFDBSSL:ro
 
 x-nginx-volume: &nginx-volume
   - ../ssl_cert:/SSL:ro
@@ -79,7 +84,7 @@ services:
       - portal_network
   igfdb:
     image: *portal_db_image
-    env_file: *igfportal-env-file
+    env_file: *igfdb-env-file
     restart: unless-stopped
     logging: *common-logging
     volumes: *igfdb-volume
