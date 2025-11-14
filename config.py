@@ -24,6 +24,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "\2\1thisismyscretkey\1\2\e\y\y\h")
 
 # The SQLAlchemy connection string.
 SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///" + os.path.join('/tmp', "app.db"))
+SQLALCHEMY_BINDS = {
+    'igfdb': os.environ.get("SQLALCHEMY_BINDS_IGFDB_URI", "sqlite:///" + os.path.join('/tmp', "igfdb.db"))
+}
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
 
