@@ -8,7 +8,7 @@ from .raw_metadata_view import RawMetadataValidationView, RawMetadataSubmitView
 from .raw_seqrun_view import RawSeqrunView
 from .analysis_view import AnalysisView
 from .metadata_view import SampleProjectView, SampleView
-from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
+#from .raw_analysis_view import RawAnalysisView, RawAnalysisSchemaView, RawAnalysisQueueView, RawAnalysisTemplateView
 from .raw_analysis_view_v2 import RawAnalysisV2View, RawAnalysisSchemaV2View, RawAnalysisTemplateV2View, RawAnalysisQueueV2View
 from .iframe_view import IFrameView
 from .project_cleanup_view import ProjectCleanupFinishedView, ProjectCleanupPendingView
