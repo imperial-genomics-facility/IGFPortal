@@ -10,6 +10,8 @@ AUTH_USER_REGISTRATION_ROLE = "Admin"
 REPORT_UPLOAD_PATH = "/tmp"
 SQLALCHEMY_DATABASE_URI = \
     os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///" + '/tmp/app.db')
+SQLALCHEMY_BINDS_IGFDB_URI = \
+    os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///" + '/tmp/igfdb.db')
 AUTH_ROLES_MAPPING = {
     "User": ["User"],
     "Admin": ["admin"],
