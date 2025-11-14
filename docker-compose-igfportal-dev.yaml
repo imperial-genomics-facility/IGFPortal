@@ -137,7 +137,7 @@ services:
     depends_on:
       webserver:
         condition: service_healthy
-        restart: true
+        # restart: true
     volumes: *nginx-volume
     container_name: nginx
     restart: unless-stopped
