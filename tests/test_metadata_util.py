@@ -11,14 +11,15 @@ from app.models import (
     # RawAnalysis,
     # RawAnalysisValidationSchema,
     # RawAnalysisTemplate,
-    Project_info_data,
-    Project_seqrun_info_data,
-    Project_seqrun_info_file,
-    Project_analysis_info_data,
-    Project_analysis_info_file)
+    # Project_info_data,
+    # Project_seqrun_info_data,
+    # Project_seqrun_info_file,
+    # Project_analysis_info_data,
+    # Project_analysis_info_file
+    )
 from app.metadata.metadata_util import (
-    backup_specific_portal_tables,
-    cleanup_and_load_new_data_to_metadata_tables,
+    # backup_specific_portal_tables,
+    # cleanup_and_load_new_data_to_metadata_tables,
     check_for_projects_in_metadata_db,
     check_sample_and_project_ids_in_metadata_db,
     check_user_name_and_email_in_metadata_db)
