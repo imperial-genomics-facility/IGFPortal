@@ -855,10 +855,10 @@ class ProjectIndex(AuditMixin, Model):
   def __repr__(self):
     return self.project_tag
   def sample_table(self):
-        url = url_for(
-          'ProjectIndexView.get_index_for_project',
-          id=self.project_index_id)
-        return Markup('<a href="{url}">samples</a>')
+      url = url_for(
+        'ProjectIndexView.get_index_for_project',
+        id=self.project_index_id)
+      return Markup(f'<a href="{url}">samples</a>')
 
 class SampleIndex(AuditMixin, Model):
   __tablename__ = 'sample_index'

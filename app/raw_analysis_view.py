@@ -173,7 +173,7 @@
 #         "pipeline.pipeline_name",
 #         "status",
 #         "date_stamp",
-#         "analysis_yaml", 
+#         "analysis_yaml",
 #         "report"]
 #     add_columns = [
 #         "analysis_name",
