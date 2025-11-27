@@ -1203,10 +1203,10 @@ class Project(Model):
     return  self.project_igf_id
 
   def project_info(self):
-        url = +url_for(
+        url = url_for(
           'ProjectView.get_project_data',
           id=self.project_id)
-        return Markup(f'<a href="{url}">'+self.project_igf_id+'</a>')
+        return Markup(f'<a href="{url}">{self.project_igf_id}</a>')
 
 
 class IgfUser(Model):

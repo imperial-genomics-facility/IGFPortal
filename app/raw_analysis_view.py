@@ -621,7 +621,7 @@
 #         "pipeline.pipeline_name",
 #         "status",
 #         "date_stamp",
-#         "analysis_yaml", 
+#         "analysis_yaml",
 #         "report"]
 #     base_filters = [
 #         ["status", FilterInFunction, lambda: ["VALIDATED",]]]
