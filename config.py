@@ -1,4 +1,5 @@
 import os
+import tempfile
 from flask_appbuilder.security.manager import (
     AUTH_REMOTE_USER,
     AUTH_DB,
@@ -14,7 +15,7 @@ MAX_CONTENT_LENGTH = 50 * 1024 * 1024
 # Celery
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", 'memory://')
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", 'cache+memory://')
-CELERY_WORK_DIR = os.environ.get("CELERY_WORK_DIR", '/tmp')
+CELERY_WORK_DIR = os.environ.get("CELERY_WORK_DIR", tempfile.gettempdir())
 
 # cache
 CACHE_REDIS_URL = os.environ.get("CACHE_REDIS_URL", 'unix://')
@@ -23,9 +24,13 @@ CACHE_REDIS_URL = os.environ.get("CACHE_REDIS_URL", 'unix://')
 SECRET_KEY = os.environ.get("SECRET_KEY", "\2\1thisismyscretkey\1\2\e\y\y\h")
 
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///" + os.path.join('/tmp', "app.db"))
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "SQLALCHEMY_DATABASE_URI",
+    "sqlite:///" + os.path.join(tempfile.gettempdir(), "app.db"))
 SQLALCHEMY_BINDS = {
-    'igfdb': os.environ.get("SQLALCHEMY_BINDS_IGFDB_URI", "sqlite:///" + os.path.join('/tmp', "igfdb.db"))
+    'igfdb': os.environ.get(
+        "SQLALCHEMY_BINDS_IGFDB_URI",
+        "sqlite:///" + os.path.join(tempfile.gettempdir(), "igfdb.db"))
 }
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
