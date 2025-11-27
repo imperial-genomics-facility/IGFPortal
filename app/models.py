@@ -170,8 +170,8 @@ class IlluminaInteropData(Model):
     def __repr__(self):
         return self.run_name
     def report(self):
-        return Markup('<a href="'+url_for('IFrameView.view_interop_report',
-                                          id=self.report_id)+'">report</a>')
+        url = url_for('IFrameView.view_interop_report', id=self.report_id)
+        return Markup(f'<a href="{url}">report</a>')
 
 """
   Pre de-multiplexing data
@@ -787,8 +787,8 @@ class CosmxSlideQCData(Model):
         return self.cosmx_slide_igf_id
 
     # def report(self):
-    #     return Markup('<a href="'+url_for('IFrameView.view_cosmx_qc_report', 
-    #         id=self.qc_id)+'">report</a>')
+    #   url = url_for('IFrameView.view_cosmx_qc_report', id=self.qc_id)
+    #   return Markup(f'<a href="{url}">report</a>')
 
 
 class AnalysesQCData(Model):
@@ -826,8 +826,8 @@ class AnalysesQCData(Model):
         return self.analysis_name
 
     # def report(self):
-    #     return Markup('<a href="'+url_for('IFrameView.view_analyses_qc_report', 
-    #       id=self.qc_id)+'">report</a>')
+    #   url = url_for('IFrameView.view_analyses_qc_report', id=self.qc_id)
+    #   return Markup(f'<a href="{url}">report</a>')
 
 
 """
@@ -855,8 +855,10 @@ class ProjectIndex(AuditMixin, Model):
   def __repr__(self):
     return self.project_tag
   def sample_table(self):
-        return Markup('<a href="'+url_for('ProjectIndexView.get_index_for_project', \
-                                          id=self.project_index_id)+'">samples</a>')
+        url = url_for(
+          'ProjectIndexView.get_index_for_project',
+          id=self.project_index_id)
+        return Markup('<a href="{url}">samples</a>')
 
 class SampleIndex(AuditMixin, Model):
   __tablename__ = 'sample_index'
@@ -1201,8 +1203,10 @@ class Project(Model):
     return  self.project_igf_id
 
   def project_info(self):
-        return Markup('<a href="'+url_for('ProjectView.get_project_data',\
-                                          id=self.project_id)+'">'+self.project_igf_id+'</a>')
+        url = +url_for(
+          'ProjectView.get_project_data',
+          id=self.project_id)
+        return Markup(f'<a href="{url}">'+self.project_igf_id+'</a>')
 
 
 class IgfUser(Model):
