@@ -91,41 +91,41 @@ def test_client(db):
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_list",
                     "SampleIndexView"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_list",
-                    "RawAnalysisView"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_list",
+            #         "RawAnalysisView"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_list",
                     "RawAnalysisV2View"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_list",
-                    "RDSProjectBackupView"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_list",
+            #         "RDSProjectBackupView"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_list",
                     "AnalysisView"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_list",
-                    "ProjectView"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_list",
-                    "UserView"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_list",
-                    "SeqrunView"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_list",
+            #         "ProjectView"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_list",
+            #         "UserView"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_list",
+            #         "SeqrunView"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
@@ -170,34 +170,34 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_add_project_cleanup_data", "ProjectCleanupApi"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_search_new_analysis", "RawAnalysisApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_search_new_analysis", "RawAnalysisApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_search_new_analysis", "RawAnalysisV2Api"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_get_raw_analysis_data", "RawAnalysisApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_get_raw_analysis_data", "RawAnalysisApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_get_raw_analysis_data", "RawAnalysisV2Api"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_mark_analysis_synched", "RawAnalysisApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_mark_analysis_synched", "RawAnalysisApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_mark_analysis_synched", "RawAnalysisV2Api"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_mark_analysis_rejected", "RawAnalysisApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_mark_analysis_rejected", "RawAnalysisApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
@@ -246,10 +246,10 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_update_admin_view_data", "AdminHomeApi"))
-            app.appbuilder.sm.add_permission_role(
-                admin_role,
-                app.appbuilder.sm.add_permission_view_menu(
-                    "can_submit_cleanup_job", "MetadataLoadApi"))
+            # app.appbuilder.sm.add_permission_role(
+            #     admin_role,
+            #     app.appbuilder.sm.add_permission_view_menu(
+            #         "can_submit_cleanup_job", "MetadataLoadApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(

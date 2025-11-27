@@ -1,7 +1,7 @@
 x-images:
   portal_db_image: &portal_db_image mysql:9.4
   redis_image: &redis_image redis:8.2
-  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v2.0.7
+  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v3.0.0
   nginx_image: &nginx_image nginx:1.29.1
   adminer_image: &adminer_image adminer:latest
 
@@ -13,10 +13,18 @@ x-common-logging: &common-logging
 x-igfportal-env-file: &igfportal-env-file
     - ../env
 
+x-igfdb-env-file: &igfdb-env-file
+    - ../igfdb_env
+
 x-portal-db-volume: &portal-db-volume
   - ../mysqlappdb/db:/var/lib/mysql:rw
   - ../mysqlappdb/SSL:/SSL:ro
   - ../mysqlappdb/mysql.conf.d:/etc/mysql/conf.d:ro
+
+x-igfdb-volume: &igfdb-volume
+  - ../igfdb/db:/var/lib/mysql:rw
+  - ../igfdb/SSL:/SSL:ro
+  - ../igfdb/mysql.conf.d:/etc/mysql/conf.d:ro
 
 x-redis-volume: &redis-volume
   - ../redis_data:/data:rw
@@ -24,12 +32,14 @@ x-redis-volume: &redis-volume
 x-webserver-volume: &webserver-volume
   - ../ssl_cert:/SSL:ro
   - ../mysqlappdb/SSL:/DBSSL:ro
+  - ../igfdb/SSL:/IGFDBSSL:ro
   - ../static:/data/static:rw
   - ../secret/:/secret:ro
   - ../celery_tmp:/TMP_WORK_DIR:rw
 
 x-celery-flower-volume: &celery-flower-volume
   - ../mysqlappdb/SSL:/DBSSL:ro
+  - ../igfdb/SSL:/IGFDBSSL:ro
 
 x-nginx-volume: &nginx-volume
   - ../ssl_cert:/SSL:ro
@@ -40,12 +50,16 @@ x-nginx-volume: &nginx-volume
 x-portal-links: &portal-links
   - redis_db
   - portal_db
+  - igfdb
 
 x-portal-depends-on: &portal-depends-on
   redis_db:
     condition: service_healthy
     restart: true
   portal_db:
+    condition: service_healthy
+    restart: true
+  igfdb:
     condition: service_healthy
     restart: true
 
@@ -66,6 +80,21 @@ services:
       retries: 5
     ports:
       - 3306:3306
+    networks:
+      - portal_network
+  igfdb:
+    image: *portal_db_image
+    env_file: *igfdb-env-file
+    restart: unless-stopped
+    logging: *common-logging
+    volumes: *igfdb-volume
+    container_name: igfdb
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 5
+    ports:
+      - 3305:3306
     networks:
       - portal_network
   redis_db:
