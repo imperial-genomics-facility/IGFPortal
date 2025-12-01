@@ -583,7 +583,7 @@ def _run_metadata_json_validation(
 def _set_metadata_validation_status(
     raw_metadata_id: int,
     status: str,
-    report: str=''
+    report: str = ''
     ) -> None:
     try:
         if status.upper() == 'VALIDATED':

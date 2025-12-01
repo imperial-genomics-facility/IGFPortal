@@ -37,7 +37,7 @@ def check_for_projects_in_metadata_db(
 def check_sample_and_project_ids_in_metadata_db(
     sample_project_list: list,
     check_user: bool = True,
-    check_missing: bool =True
+    check_missing: bool = True
     ) -> list:
     try:
         input_sample_project_dict = dict()
@@ -213,7 +213,7 @@ def check_user_name_and_email_in_metadata_db(
                     and email_id != name_dict.get(name)
                 ):
                    errors.append(
-                       f"User {name} registered with email id " 
+                       f"User {name} registered with email id "
                        + str(name_dict.get(name))
                        + f", not {email_id}"
                     )
