@@ -13,22 +13,29 @@ from . import celery
 
 log = logging.getLogger(__name__)
 
-def get_analysis_pipeline_seed_status(analysis_id: int) -> str:
+def get_analysis_pipeline_seed_status(
+    analysis_id: int
+) -> str:
     try:
-        result = \
-            db.session.\
-                query(
-                    Analysis.analysis_name,
-                    Pipeline.pipeline_name,
-                    Pipeline_seed.status).\
-                join(Pipeline, Pipeline.pipeline_name==Analysis.analysis_type).\
-                join(Pipeline_seed, Pipeline_seed.seed_id==Analysis.analysis_id).\
-                filter(Pipeline_seed.pipeline_id==Pipeline.pipeline_id).\
-                filter(Pipeline_seed.seed_table=='analysis').\
-                filter(Pipeline_seed.status=='SEEDED').\
-                filter(Pipeline.pipeline_type=='AIRFLOW').\
-                filter(Analysis.analysis_id==analysis_id).\
-                one_or_none()
+        result = (
+            db.session
+            .query(
+                Analysis.analysis_name,
+                Pipeline.pipeline_name,
+                Pipeline_seed.status)
+            .join(
+                Pipeline,
+                Pipeline.pipeline_name==Analysis.analysis_type)
+            .join(
+                Pipeline_seed,
+                Pipeline_seed.seed_id==Analysis.analysis_id)
+            .filter(Pipeline_seed.pipeline_id==Pipeline.pipeline_id)
+            .filter(Pipeline_seed.seed_table=='analysis')
+            .filter(Pipeline_seed.status=='SEEDED')
+            .filter(Pipeline.pipeline_type=='AIRFLOW')
+            .filter(Analysis.analysis_id==analysis_id)
+            .one_or_none()
+        )
         if result is None:
             return 'INVALID'
         else:
@@ -45,11 +52,12 @@ def async_submit_analysis_pipeline(self, id_list):
         results = list()
         for analysis_id in id_list:
             ## get dag id
-            dag_name = \
-                db.session.\
-                    query(Analysis.analysis_type).\
-                    filter(Analysis.analysis_id==analysis_id).\
-                    one_or_none()
+            dag_name = (
+                db.session
+                .query(Analysis.analysis_type)
+                .filter(Analysis.analysis_id==analysis_id)
+                .one_or_none()
+            )
             if dag_name is not None:
                 dag_name = dag_name[0]
             res = \
@@ -76,7 +84,11 @@ class AnalysisView(ModelView):
         "can_show"]
     base_order = ("analysis_id", "desc")
 
-    @action("trigger_analysis_pipeline", "Trigger analysis pipeline", confirmation="confirm pipeline run?", icon="fa-rocket")
+    @action(
+        "trigger_analysis_pipeline",
+        "Trigger analysis pipeline",
+        confirmation="confirm pipeline run?",
+        icon="fa-rocket")
     def trigger_analysis_pipeline(self, item):
         try:
             id_list = list()
@@ -87,8 +99,9 @@ class AnalysisView(ModelView):
             else:
                 id_list = [item.analysis_id]
                 analysis_list = [item.analysis_name]
-            analysis_dict = \
-                dict(zip(id_list, analysis_list))
+            analysis_dict = dict(
+                zip(id_list, analysis_list)
+            )
             invalid_id_list = list()
             valid_id_list = list()
             invalid_name_list = list()
@@ -98,19 +111,20 @@ class AnalysisView(ModelView):
                     get_analysis_pipeline_seed_status(
                         analysis_id=analysis_id)
                 if status == 'VALID':
-                    valid_id_list.\
-                        append(analysis_id)
-                    valid_name_list.\
-                        append(analysis_dict.get(analysis_id))
+                    valid_id_list.append(
+                        analysis_id)
+                    valid_name_list.append(
+                        analysis_dict.get(analysis_id))
                 if status == 'INVALID':
-                    invalid_id_list.\
-                        append(analysis_id)
-                    invalid_name_list.\
-                        append(analysis_dict.get(analysis_id))
+                    invalid_id_list.append(
+                        analysis_id)
+                    invalid_name_list.append(
+                        analysis_dict.get(analysis_id))
             if len(valid_name_list) > 0:
                 _ = \
-                    async_submit_analysis_pipeline.\
-                        apply_async(args=[valid_id_list])
+                    async_submit_analysis_pipeline.apply_async(
+                        args=[valid_id_list]
+                    )
                 flash(f"Submitted jobs for {', '.join(valid_name_list)}", "info")
             if len(invalid_name_list) > 0:
                 flash(f"Skipped old analysis {', '.join(invalid_name_list)}", "danger")
