@@ -114,7 +114,7 @@ def check_sample_and_project_ids_in_metadata_db(
                errors.append(
                     f"Sample {sample} is linked to project "
                     + str(output_sample_project_dict.get(sample))
-                    + f" not {project}"
+                    + f", not {project}"
                 )
         return errors
     except Exception as e:
@@ -215,7 +215,7 @@ def check_user_name_and_email_in_metadata_db(
                    errors.append(
                        f"User {name} registered with email id " 
                        + str(name_dict.get(name))
-                       + f"not {email_id}"
+                       + f", not {email_id}"
                     )
                 if (
                     email_dict.get(email_id) is not None
@@ -224,7 +224,7 @@ def check_user_name_and_email_in_metadata_db(
                    errors.append(
                        f"Email {email_id} registered with name "
                        + str(email_dict.get(email_id))
-                       + f"not {name}"
+                       + f", not {name}"
                     )
         return errors
     except Exception as e:
