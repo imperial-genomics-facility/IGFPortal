@@ -247,8 +247,8 @@ class SampleSheet:
                                     (l_data[index_lookup_columns[0]] == entry[index_lookup_columns[0]])]
                         errors.append(
                             f"Duplicate index for lane {lane} samples "
-                            + ", ".join(f_df[sample_id_col].tolist()),
-                            + " : ",
+                            + ", ".join(f_df[sample_id_col].tolist())
+                            + " : "
                             + ", ".join([entry.get(i) for i in index_lookup_columns])
                         )
             else:
@@ -264,8 +264,8 @@ class SampleSheet:
                             df[(df[index_lookup_columns[0]] == entry[index_lookup_columns[0]])]
                     errors.append(
                         "Duplicate index for sample "
-                        + ", ".join(f_df[sample_id_col].tolist()),
-                        + " : ",
+                        + ", ".join(f_df[sample_id_col].tolist())
+                        + " : "
                         + ", ".join([entry.get(i) for i in index_lookup_columns])
                     )
             # get duplicate samples ids and names
