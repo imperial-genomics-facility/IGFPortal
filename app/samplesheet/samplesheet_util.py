@@ -147,10 +147,12 @@ class SampleSheet:
                     + {data_series['Sample_ID']})
             if (
                 'I5_Index_ID' in data_series
-                and data_series['I5_Index_ID'] != '') and \
-               (
-                'index2' not in data_series
-                or data_series['index2'] == ''):
+                and data_series['I5_Index_ID'] != ''
+                and (
+                    'index2' not in data_series
+                    or data_series['index2'] == ''
+                )
+            ):
                 err.append(
                     "Missing I_5 index sequences for "
                     + data_series['Sample_ID'])
@@ -159,14 +161,14 @@ class SampleSheet:
             if (
                 re.search(single_cell_flag_pattern, data_series['Description'])
                 and not re.search(single_cell_index_pattern, data_series['index'])
-                ):
+            ):
                 err.append(
                     "Required I_7 single cell indexes for 10X sample "
                     + data_series['Sample_ID'])
             if (
                 not re.search(single_cell_flag_pattern, data_series['Description'])
                 and re.search(single_cell_index_pattern, data_series['index'])
-                ):
+            ):
                 err.append(
                     "Found I_7 single cell indexes, missing 10X description sample "
                     + data_series['Sample_ID'])
@@ -174,7 +176,7 @@ class SampleSheet:
                 re.search(single_cell_flag_pattern, data_series['Description'])
                 and re.search(single_cell_index_pattern, data_series['index'])
                 and 'index2' in data_series and data_series['index2'] !=''
-                ):
+            ):
                 err.append(
                     "Found I_5 index(2) for single cell sample "
                     + data_series['Sample_ID'])
@@ -224,7 +226,7 @@ class SampleSheet:
                     + entry.get(sample_id_col))
             # get duplicate indices
             index_lookup_columns = [
-                i for i in index_columns 
+                i for i in index_columns
                 if i in df.columns]
             if len(index_lookup_columns) == 0:
                 raise ValueError(
