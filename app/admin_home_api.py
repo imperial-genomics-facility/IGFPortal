@@ -1,13 +1,15 @@
-import logging, json, tempfile
+import logging
+import json
+import tempfile
+from flask import request
 from flask_appbuilder.api import expose
 from flask_appbuilder.security.decorators import protect
 from flask_appbuilder import ModelRestApi
-from flask import request
-from flask_appbuilder import ModelRestApi
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from .models import AdminHomeData
-from . import app, db, celery
-from .admin_home.admin_home_utils import parse_and_add_new_admin_view_data
+from app.models import AdminHomeData
+from app import app, celery
+from app.admin_home.admin_home_utils import (
+    parse_and_add_new_admin_view_data)
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +21,7 @@ def async_parse_and_add_new_admin_view_data(
         return {"message": "success"}
     except Exception as e:
         log.error(
-            "Failed to run celery job, error: {0}".\
-                format(e))
+            f"Failed to run celery job, error: {e}")
 
 class AdminHomeApi(ModelRestApi):
     resource_name = "admin_home"
@@ -38,16 +39,19 @@ class AdminHomeApi(ModelRestApi):
             json_data = file_obj.read()
             if isinstance(json_data, bytes):
                 json_data = json.loads(json_data.decode())
-            (_, json_file) = \
-                tempfile.mkstemp(
-                    dir=app.config['CELERY_WORK_DIR'],
-                    suffix='.json',
-                    prefix='admin_view_',)
+            (_, json_file) = tempfile.mkstemp(
+                dir=app.config['CELERY_WORK_DIR'],
+                suffix='.json',
+                prefix='admin_view_'
+            )
             with open(json_file, 'w') as fp:
                 json.dump(json_data, fp)
-            msg = \
-                async_parse_and_add_new_admin_view_data.\
-                    apply_async(args=[json_file])
+            msg = (
+                async_parse_and_add_new_admin_view_data
+                .apply_async(args=[json_file])
+            )
+            log.debug(f"Registered new admin home data, {msg}")
             return self.response(200, message='loaded new data')
         except Exception as e:
-            log.error(e)
+            log.error(f"Failed to load new admin home data: {e}")
+            return self.response_500(message='failed to load data')
