@@ -1,30 +1,30 @@
 # IGFPortal
 
-IGFPortal is a web-based data management and analysis tool created by the NIHR Imperial BRC  Genomics Facility. It facilitates tracking and managing genomic sequencing projects, integrating data pipelines, and visualizing results, particularly in genomics research.
+IGFPortal is a web-based data management and analysis tool created by the NIHR Imperial BRC Genomics Facility. It facilitates tracking and managing genomic sequencing projects, integrates with data pipelines, and provides tools for visualizing results.
 
-## Key Features
-- **Project Management**: Track sequencing projects, sequencing runs, samplesheets and analysis metadata, improving organization and facilitate validation.
-- **Pipeline Integration**: Automates genomic data processing, enabling seamless integration with bioinformatics workflows. Provides easy to use interface for triggering data pipelines.
-- **Result Visualization**: Offers an intuitive interface with graphical views for data analysis results and project status. Utilises Redis caching to minimise loading analysis reports.
+## Key features
+- Project management: track sequencing projects, runs, samplesheets, and analysis metadata.
+- Pipeline integration: automates genomic data processing and integrates with bioinformatics workflows.
+- Result visualization: offers an intuitive interface with graphical views for results and project status. Uses Redis caching to reduce load times.
 
 ## Requirements
-- **Docker**: For containerized deployments
+- Docker (for containerized deployments)
+- Optional: Docker Compose
 
 ## Installation
 
-**1. Clone the Repository**
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/imperial-genomics-facility/IGFPortal.git
-
 cd IGFPortal
 ```
 
-**2. Create an environment file**
+2. Create an environment file
 
-Create a new file `env` and add the following lines:
+Create a new file named `env` and add:
 
-```
+```bash
 PYTHONPATH=/container_path/IGFPortal
 FLASK_APP=/container_path/IGFPortal/app/__init__.py
 SQLALCHEMY_DATABASE_URI=mysql+pymysql://DBUSER:DBPASS@DB/MYSQL_DATABASE
@@ -40,43 +40,49 @@ CELERY_WORK_DIR=/TMP_WORK_DIR_FOR_CELERY_WORKER
 AIRFLOW_CONF_FILE=/container_path/secret/airflow_conf.json
 ```
 
-**3. Create Nginx config file**
+3. Create nginx configuration
 
-Copy the `nginx_template.conf` to `nginx.conf` and replace `server_name` value.
+Copy `nginx_template.conf` to `nginx.conf` and update the `server_name`:
 
+```bash
+cp nginx_template.conf nginx.conf
+# Edit nginx.conf and replace SERVER_ADDRESS
 ```
+
+Example (for HTTP -> HTTPS redirect):
+
+```nginx
 server {
-    # Redirect http to https
     listen 80 default_server;
     server_name SERVER_ADDRESS;
     return 301 https://$server_name$request_uri;
 }
 ```
 
-**4. Build docker image**
+4. Build the Docker image:
 
 ```bash
-docker build -t imperialgenomicsfacility/igfportal:v0.0.2.1 .
+docker build -t imperialgenomicsfacility/igfportal:v3.0.0 .
 ```
 
-**5. Update docker compose file**
+5. Update `docker-compose.yaml`
 
-Update `docker-compose.yaml` file and add correct path for following:
+Update paths in `docker-compose.yaml` to match your environment:
 
-  * Path of the local copy of IGFPortal repo (default is /home/vmuser/github/IGFPortal)
-  * Path for SSL certs (default is /home/vmuser/github/ssl)
-  * Path for static directory (default is ./static)
-  * Path for Apache Airflow connection conf (default /home/vmuser/secrets/airflow_conf.json)
+- Path to local IGFPortal repo (default: `/home/vmuser/github/IGFPortal`)
+- Path for SSL certs (default: `/home/vmuser/github/ssl`)
+- Path for static directory (`./static`)
+- Path for Airflow connection conf (default: `/home/vmuser/secrets/airflow_conf.json`)
 
-**6. Start the server using docker compose**
+6. Start the server using Docker Compose:
 
 ```bash
-  PORTAL_UID="$(id -u)" GID="$(id -g)"  docker compose -f docker-compose.yaml -p igfportal up -d
+PORTAL_UID="$(id -u)" GID="$(id -g)" docker compose -f docker-compose.yaml -p igfportal up -d
 ```
 
-**7. Access the Portal**
+7. Access the portal
 
-Open your browser at `https://SERVER_ADDRESS` to access the IGFPortal dashboard.
+Open your browser at `https://SERVER_ADDRESS`.
 
 ## License
 
