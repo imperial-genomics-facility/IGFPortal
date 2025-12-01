@@ -144,7 +144,8 @@ class SampleSheet:
             ):
                 err.append(
                     "Same sample id and sample names are not allowed"
-                    + {data_series['Sample_ID']})
+                    + str(data_series['Sample_ID'])
+                )
             if (
                 'I5_Index_ID' in data_series
                 and data_series['I5_Index_ID'] != ''
@@ -155,7 +156,8 @@ class SampleSheet:
             ):
                 err.append(
                     "Missing I_5 index sequences for "
-                    + data_series['Sample_ID'])
+                    + str(data_series['Sample_ID'])
+                )
             single_cell_index_pattern = \
                 re.compile(r'^SI-[GNT][ATNS]-[A-Z][0-9]+')
             if (
@@ -164,14 +166,16 @@ class SampleSheet:
             ):
                 err.append(
                     "Required I_7 single cell indexes for 10X sample "
-                    + data_series['Sample_ID'])
+                    + str(data_series['Sample_ID'])
+                )
             if (
                 not re.search(single_cell_flag_pattern, data_series['Description'])
                 and re.search(single_cell_index_pattern, data_series['index'])
             ):
                 err.append(
                     "Found I_7 single cell indexes, missing 10X description sample "
-                    + data_series['Sample_ID'])
+                    + str(data_series['Sample_ID'])
+                )
             if (
                 re.search(single_cell_flag_pattern, data_series['Description'])
                 and re.search(single_cell_index_pattern, data_series['index'])
@@ -179,7 +183,8 @@ class SampleSheet:
             ):
                 err.append(
                     "Found I_5 index(2) for single cell sample "
-                    + data_series['Sample_ID'])
+                    + str(data_series['Sample_ID'])
+                )
             if len(err) == 0:
                 err_str = np.nan
             else:
@@ -223,7 +228,8 @@ class SampleSheet:
             for entry in duplicates.to_dict(orient="records"):
                 errors.append(
                     "Duplicte entry found for sample "
-                    + entry.get(sample_id_col))
+                    + str(entry.get(sample_id_col))
+                )
             # get duplicate indices
             index_lookup_columns = [
                 i for i in index_columns
@@ -441,7 +447,7 @@ class SampleSheet:
                 else:
                     if len(err.schema_path) > 2:
                         temp_error_list.append(
-                            err.schema_path[2]
+                            str(err.schema_path[2])
                             + ": "
                             + err.message)
                     else:
@@ -545,9 +551,10 @@ def validate_samplesheet_data_and_update_db(
                     formatted_errors = list()
                     for index, err_str in enumerate(errors):
                         formatted_errors.append(
-                            index + 1
+                            str(index + 1)
                             + ". "
-                            + err_str)
+                            + str(err_str)
+                        )
                     update_samplesheet_validation_entry_in_db(
                         samplesheet_tag=entry.samplesheet_tag,
                         report='\n'.join(formatted_errors),
