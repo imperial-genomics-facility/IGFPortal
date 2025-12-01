@@ -1,14 +1,18 @@
 import pandas as pd
 import numpy as np
-import os, json, re, tempfile, typing
+import os
+import json
+import re
+import tempfile
 from typing import Tuple, Any
 from datetime import datetime
-from jsonschema import Draft4Validator, ValidationError
+from jsonschema import Draft4Validator
 from collections import defaultdict, deque
-from .. import db
-from ..models import SampleSheetModel
-from ..metadata.metadata_util import check_for_projects_in_metadata_db
-from ..metadata.metadata_util import check_sample_and_project_ids_in_metadata_db
+from app import db
+from app.models import SampleSheetModel
+from app.metadata.metadata_util import (
+    check_for_projects_in_metadata_db,
+    check_sample_and_project_ids_in_metadata_db)
 
 class SampleSheet:
     '''
@@ -20,7 +24,7 @@ class SampleSheet:
 
     def __init__(self,
         infile: str,
-        data_header_name: tuple=('Data', 'BCLConvert_Data')):
+        data_header_name: tuple = ('Data', 'BCLConvert_Data')):
         self.infile = infile
         self.data_header_name = data_header_name
         self._sample_data = self._read_samplesheet()                            # reading samplesheet data
@@ -40,8 +44,7 @@ class SampleSheet:
         try:
             infile = self.infile
             if os.path.exists(infile) == False:
-                raise IOError('file {0} not found'.\
-                        format(infile))
+                raise IOError(f'file {infile} not found')
             sample_data = defaultdict(list)
             header = ''
             with open(infile, 'r') as f:
@@ -49,23 +52,25 @@ class SampleSheet:
                     row = i.rstrip('\n')
                     if row != '':
                         if row.startswith('['):
-                            header = \
-                                row.split(',')[0].\
-                                    strip('[').\
-                                    strip(']')
+                            header = (
+                                row
+                                .split(',')[0]
+                                .strip('[')
+                                .strip(']')
+                            )
                         else:
                             sample_data[header].append(row)
             return sample_data
         except Exception as e:
             raise ValueError(
-                    "Failed to read samplesheet, error {0}".\
-                        format(e))
+                f"Failed to read samplesheet, error {e}")
 
     def _load_data(self) -> Tuple[list, list]:
         '''
             Function for loading SampleSheet data
         '''
         try:
+            data = {}
             sample_data = self._sample_data
             for entry in self.data_header_name:
                 if entry in sample_data:
@@ -83,13 +88,17 @@ class SampleSheet:
             for row in data:
                 row = row.split(',')
                 row = [
-                    row_val.rstrip() for row_val in row]
-                row_data = \
-                    dict(zip(data_header,row))
+                    row_val.rstrip()
+                    for row_val in row
+                ]
+                row_data = dict(
+                    zip(data_header,row)
+                )
                 sample_data.append(row_data)
             return data_header, sample_data
         except Exception as e:
-            raise ValueError("Failed to load data, error: {0}".format(e))
+            raise ValueError(
+                f"Failed to load data, error: {e}")
 
     def _load_header(self) -> dict:
         '''
@@ -112,7 +121,7 @@ class SampleSheet:
     @staticmethod
     def _check_samplesheet_data_row(
         data_series: pd.Series,
-        single_cell_flag: str='10X') -> Any:
+        single_cell_flag: str = '10X') -> Any:
         '''
             An internal static method for additional validation of samplesheet data
 
@@ -128,34 +137,47 @@ class SampleSheet:
                     r'^{0}$'.format(single_cell_flag),
                     re.IGNORECASE)
             err = list()
-            if ('Sample_ID' in data_series and 'Sample_Name' in data_series) and \
-               data_series['Sample_ID']==data_series['Sample_Name']:
+            if (
+                'Sample_ID' in data_series
+                and 'Sample_Name' in data_series
+                and data_series['Sample_ID']==data_series['Sample_Name']
+            ):
                 err.append(
-                    "Same sample id and sample names are not allowed, {0}".\
-                        format(data_series['Sample_ID']))
-            if ('I5_Index_ID' in data_series and data_series['I5_Index_ID'] != '') and \
-               ('index2' not in data_series or data_series['index2'] == ''):
+                    "Same sample id and sample names are not allowed"
+                    + {data_series['Sample_ID']})
+            if (
+                'I5_Index_ID' in data_series
+                and data_series['I5_Index_ID'] != '') and \
+               (
+                'index2' not in data_series
+                or data_series['index2'] == ''):
                 err.append(
-                    "Missing I_5 index sequences for {0}".\
-                        format(data_series['Sample_ID']))
+                    "Missing I_5 index sequences for "
+                    + data_series['Sample_ID'])
             single_cell_index_pattern = \
                 re.compile(r'^SI-[GNT][ATNS]-[A-Z][0-9]+')
-            if re.search(single_cell_flag_pattern, data_series['Description']) and \
-               not re.search(single_cell_index_pattern, data_series['index']):
+            if (
+                re.search(single_cell_flag_pattern, data_series['Description'])
+                and not re.search(single_cell_index_pattern, data_series['index'])
+                ):
                 err.append(
-                    "Required I_7 single cell indexes for 10X sample {0}".\
-                        format(data_series['Sample_ID']))
-            if not re.search(single_cell_flag_pattern, data_series['Description']) and \
-               re.search(single_cell_index_pattern, data_series['index']):
+                    "Required I_7 single cell indexes for 10X sample "
+                    + data_series['Sample_ID'])
+            if (
+                not re.search(single_cell_flag_pattern, data_series['Description'])
+                and re.search(single_cell_index_pattern, data_series['index'])
+                ):
                 err.append(
-                    "Found I_7 single cell indexes, missing 10X description sample {0}".\
-                        format(data_series['Sample_ID']))
-            if re.search(single_cell_flag_pattern, data_series['Description']) and \
-               re.search(single_cell_index_pattern, data_series['index']) and \
-               'index2' in data_series and data_series['index2'] !='':
+                    "Found I_7 single cell indexes, missing 10X description sample "
+                    + data_series['Sample_ID'])
+            if (
+                re.search(single_cell_flag_pattern, data_series['Description'])
+                and re.search(single_cell_index_pattern, data_series['index'])
+                and 'index2' in data_series and data_series['index2'] !=''
+                ):
                 err.append(
-                    "Found I_5 index(2) for single cell sample {0}".\
-                        format(data_series['Sample_ID']))
+                    "Found I_5 index(2) for single cell sample "
+                    + data_series['Sample_ID'])
             if len(err) == 0:
                 err_str = np.nan
             else:
@@ -163,8 +185,7 @@ class SampleSheet:
             return err_str
         except Exception as e:
             raise ValueError(
-                    "Failed to check samplesheet data row, error: {0}".\
-                        format(e))
+                    f"Failed to check samplesheet data row, error: {e}")
 
 
     def _validate_samplesheet_columns(self, schema_json: str) -> list:
@@ -176,23 +197,21 @@ class SampleSheet:
             errors = list()
             for header_name in self._data_header:
                 if header_name not in allowed_samplesheet_fields:
-                    errors.\
-                        append(
-                            'Header {0} is not supported. Validation incomplete.'.\
-                                format(header_name))
+                    errors.append(
+                        f'Header {header_name} is not supported. Validation incomplete.'
+                    )
             return errors
         except Exception as e:
             raise ValueError(
-                    "Failed to validate samplesheet columns, error: {0}".\
-                        format(e))
+                    f"Failed to validate samplesheet columns, error: {e}")
 
 
     def _get_duplicate_entries(
         self,
-        sample_id_col: str='Sample_ID',
-        sample_name_col: str="Sample_Name",
-        lane_col: str='Lane',
-        index_columns: tuple=("index", "index2")) -> list:
+        sample_id_col: str = 'Sample_ID',
+        sample_name_col: str = "Sample_Name",
+        lane_col: str = 'Lane',
+        index_columns: tuple = ("index", "index2")) -> list:
         try:
             errors = list()
             df = pd.DataFrame(self._data)
@@ -200,15 +219,16 @@ class SampleSheet:
             # get samplesheet wide duplicates
             duplicates = df[df.duplicated()]
             for entry in duplicates.to_dict(orient="records"):
-                errors.\
-                    append("Duplicte entry found for sample {0}".\
-                        format(entry.get(sample_id_col)))
+                errors.append(
+                    "Duplicte entry found for sample "
+                    + entry.get(sample_id_col))
             # get duplicate indices
-            index_lookup_columns = \
-                [i for i in index_columns 
-                    if i in df.columns]
+            index_lookup_columns = [
+                i for i in index_columns 
+                if i in df.columns]
             if len(index_lookup_columns) == 0:
-                raise ValueError("No index lookup column found in samplesheet")
+                raise ValueError(
+                    "No index lookup column found in samplesheet")
             if lane_col in df.columns:
                 for lane, l_data in df.drop_duplicates().groupby(lane_col):
                     duplicate_entries = \
@@ -224,11 +244,11 @@ class SampleSheet:
                                 l_data[
                                     (l_data[index_lookup_columns[0]] == entry[index_lookup_columns[0]])]
                         errors.append(
-                            "Duplicate index for lane {0} samples {1}: {2}".\
-                                format(
-                                    lane,
-                                    ','.join(f_df[sample_id_col].tolist()),
-                                    ', '.join([entry.get(i) for i in index_lookup_columns])) )
+                            f"Duplicate index for lane {lane} samples "
+                            + ", ".join(f_df[sample_id_col].tolist()),
+                            + " : ",
+                            + ", ".join([entry.get(i) for i in index_lookup_columns])
+                        )
             else:
                 duplicate_entries = \
                     df[df[index_lookup_columns].duplicated()]
@@ -241,10 +261,11 @@ class SampleSheet:
                         f_df = \
                             df[(df[index_lookup_columns[0]] == entry[index_lookup_columns[0]])]
                     errors.append(
-                        "Duplicate index for sample {0}: {1}".\
-                            format(
-                                ','.join(f_df[sample_id_col].tolist()),
-                                ', '.join([entry.get(i) for i in index_lookup_columns])) )
+                        "Duplicate index for sample "
+                        + ", ".join(f_df[sample_id_col].tolist()),
+                        + " : ",
+                        + ", ".join([entry.get(i) for i in index_lookup_columns])
+                    )
             # get duplicate samples ids and names
             if lane_col in df.columns:
                 for lane, l_data in df.drop_duplicates().groupby(lane_col):
@@ -253,34 +274,38 @@ class SampleSheet:
                             values.tolist()
                     if len(duplicate_ids) > 0:
                         errors.append(
-                            "Duplicate sample ids present on lane {0}: {1}".\
-                                format(lane, ', '.join(duplicate_ids)) )
+                            f"Duplicate sample ids present on lane {lane}: "
+                            + ", ".join(duplicate_ids)
+                        )
                     duplicate_names = \
                         l_data[l_data[sample_name_col].duplicated()][sample_name_col].\
                             values.tolist()
                     if len(duplicate_names) > 0:
                         errors.append(
-                            "Duplicate sample names present on lane {0}: {1}".\
-                                format(lane, ', '.join(duplicate_names)) )
+                            f"Duplicate sample names present on lane {lane}: "
+                            + ", ".join(duplicate_names)
+                        )
             else:
                 duplicate_ids = \
                     df[df[sample_id_col].duplicated()][sample_id_col].\
                         values.tolist()
                 if len(duplicate_ids) > 0:
                     errors.append(
-                        "Duplicate sample ids present: {0}".\
-                            format(', '.join(duplicate_ids)) )
+                        "Duplicate sample ids present: "
+                        + ", ".join(duplicate_ids)
+                    )
                 duplicate_names = \
                     df[df[sample_name_col].duplicated()][sample_name_col].\
                         values.tolist()
                 if len(duplicate_names) > 0:
                     errors.append(
-                        "Duplicate sample names present: {0}".\
-                            format(', '.join(duplicate_names)) )
+                        "Duplicate sample names present: "
+                        + ", ".join(duplicate_names)
+                    )
             return errors
         except Exception as e:
             raise ValueError(
-                    f"Failed to get duplicate entries, error: {e}")
+                f"Failed to get duplicate entries, error: {e}")
 
 
     def get_samplesheet_with_reverse_complement_index(
@@ -292,58 +317,60 @@ class SampleSheet:
             df.fillna('', inplace=True)
             # Only run the reverse complement function if index_field exists
             if index_field in df.columns:
-                df[index_field] = \
-                    df[index_field].map(
-                        lambda x: \
-                            x.upper().\
-                            translate(
-                                str.maketrans('ACGT','TGCA'))[::-1])
+                df[index_field] = df[index_field].map(
+                    lambda x: (
+                        str(x).upper()
+                        .translate(str.maketrans('ACGT','TGCA'))[::-1]
+                    ) if x else ''
+                )
             ## get samplesheet data
             final_samplesheet = list()
             ## get headers
             for key, val in self._header_data.items():
                 if key not in self.data_header_name:
-                    final_samplesheet.\
-                        append(f'[{key}]')
-                    final_samplesheet.\
-                        extend(val)
+                    final_samplesheet.append(
+                        f'[{key}]'
+                    )
+                    final_samplesheet.extend(val)
             ## get data
-            final_samplesheet.\
-                append('[Data]')
+            final_samplesheet.append('[Data]')
             ## get data column
-            final_samplesheet.\
-                append(','.join(self._data_header))
+            final_samplesheet.append(
+                ",".join(self._data_header)
+            )
             ## get data
             for row in df[self._data_header].values.tolist():
-                final_samplesheet.\
-                    append(','.join(row))
+                final_samplesheet.append(
+                    ",".join(row)
+                )
             return '\n'.join(final_samplesheet)
         except Exception as e:
             raise ValueError(
-                    f"Failed to reverse complement index, error: {e}")
+                f"Failed to reverse complement index, error: {e}")
 
 
     def get_v2_samplesheet_data(
         self,
-        allowed_columns: list = ['Sample_ID', 'index', 'index2', 'Sample_Project']) -> str:
+        allowed_columns: tuple = ('Sample_ID', 'index', 'index2', 'Sample_Project')) -> str:
         '''
         Convert V1 to V2 samplesheet
         '''
         try:
             final_v2_samplesheet = list()
             for key, val in self._header_data.items():
-                if key != 'Settings' and  \
-                   key != 'Header' and  \
-                   key != 'Reads' and  \
-                   key not in self.data_header_name:
-                    final_v2_samplesheet.\
-                        append(f'[{key}]')
-                    final_v2_samplesheet.\
-                        extend(val)
-            final_v2_samplesheet.\
-                append('[Header]')
-            final_v2_samplesheet.\
-                append('FileFormatVersion,2')
+                if (
+                    key != 'Settings'
+                    and key != 'Header'
+                    and key != 'Reads'
+                    and key not in self.data_header_name
+                    ):
+                    final_v2_samplesheet.append(
+                        f'[{key}]')
+                    final_v2_samplesheet.extend(val)
+            final_v2_samplesheet.append(
+                '[Header]')
+            final_v2_samplesheet.append(
+                'FileFormatVersion,2')
             key = 'BCLConvert_Settings'
             val = [
                 "CreateFastqForIndexReads,1",
@@ -353,24 +380,23 @@ class SampleSheet:
                 "OverrideCycles,Y_READ1_;I_INDEX1_;I_INDEX2_;Y_READ2_",
                 ","
             ]
-            final_v2_samplesheet.\
-                append(f'[{key}]')
-            final_v2_samplesheet.\
-                extend(val)
-            final_v2_samplesheet.\
-                append('[BCLConvert_Data]')
-            samplesheet_df = \
-                pd.DataFrame(self._data, columns=self._data_header)
+            final_v2_samplesheet.append(
+                f'[{key}]')
+            final_v2_samplesheet.extend(val)
+            final_v2_samplesheet.append(
+                '[BCLConvert_Data]')
+            samplesheet_df = pd.DataFrame(
+                self._data,
+                columns=self._data_header)
             target_columns = [
                 c for c in self._data_header
-                    if c in allowed_columns]
-            samplesheet_df = \
-                samplesheet_df[target_columns]
-            final_v2_samplesheet.\
-                append(','.join(target_columns))
+                if c in allowed_columns]
+            samplesheet_df = samplesheet_df[target_columns]
+            final_v2_samplesheet.append(
+                ",".join(target_columns))
             for row in samplesheet_df.values.tolist():
-                final_v2_samplesheet.\
-                    append(','.join(row))
+                final_v2_samplesheet.append(
+                    ",".join(row))
             return '\n'.join(final_v2_samplesheet)
         except Exception as e:
             raise ValueError(
@@ -379,8 +405,10 @@ class SampleSheet:
 
     def validate_samplesheet_data(
         self,
-        schema_json: str=os.path.join(os.path.dirname(__file__), 'samplesheet_validation.json')) \
-            -> list:
+        schema_json: str = os.path.join(
+            os.path.dirname(__file__),
+            'samplesheet_validation.json')
+        ) -> list:
         '''
             A method for validation of samplesheet data
 
@@ -395,8 +423,7 @@ class SampleSheet:
             error_list = list()                                                 # define empty error list
             if not os.path.exists(schema_json):
                 raise IOError(
-                        'json schema file {0} not found'.\
-                            format(schema_json))
+                    f'json schema file {schema_json} not found')
             with open(schema_json,'r') as jf:
                 schema = json.load(jf)                                          # read schema from the json file
             # syntactic validation
@@ -412,53 +439,56 @@ class SampleSheet:
                 else:
                     if len(err.schema_path) > 2:
                         temp_error_list.append(
-                            "{0}: {1}".format(err.schema_path[2], err.message))
+                            err.schema_path[2]
+                            + ": "
+                            + err.message)
                     else:
                         temp_error_list.append(
-                            "{0}".format(err.message))
+                            err.message)
             error_list = temp_error_list
             # semantic validation
-            column_errors = \
-                self._validate_samplesheet_columns(schema_json=schema_json)
+            column_errors = self._validate_samplesheet_columns(
+                schema_json=schema_json)
             if len(column_errors) > 0:
                 error_list.extend(column_errors)
             else:
-                other_errors = \
-                    data.apply(
-                        lambda x: \
-                            self._check_samplesheet_data_row(data_series=x),
-                        axis=1)                                                 # check for additional errors
+                other_errors = data.apply(
+                    lambda x: (
+                        self._check_samplesheet_data_row(
+                            data_series=x)
+                        ),
+                    axis=1
+                )
                 other_errors.dropna(inplace=True)
+                # add other errors to the list
                 if len(other_errors) > 0:
                     error_list.extend([
-                        value for value in other_errors.to_dict().values()])    # add other errors to the list
+                        value for value in other_errors.to_dict().values()])
                 duplicate_errors = \
                     self._get_duplicate_entries()
                 if len(duplicate_errors) > 0:
                     error_list.extend(duplicate_errors)
-            #formatted_errors = list()
-            #for index, entry in enumerate(error_list):
-            #    formatted_errors.\
-            #        append("{0}. {1}".format(index + 1, entry))
-            return error_list #formatted_errors
+            return error_list
         except Exception as e:
             raise ValueError(
-                    "Failed to validate samplesheet. Error: {0}".\
-                        format(e))
+                f"Failed to validate samplesheet. Error: {e}")
 
 
 def update_samplesheet_validation_entry_in_db(
     samplesheet_tag: str,
     report: str,
-    status: str='') -> None:
+    status: str = ''
+    ) -> None:
     try:
-        entry = \
-            db.session.\
-                query(SampleSheetModel).\
-                filter(SampleSheetModel.samplesheet_tag==samplesheet_tag).\
-                one_or_none()
+        entry = (
+            db.session
+            .query(SampleSheetModel)
+            .filter(SampleSheetModel.samplesheet_tag==samplesheet_tag)
+            .one_or_none()
+        )
         if entry is None:
-            raise ValueError("No entr found for samplesheet tag {0}".format(samplesheet_tag))
+            raise ValueError(
+                f"No entr found for samplesheet tag {samplesheet_tag}")
         if status == 'pass':
             status = 'PASS'
         else:
@@ -469,31 +499,33 @@ def update_samplesheet_validation_entry_in_db(
             'validation_time': datetime.now(),
             'update_time': datetime.now()}
         try:
-            db.session.\
-                query(SampleSheetModel).\
-                filter(SampleSheetModel.samplesheet_tag==samplesheet_tag).\
-                update(samplesheeet_data)
+            (
+                db.session
+                .query(SampleSheetModel)
+                .filter(SampleSheetModel.samplesheet_tag==samplesheet_tag)
+                .update(samplesheeet_data)
+            )
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             raise ValueError(
-                    "Failed db update for {0}, error: {1}".\
-                        format(samplesheet_tag, e))
+                f"Failed db update for {samplesheet_tag}, error: {e}")
     except Exception as e:
         raise ValueError(
-                "Failed to update samplesheet validation status, error: {0}".\
-                    format(e))
+            f"Failed to update samplesheet validation status, error: {e}")
 
 
 def validate_samplesheet_data_and_update_db(
     samplesheet_id: str,
-    check_metadata: bool=True) -> Any:
+    check_metadata: bool = True
+    ) -> Any:
     try:
-        entry = \
-            db.session.\
-                query(SampleSheetModel).\
-                filter(SampleSheetModel.samplesheet_id==samplesheet_id).\
-                one_or_none()
+        entry = (
+            db.session
+            .query(SampleSheetModel)
+            .filter(SampleSheetModel.samplesheet_id==samplesheet_id)
+            .one_or_none()
+        )
         if entry is not None:
             csv_data = entry.csv_data
             with tempfile.TemporaryDirectory() as temp_dir:
@@ -503,16 +535,17 @@ def validate_samplesheet_data_and_update_db(
                 sa = SampleSheet(infile=csv_file)
                 errors = sa.validate_samplesheet_data()
                 if check_metadata:
-                    metadata_errors = \
-                        compare_sample_with_metadata_db(
-                            samplesheet_file=csv_file)
+                    metadata_errors = compare_sample_with_metadata_db(
+                        samplesheet_file=csv_file)
                     if len(metadata_errors) > 0:
                         errors.extend(metadata_errors)
                 if len(errors) > 0:
                     formatted_errors = list()
                     for index, err_str in enumerate(errors):
-                        formatted_errors.\
-                            append("{0}. {1}".format(index + 1, err_str))
+                        formatted_errors.append(
+                            index + 1
+                            + ". "
+                            + err_str)
                     update_samplesheet_validation_entry_in_db(
                         samplesheet_tag=entry.samplesheet_tag,
                         report='\n'.join(formatted_errors),
@@ -528,32 +561,35 @@ def validate_samplesheet_data_and_update_db(
             return None
     except Exception as e:
         raise ValueError(
-                "Failed samplesheet validation wrapper, error: {0}".\
-                    format(e))
+            f"Failed samplesheet validation wrapper, error: {e}")
 
 
 def compare_sample_with_metadata_db(
     samplesheet_file: str,
-    project_column: str='Sample_Project',
-    sample_column: str='Sample_ID') -> list:
+    project_column: str = 'Sample_Project',
+    sample_column: str = 'Sample_ID'
+    ) -> list:
     try:
         errors = list()
         sa = SampleSheet(infile=samplesheet_file)
         df = pd.DataFrame(sa._data)
-        project_list = \
-            df[project_column].\
-                drop_duplicates().\
-                values.\
-                tolist()
-        sample_projects_df = \
-            df[[sample_column, project_column]].\
-                drop_duplicates()
+        project_list = (
+            df[project_column]
+            .drop_duplicates()
+            .values
+            .tolist()
+        )
+        sample_projects_df = (
+            df[[sample_column, project_column]]
+            .drop_duplicates()
+        )
         sample_projects_df.columns = [
             'sample_igf_id',
             'project_igf_id']
-        sample_project_list = \
-            sample_projects_df.\
-                to_dict(orient='records')
+        sample_project_list = (
+            sample_projects_df
+            .to_dict(orient='records')
+        )
         _, project_errors = \
             check_for_projects_in_metadata_db(
                 project_list=project_list)
@@ -568,5 +604,4 @@ def compare_sample_with_metadata_db(
         return errors
     except Exception as e:
         raise ValueError(
-                "Failed to compare samplesheet with metadata, error: {0}".\
-                    format(e))
+            f"Failed to compare samplesheet with metadata, error: {e}")
