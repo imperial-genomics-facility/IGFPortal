@@ -1,16 +1,28 @@
 import os
 import json
 import requests
-import tempfile
-from unittest.mock import MagicMock
 from unittest.mock import patch
-from app.airflow.airflow_api_utils import get_airflow_dag_id
-from app.airflow.airflow_api_utils import post_to_airflow_api
-from app.airflow.airflow_api_utils import trigger_airflow_pipeline
+from app.airflow.airflow_api_utils import (
+    get_airflow_dag_id,
+    post_to_airflow_api,
+    trigger_airflow_pipeline
+)
 
-@patch('app.airflow.airflow_api_utils.requests', return_value=requests.patch('https://httpbin.org/patch', data ={'key': 'value'}, headers={'Content-Type': 'application/json'}))
-def test_get_airflow_dag_id(mock_object, tmp_path):
-    config_file_path = os.path.join(tmp_path, 'airflow_conf.json')
+@patch(
+    'app.airflow.airflow_api_utils.requests',
+    return_value=requests.patch(
+        'https://httpbin.org/patch',
+        data ={'key': 'value'},
+        headers={'Content-Type': 'application/json'}
+    )
+)
+def test_get_airflow_dag_id(
+    mock_object,
+    tmp_path):
+    config_file_path = os.path.join(
+        tmp_path,
+        'airflow_conf.json'
+    )
     conf_data = {
         "url": "https://airflow.test/api/v1/",
         "username": "airflow",
@@ -22,21 +34,29 @@ def test_get_airflow_dag_id(mock_object, tmp_path):
     with open(config_file_path, "w") as fp:
         json.dump(conf_data, fp)
     assert os.path.exists(config_file_path)
-    dag_id = \
-        get_airflow_dag_id(
-            airflow_conf_file=os.path.abspath(config_file_path),
-            dag_tag="de_multiplexing_test_barcode_dag")
+    dag_id = get_airflow_dag_id(
+        airflow_conf_file=os.path.abspath(config_file_path),
+        dag_tag="de_multiplexing_test_barcode_dag")
     assert dag_id == "dag23_test_bclconvert_demult"
-    dag_id = \
-        get_airflow_dag_id(
-            airflow_conf_file=config_file_path,
-            dag_tag="no match")
+    dag_id = get_airflow_dag_id(
+        airflow_conf_file=config_file_path,
+        dag_tag="no match")
     assert dag_id is None
 
 
-@patch('app.airflow.airflow_api_utils.requests', return_value=requests.patch('https://httpbin.org/patch', data=json.dumps({'key': 'value'}), headers={'Content-Type': 'application/json'}))
+@patch(
+    'app.airflow.airflow_api_utils.requests',
+    return_value=requests.patch(
+        'https://httpbin.org/patch',
+        data=json.dumps({'key': 'value'}),
+        headers={'Content-Type': 'application/json'}
+    )
+)
 def test_post_to_airflow_api(mock_object, tmp_path):
-    config_file_path = os.path.join(tmp_path, 'airflow_conf.json')
+    config_file_path = os.path.join(
+        tmp_path,
+        'airflow_conf.json'
+    )
     conf_data = {
         "url": "https://airflow.test/api/v1/",
         "username": "airflow",
@@ -47,24 +67,35 @@ def test_post_to_airflow_api(mock_object, tmp_path):
     }
     with open(config_file_path, "w") as fp:
         json.dump(conf_data, fp)
-    res = \
-        post_to_airflow_api(
-            airflow_conf_file=config_file_path,
-            url_suffix="test",
-            data={"key": "val"},
-            dry_run=True
-        )
+    res = post_to_airflow_api(
+        airflow_conf_file=config_file_path,
+        url_suffix="test",
+        data={"key": "val"},
+        dry_run=True
+    )
     mock_object.post.assert_called_once()
-    mock_object.post.assert_called_with(url="https://airflow.test/api/v1/test",
-                data=json.dumps({"key": "val"}),
-                headers={"Content-Type": "application/json"},
-                auth=("airflow", "airflow"),
-                verify=False)
+    mock_object.post.assert_called_with(
+        url="https://airflow.test/api/v1/test",
+        data=json.dumps({"key": "val"}),
+        headers={"Content-Type": "application/json"},
+        auth=("airflow", "airflow"),
+        verify=False
+    )
 
 
-@patch('app.airflow.airflow_api_utils.requests', return_value=requests.patch('https://httpbin.org/patch', data ={'key': 'value'}, headers={'Content-Type': 'application/json'}))
+@patch(
+    'app.airflow.airflow_api_utils.requests',
+    return_value=requests.patch(
+        'https://httpbin.org/patch',
+        data ={'key': 'value'},
+        headers={'Content-Type': 'application/json'}
+    )
+)
 def test_trigger_airflow_pipeline(mock_object, tmp_path):
-    config_file_path = os.path.join(tmp_path, 'airflow_conf.json')
+    config_file_path = os.path.join(
+        tmp_path,
+        'airflow_conf.json'
+    )
     conf_data = {
         "url": "https://airflow.test/api/v1/",
         "username": "airflow",
@@ -75,15 +106,17 @@ def test_trigger_airflow_pipeline(mock_object, tmp_path):
     }
     with open(config_file_path, "w") as fp:
         json.dump(conf_data, fp)
-    res = \
-        trigger_airflow_pipeline(
-            dag_id="dag23_test_bclconvert_demult",
-            conf_data={"key": "value"},
-            airflow_conf_file=config_file_path,
-            dry_run=True)
+    res = trigger_airflow_pipeline(
+        dag_id="dag23_test_bclconvert_demult",
+        conf_data={"key": "value"},
+        airflow_conf_file=config_file_path,
+        dry_run=True
+    )
     mock_object.post.assert_called_once()
-    mock_object.post.assert_called_with(url="https://airflow.test/api/v1/dags/dag23_test_bclconvert_demult/dagRuns",
-                data=json.dumps({"conf": {"key": "value"}}),
-                headers={"Content-Type": "application/json"},
-                auth=("airflow", "airflow"),
-                verify=False)
+    mock_object.post.assert_called_with(
+        url="https://airflow.test/api/v1/dags/dag23_test_bclconvert_demult/dagRuns",
+        data=json.dumps({"conf": {"key": "value"}}),
+        headers={"Content-Type": "application/json"},
+        auth=("airflow", "airflow"),
+        verify=False
+    )
