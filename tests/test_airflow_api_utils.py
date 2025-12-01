@@ -12,6 +12,7 @@ from app.airflow.airflow_api_utils import (
     'app.airflow.airflow_api_utils.requests',
     return_value=requests.patch(
         'https://httpbin.org/patch',
+        timeout=5,
         data ={'key': 'value'},
         headers={'Content-Type': 'application/json'}
     )
@@ -48,6 +49,7 @@ def test_get_airflow_dag_id(
     'app.airflow.airflow_api_utils.requests',
     return_value=requests.patch(
         'https://httpbin.org/patch',
+        timeout=5,
         data=json.dumps({'key': 'value'}),
         headers={'Content-Type': 'application/json'}
     )
@@ -67,7 +69,7 @@ def test_post_to_airflow_api(mock_object, tmp_path):
     }
     with open(config_file_path, "w") as fp:
         json.dump(conf_data, fp)
-    res = post_to_airflow_api(
+    _ = post_to_airflow_api(
         airflow_conf_file=config_file_path,
         url_suffix="test",
         data={"key": "val"},
@@ -87,6 +89,7 @@ def test_post_to_airflow_api(mock_object, tmp_path):
     'app.airflow.airflow_api_utils.requests',
     return_value=requests.patch(
         'https://httpbin.org/patch',
+        timeout=5,
         data ={'key': 'value'},
         headers={'Content-Type': 'application/json'}
     )
@@ -106,7 +109,7 @@ def test_trigger_airflow_pipeline(mock_object, tmp_path):
     }
     with open(config_file_path, "w") as fp:
         json.dump(conf_data, fp)
-    res = trigger_airflow_pipeline(
+    _ = trigger_airflow_pipeline(
         dag_id="dag23_test_bclconvert_demult",
         conf_data={"key": "value"},
         airflow_conf_file=config_file_path,

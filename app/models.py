@@ -170,7 +170,10 @@ class IlluminaInteropData(Model):
     def __repr__(self):
         return self.run_name
     def report(self):
-        url = url_for('IFrameView.view_interop_report', id=self.report_id)
+        url = url_for(
+          'IFrameView.view_interop_report',
+          record_id=self.report_id
+        )
         return Markup(f'<a href="{url}">report</a>')
 
 """
@@ -207,11 +210,21 @@ class PreDeMultiplexingData(Model):
     def __repr__(self):
         return self.run_name
     def report(self):
-        return Markup('<a href="'+url_for('IFrameView.view_predemult_report',
-                                          id=self.demult_id)+'">report</a>')
+        url = url_for(
+          'IFrameView.view_predemult_report',
+          record_id=self.demult_id
+        )
+        return Markup(
+          f'<a href="{url}">report</a>'
+        )
     def download_report(self):
-        return Markup('<a href="'+url_for('PreDeMultiplexingDataView.download_reports',
-                                          id=self.demult_id)+'">download</a>')
+        url = url_for(
+          'PreDeMultiplexingDataView.download_reports',
+          record_id=self.demult_id
+        )
+        return Markup(
+          f'<a href="{url}">download</a>'
+        )
 
 """
   Admin home view
@@ -787,7 +800,7 @@ class CosmxSlideQCData(Model):
         return self.cosmx_slide_igf_id
 
     # def report(self):
-    #   url = url_for('IFrameView.view_cosmx_qc_report', id=self.qc_id)
+    #   url = url_for('IFrameView.view_cosmx_qc_report', record_id=self.qc_id)
     #   return Markup(f'<a href="{url}">report</a>')
 
 
@@ -826,7 +839,7 @@ class AnalysesQCData(Model):
         return self.analysis_name
 
     # def report(self):
-    #   url = url_for('IFrameView.view_analyses_qc_report', id=self.qc_id)
+    #   url = url_for('IFrameView.view_analyses_qc_report', record_id=self.qc_id)
     #   return Markup(f'<a href="{url}">report</a>')
 
 
