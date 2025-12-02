@@ -69,14 +69,17 @@ IGFPortal is a web-based data management and analysis tool created by the NIHR I
 
   Update paths in `docker-compose.yaml` to match your environment:
 
-  - Path for SSL certs (default: `../ssl_cert`)
-  - Path for static directory (`../static`)
-  - Path for Airflow connection conf (default: `../secret/airflow_conf.json`)
+  * Path for SSL certs (default: `../ssl_cert`)
+  * Path for static directory (`../static`)
+  * Path for Airflow connection conf (default: `../secret/airflow_conf.json`)
 
 6. Start the server using Docker Compose:
 
   ```bash
-  PORTAL_UID="$(id -u)" GID="$(id -g)" docker compose -f docker-compose-prod.yaml -p igfportal up -d
+  PORTAL_UID="$(id -u)" GID="$(id -g)" \
+  docker compose \
+  -f docker-compose-prod.yaml \
+  -p igfportal up -d
   ```
 
 7. Access the portal
