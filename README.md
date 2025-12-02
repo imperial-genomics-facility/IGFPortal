@@ -1,83 +1,91 @@
 # IGFPortal
 
-IGFPortal is a web-based data management and analysis tool created by the NIHR Imperial BRC  Genomics Facility. It facilitates tracking and managing genomic sequencing projects, integrating data pipelines, and visualizing results, particularly in genomics research.
+IGFPortal is a web-based data management and analysis tool created by the NIHR Imperial BRC Genomics Facility. It facilitates tracking and managing genomic sequencing projects, integrates with data pipelines, and provides tools for visualizing results.
 
-## Key Features
-- **Project Management**: Track sequencing projects, sequencing runs, samplesheets and analysis metadata, improving organization and facilitate validation.
-- **Pipeline Integration**: Automates genomic data processing, enabling seamless integration with bioinformatics workflows. Provides easy to use interface for triggering data pipelines.
-- **Result Visualization**: Offers an intuitive interface with graphical views for data analysis results and project status. Utilises Redis caching to minimise loading analysis reports.
+## Key features
+* Project management: track sequencing projects, runs, samplesheets, and analysis metadata.
+* Pipeline integration: automates genomic data processing and integrates with bioinformatics workflows.
+* Result visualization: offers an intuitive interface with graphical views for results and project status. Uses Redis caching to reduce load times.
 
 ## Requirements
-- **Docker**: For containerized deployments
+* Docker (for containerized deployments)
+* Optional: Docker Compose
 
 ## Installation
 
-**1. Clone the Repository**
+1. Clone the repository:
 
-```bash
-git clone https://github.com/imperial-genomics-facility/IGFPortal.git
+  ```bash
+  git clone https://github.com/imperial-genomics-facility/IGFPortal.git
+  cd IGFPortal
+  ```
 
-cd IGFPortal
-```
+2. Create an environment file
 
-**2. Create an environment file**
+  Create a new file named `env` and add:
 
-Create a new file `env` and add the following lines:
+  ```bash
+  PYTHONPATH=/container_path/IGFPortal
+  FLASK_APP=/container_path/IGFPortal/app/__init__.py
+  SQLALCHEMY_DATABASE_URI=mysql+pymysql://DBUSER:DBPASS@DB/MYSQL_DATABASE
+  MYSQL_ROOT_PASSWORD=MYSQL_ROOT_PASSWORD
+  MYSQL_DATABASE=MYSQL_DATABASE
+  MYSQL_USER=DBUSER
+  MYSQL_PASSWORD=DBPASS
+  BASIC_AUTH=FlowerUser:FlowerUserPass
+  CELERY_BROKER_URL=redis://redis_db/0
+  CELERY_RESULT_BACKEND=redis://redis_db/1
+  CACHE_REDIS_URL=redis://redis_db/2
+  CELERY_WORK_DIR=/TMP_WORK_DIR_FOR_CELERY_WORKER
+  AIRFLOW_CONF_FILE=/container_path/secret/airflow_conf.json
+  ```
 
-```
-PYTHONPATH=/container_path/IGFPortal
-FLASK_APP=/container_path/IGFPortal/app/__init__.py
-SQLALCHEMY_DATABASE_URI=mysql+pymysql://DBUSER:DBPASS@DB/MYSQL_DATABASE
-MYSQL_ROOT_PASSWORD=MYSQL_ROOT_PASSWORD
-MYSQL_DATABASE=MYSQL_DATABASE
-MYSQL_USER=DBUSER
-MYSQL_PASSWORD=DBPASS
-BASIC_AUTH=FlowerUser:FlowerUserPass
-CELERY_BROKER_URL=redis://redis_db/0
-CELERY_RESULT_BACKEND=redis://redis_db/1
-CACHE_REDIS_URL=redis://redis_db/2
-CELERY_WORK_DIR=/TMP_WORK_DIR_FOR_CELERY_WORKER
-AIRFLOW_CONF_FILE=/container_path/secret/airflow_conf.json
-```
+3. Create nginx configuration
 
-**3. Create Nginx config file**
+  Copy `nginx_template.conf` to `nginx.conf` and update the `server_name`:
 
-Copy the `nginx_template.conf` to `nginx.conf` and replace `server_name` value.
+  ```bash
+  cp nginx_template.conf nginx.conf
+  # Edit nginx.conf and replace SERVER_ADDRESS
+  ```
 
-```
-server {
-    # Redirect http to https
-    listen 80 default_server;
-    server_name SERVER_ADDRESS;
-    return 301 https://$server_name$request_uri;
-}
-```
+  Example (for HTTP -> HTTPS redirect):
 
-**4. Build docker image**
+  ```nginx
+  server {
+      listen 80 default_server;
+      server_name SERVER_ADDRESS;
+      return 301 https://$server_name$request_uri;
+  }
+  ```
 
-```bash
-docker build -t imperialgenomicsfacility/igfportal:v0.0.2.1 .
-```
+4. Build the Docker image:
 
-**5. Update docker compose file**
+  ```bash
+  docker build -t imperialgenomicsfacility/igfportal:v3.0.0 .
+  ```
 
-Update `docker-compose.yaml` file and add correct path for following:
+5. Update `docker-compose.yaml`
 
-  * Path of the local copy of IGFPortal repo (default is /home/vmuser/github/IGFPortal)
-  * Path for SSL certs (default is /home/vmuser/github/ssl)
-  * Path for static directory (default is ./static)
-  * Path for Apache Airflow connection conf (default /home/vmuser/secrets/airflow_conf.json)
+  Update paths in `docker-compose.yaml` to match your environment:
 
-**6. Start the server using docker compose**
+  * Path for SSL certs (default: `../ssl_cert`)
+  * Path for static directory (`../static`)
+  * Path for Airflow connection conf (default: `../secret/airflow_conf.json`)
 
-```bash
-  PORTAL_UID="$(id -u)" GID="$(id -g)"  docker compose -f docker-compose.yaml -p igfportal up -d
-```
+6. Start the server using Docker Compose:
 
-**7. Access the Portal**
+  ```bash
+  PORTAL_UID="$(id -u)" GID="$(id -g)" \
+  docker compose \
+  -f docker-compose-prod.yaml \
+  -p igfportal up -d
+  ```
 
-Open your browser at `https://SERVER_ADDRESS` to access the IGFPortal dashboard.
+7. Access the portal
+
+  Open your browser at `https://SERVER_ADDRESS`.
 
 ## License
 
-This project is licensed under the Apache-2.0 License. See the [LICENSE](LICENSE) file for details.
+  This project is licensed under the Apache-2.0 License. See the [LICENSE](LICENSE) file for details.
