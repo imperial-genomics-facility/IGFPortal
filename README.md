@@ -3,13 +3,13 @@
 IGFPortal is a web-based data management and analysis tool created by the NIHR Imperial BRC Genomics Facility. It facilitates tracking and managing genomic sequencing projects, integrates with data pipelines, and provides tools for visualizing results.
 
 ## Key features
-  - Project management: track sequencing projects, runs, samplesheets, and analysis metadata.
-  - Pipeline integration: automates genomic data processing and integrates with bioinformatics workflows.
-  - Result visualization: offers an intuitive interface with graphical views for results and project status. Uses Redis caching to reduce load times.
+- Project management: track sequencing projects, runs, samplesheets, and analysis metadata.
+- Pipeline integration: automates genomic data processing and integrates with bioinformatics workflows.
+- Result visualization: offers an intuitive interface with graphical views for results and project status. Uses Redis caching to reduce load times.
 
 ## Requirements
-  - Docker (for containerized deployments)
-  - Optional: Docker Compose
+- Docker (for containerized deployments)
+- Optional: Docker Compose
 
 ## Installation
 
