@@ -6,6 +6,7 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       -
         name: Login to Docker Hub
