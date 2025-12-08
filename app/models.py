@@ -1,5 +1,5 @@
-import datetime, json
-from . import db
+import datetime
+import json
 from markupsafe import Markup
 from flask import url_for
 from flask_appbuilder import Model
@@ -44,16 +44,20 @@ class JSONType(TypeDecorator):
       return dialect.type_descriptor(self.impl)
 
   def process_bind_param(self, value, dialect):
-    if dialect.name == 'mysql' or \
-       dialect.name == 'postgresql':
+    if (
+      dialect.name == 'mysql'
+      or dialect.name == 'postgresql'
+    ):
       return value
     if value is not None:
       value = json.dumps(value)
       return value
 
   def process_result_value(self, value, dialect):
-    if dialect.name == 'mysql' or \
-       dialect.name == 'postgresql':
+    if (
+      dialect.name == 'mysql'
+      or dialect.name == 'postgresql'
+    ):
       return value
     if value is not None:
       value = json.loads(value)
@@ -81,16 +85,20 @@ class LONGTEXTType(TypeDecorator):
       return dialect.type_descriptor(String(16777216))
 
   def process_bind_param(self, value, dialect):
-    if dialect.name == 'mysql' or \
-       dialect.name == 'postgresql':
+    if (
+      dialect.name == 'mysql'
+      or dialect.name == 'postgresql'
+    ):
       return value
     if value is not None:
       # TO DO: Check if this is correct
       return value
 
   def process_result_value(self, value, dialect):
-    if dialect.name == 'mysql' or \
-       dialect.name == 'postgresql':
+    if (
+      dialect.name == 'mysql'
+      or dialect.name == 'postgresql'
+    ):
       return value
     if value is not None:
       # TO DO: Check if this is correct
@@ -113,13 +121,16 @@ class DECIMALType(TypeDecorator):
       return dialect.type_descriptor(
         mysql.DECIMAL(
           precision=self.precision,
-          scale=self.scale))
+          scale=self.scale
+        )
+      )
     elif dialect.name == 'postgresql':
       return dialect.type_descriptor(
         postgresql.NUMERIC(
           precision=self.precision,
           scale=self.scale
-        ))
+        )
+      )
     else:
       return dialect.type_descriptor(self.impl)
 
@@ -131,8 +142,10 @@ class DECIMALType(TypeDecorator):
       return str(value)
 
   def process_result_value(self, value, dialect):
-    if dialect.name == 'mysql' or \
-       dialect.name == 'postgresql':
+    if (
+      dialect.name == 'mysql'
+      or dialect.name == 'postgresql'
+    ):
       return value
     if value is not None:
       return str(value)
@@ -148,25 +161,35 @@ class IlluminaInteropData(Model):
     report_id = Column(
       INTEGER(unsigned=True),
       primary_key=True,
-      nullable=False)
+      nullable=False
+    )
     run_name = Column(
       String(100),
-      nullable=False)
+      nullable=False
+    )
     tag = Column(
       String(200),
-      nullable=False)
+      nullable=False
+    )
     file_path = Column(
       String(500),
-      nullable=False)
+      nullable=False
+    )
     status = Column(
-      Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"),
+      Enum(
+        "ACTIVE",
+        "WITHDRAWN",
+        "UNKNOWN"
+      ),
       nullable=False,
-      server_default='ACTIVE')
+      server_default='ACTIVE'
+    )
     date_stamp = Column(
       TIMESTAMP(),
       nullable=False,
       server_default=current_timestamp(),
-      onupdate=datetime.datetime.now)
+      onupdate=datetime.datetime.now
+    )
     def __repr__(self):
         return self.run_name
     def report(self):
@@ -174,7 +197,9 @@ class IlluminaInteropData(Model):
           'IFrameView.view_interop_report',
           record_id=self.report_id
         )
-        return Markup(f'<a href="{url}">report</a>')
+        return Markup(
+          f'<a href="{url}">report</a>'
+        )
 
 """
   Pre de-multiplexing data
@@ -188,25 +213,35 @@ class PreDeMultiplexingData(Model):
     demult_id = Column(
       INTEGER(unsigned=True),
       primary_key=True,
-      nullable=False)
+      nullable=False
+    )
     run_name = Column(
       String(50),
-      nullable=False)
+      nullable=False
+    )
     samplesheet_tag = Column(
       String(200),
-      nullable=False)
+      nullable=False
+    )
     file_path = Column(
       String(500),
-      nullable=False)
+      nullable=False
+    )
     status = Column(
-      Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"),
+      Enum(
+        "ACTIVE",
+        "WITHDRAWN",
+        "UNKNOWN"
+      ),
       nullable=False,
-      server_default='ACTIVE')
+      server_default='ACTIVE'
+    )
     date_stamp = Column(
       TIMESTAMP(),
       nullable=False,
       server_default=current_timestamp(),
-      onupdate=datetime.datetime.now)
+      onupdate=datetime.datetime.now
+    )
     def __repr__(self):
         return self.run_name
     def report(self):
@@ -239,22 +274,28 @@ class AdminHomeData(Model):
   admin_data_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   admin_data_tag = Column(
     String(50),
-    nullable=False)
+    nullable=False
+  )
   recent_finished_runs = Column(
     INTEGER,
-    nullable=False)
+    nullable=False
+  )
   recent_finished_analysis = Column(
     INTEGER,
-    nullable=False)
+    nullable=False
+  )
   ongoing_runs = Column(
     INTEGER,
-    nullable=False)
+    nullable=False
+  )
   ongoing_analysis = Column(
     INTEGER,
-    nullable=False)
+    nullable=False
+  )
   sequence_bases_plot = Column(TEXT())
   sequence_counts_plot = Column(TEXT())
   storage_stat_plot = Column(TEXT())
@@ -273,24 +314,33 @@ class SampleSheetModel(Model):
 	samplesheet_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
 	samplesheet_tag = Column(
     String(50),
-    nullable=False)
+    nullable=False
+  )
 	csv_data = Column(
     LONGTEXTType(),
-    nullable=False)                           # 2 ^ 24
+    nullable=False
+  )                           # 2 ^ 24
 	status = Column(
-    Enum("PASS", "FAILED", "UNKNOWN"),
+    Enum(
+      "PASS",
+      "FAILED",
+      "UNKNOWN"
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
 	report = Column(LONGTEXTType())
 	validation_time = Column(TIMESTAMP())
 	update_time = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
 	def __repr__(self):
 		return self.samplesheet_tag
 
@@ -306,14 +356,17 @@ class RawMetadataModel(Model):
   raw_metadata_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   metadata_tag = Column(
     String(80),
-    nullable=False)
+    nullable=False
+  )
   raw_csv_data = Column(LONGTEXTType())                                       # 2 ^ 24
   formatted_csv_data = Column(
     LONGTEXTType(),
-    nullable=False)
+    nullable=False
+  )
   report = Column(LONGTEXTType())
   status = Column(
     Enum(
@@ -325,12 +378,14 @@ class RawMetadataModel(Model):
       "SYNCHED"
     ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   update_time = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
   def __repr__(self):
     return self.metadata_tag
 
@@ -346,13 +401,16 @@ class RawSeqrun(Model):
   raw_seqrun_id =  Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   raw_seqrun_igf_id = Column(
     String(80),
-    nullable=False)
+    nullable=False
+  )
   override_cycles = Column(
     String(30),
-    nullable=True)
+    nullable=True
+  )
   status = Column(
     Enum(
       "ACTIVE",
@@ -362,30 +420,36 @@ class RawSeqrun(Model):
       "FINISHED"
     ),
     nullable=False,
-    server_default='ACTIVE')
+    server_default='ACTIVE'
+  )
   date_stamp = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
   samplesheet_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       "samplesheet.samplesheet_id",
       onupdate="NO ACTION",
-      ondelete="NO ACTION")
+      ondelete="NO ACTION"
     )
+  )
   samplesheet = relationship('SampleSheetModel')
   mismatches = Column(
     Enum("0", "1", "2"),
     nullable=True,
-    server_default='1')
+    server_default='1'
+  )
   trigger_time = Column(
     TIMESTAMP(),
-    nullable=True)
+    nullable=True
+  )
   run_config = Column(
     LONGTEXTType(),
-    nullable=True)
+    nullable=True
+  )
 
   def __repr__(self):
     return self.raw_seqrun_igf_id
@@ -403,10 +467,12 @@ class RawMgiSeqrun(Model):
   raw_mgi_seqrun_id =  Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   raw_mgi_seqrun_igf_id = Column(
     String(80),
-    nullable=False)
+    nullable=False
+  )
   status = Column(
     Enum(
       "ACTIVE",
@@ -416,18 +482,21 @@ class RawMgiSeqrun(Model):
       "FINISHED"
     ),
     nullable=False,
-    server_default='ACTIVE')
+    server_default='ACTIVE'
+  )
   date_stamp = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
   trigger_time = Column(
     TIMESTAMP(),
     nullable=True)
   run_config = Column(
     LONGTEXTType(),
-    nullable=True)
+    nullable=True
+  )
 
   def __repr__(self):
     return self.raw_mgi_seqrun_igf_id
@@ -466,9 +535,16 @@ class RawPipeline(Model):
   pipeline_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
-  pipeline_name = Column(String(120), nullable=False)
-  pipeline_db = Column(String(200), nullable=False)
+    nullable=False
+  )
+  pipeline_name = Column(
+    String(120),
+    nullable=False
+  )
+  pipeline_db = Column(
+    String(200),
+    nullable=False
+  )
   pipeline_init_conf = Column(JSONType)
   pipeline_run_conf = Column(JSONType)
   pipeline_type = Column(
@@ -479,16 +555,19 @@ class RawPipeline(Model):
       'UNKNOWN'
     ),
     nullable=False,
-    server_default='EHIVE')
+    server_default='EHIVE'
+  )
   is_active = Column(
     Enum('Y', 'N'),
     nullable=False,
-    server_default='Y')
+    server_default='Y'
+  )
   date_stamp = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
@@ -528,15 +607,18 @@ class RawProject(Model):
   project_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   project_igf_id = Column(
     String(70),
-    nullable=False)
+    nullable=False
+  )
   project_name = Column(String(40))
   start_timestamp = Column(
     TIMESTAMP(),
     nullable=True,
-    server_default=current_timestamp())
+    server_default=current_timestamp()
+  )
   description = Column(TEXT())
   status = Column(
     Enum(
@@ -545,7 +627,8 @@ class RawProject(Model):
       'WITHDRAWN'
     ),
     nullable=False,
-    server_default='ACTIVE')
+    server_default='ACTIVE'
+  )
   deliverable = Column(
     Enum(
       'FASTQ',
@@ -553,7 +636,8 @@ class RawProject(Model):
       'ANALYSIS',
       'COSMX'
     ),
-    server_default='FASTQ')
+    server_default='FASTQ'
+  )
 
   def __repr__(self):
     '''
@@ -596,10 +680,17 @@ class RawIgfUser(Model):
   user_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   user_igf_id = Column(String(10))
-  name = Column(String(30), nullable=False)
-  email_id = Column(String(80), nullable=False)
+  name = Column(
+    String(30),
+    nullable=False
+  )
+  email_id = Column(
+    String(80),
+    nullable=False
+  )
   username = Column(String(20))
   hpc_username = Column(String(20))
   twitter_user = Column(String(20))
@@ -611,7 +702,8 @@ class RawIgfUser(Model):
       'EXTERNAL'
     ),
     nullable=False,
-    server_default='NON_HPC_USER')
+    server_default='NON_HPC_USER'
+  )
   status = Column(
     Enum(
       'ACTIVE',
@@ -619,12 +711,14 @@ class RawIgfUser(Model):
       'WITHDRAWN'
     ),
     nullable=False,
-    server_default='ACTIVE')
+    server_default='ACTIVE'
+  )
   date_created = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
 
 
 class RawAnalysisV2(Model):
@@ -635,33 +729,52 @@ class RawAnalysisV2(Model):
   raw_analysis_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   project_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'raw_project.project_id',
       onupdate="CASCADE",
-      ondelete="SET NULL"))
+      ondelete="SET NULL"
+    )
+  )
   project = relationship('RawProject')
   pipeline_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'raw_pipeline.pipeline_id',
       onupdate="CASCADE",
-      ondelete="SET NULL"))
+      ondelete="SET NULL"
+    )
+  )
   pipeline = relationship('RawPipeline')
-  analysis_name = Column(String(120), nullable=False)
-  analysis_yaml = Column(LONGTEXTType(), nullable=True)
+  analysis_name = Column(
+    String(120),
+    nullable=False
+  )
+  analysis_yaml = Column(
+    LONGTEXTType(),
+    nullable=True
+  )
   status = Column(
-    Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"),
+    Enum(
+      "VALIDATED",
+      "FAILED",
+      "REJECTED",
+      "SYNCHED",
+      "UNKNOWN"
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   report = Column(LONGTEXTType())
   date_stamp = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     return self.analysis_name
@@ -675,25 +788,36 @@ class RawAnalysisValidationSchemaV2(Model):
   raw_analysis_schema_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   pipeline_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'raw_pipeline.pipeline_id',
       onupdate="CASCADE",
-      ondelete="SET NULL"),
-    nullable=True)
+      ondelete="SET NULL"
+    ),
+    nullable=True
+  )
   pipeline = relationship('RawPipeline')
   json_schema = Column(JSONType)
   status = Column(
-    Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"),
+    Enum(
+      "VALIDATED",
+      "FAILED",
+      "REJECTED",
+      "SYNCHED",
+      "UNKNOWN"
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   date_stamp = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     return self.pipeline.pipeline_name
@@ -707,18 +831,21 @@ class RawAnalysisTemplateV2(Model):
   template_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   pipeline_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'raw_pipeline.pipeline_id',
       onupdate="CASCADE",
       ondelete="SET NULL"),
-    nullable=True)
+    nullable=True
+  )
   pipeline = relationship('RawPipeline')
   template_data = Column(
     LONGTEXTType(),
-    nullable=False)
+    nullable=False
+  )
 
   def __repr__(self):
     return self.pipeline.pipeline_name
@@ -735,24 +862,30 @@ class RawCosMxMetadataBuilder(Model):
   raw_cosmx_metadata_builder_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   cosmx_metadata_tag = Column(
     String(80),
-    nullable=False)
+    nullable=False
+  )
   name = Column(
     String(30),
-    nullable=True)
+    nullable=True
+  )
   email_id = Column(
     String(80),
-    nullable=True)
+    nullable=True
+  )
   username = Column(String(20))
   raw_user_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       "raw_user.user_id",
       onupdate="CASCADE",
-      ondelete="CASCADE"),
-    nullable=True)
+      ondelete="CASCADE"
+    ),
+    nullable=True
+  )
   user = relationship('RawIgfUser')
   
 
@@ -764,23 +897,35 @@ class RawCosMxMetadataModel(Model):
   raw_cosmx_metadata_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   cosmx_metadata_tag = Column(
     String(80),
-    nullable=False)                                     # 2 ^ 24
+    nullable=False
+  )                                     # 2 ^ 24
   formatted_csv_data = Column(
     LONGTEXTType(),
-    nullable=False)
+    nullable=False
+  )
   report = Column(LONGTEXTType())
   status = Column(
-    Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"),
+    Enum(
+      "UNKNOWN",
+      "FAILED",
+      "VALIDATED",
+      "REJECTED",
+      "READY",
+      "SYNCHED"
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   update_time = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     return self.cosmx_metadata_tag
@@ -799,25 +944,35 @@ class CosmxSlideQCData(Model):
     qc_id = Column(
       INTEGER(unsigned=True),
       primary_key=True,
-      nullable=False)
+      nullable=False
+    )
     cosmx_slide_igf_id = Column(
       String(200),
-      nullable=False)
+      nullable=False
+    )
     qc_tag = Column(
       String(200),
-      nullable=False)
+      nullable=False
+    )
     file_path = Column(
       String(500),
-      nullable=False)
+      nullable=False
+    )
     status = Column(
-      Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"),
+      Enum(
+        "ACTIVE",
+        "WITHDRAWN",
+        "UNKNOWN"
+      ),
       nullable=False,
-      server_default='ACTIVE')
+      server_default='ACTIVE'
+    )
     date_stamp = Column(
       TIMESTAMP(),
       nullable=False,
       server_default=current_timestamp(),
-      onupdate=datetime.datetime.now)
+      onupdate=datetime.datetime.now
+    )
 
     def __repr__(self):
         return self.cosmx_slide_igf_id
@@ -835,28 +990,39 @@ class AnalysesQCData(Model):
     qc_id = Column(
       INTEGER(unsigned=True),
       primary_key=True,
-      nullable=False)
+      nullable=False
+    )
     analysis_name = Column(
       String(120),
-      nullable=False)
+      nullable=False
+    )
     analysis_type = Column(
       String(120),
-      nullable=False)
+      nullable=False
+    )
     qc_tag = Column(
       String(200),
-      nullable=False)
+      nullable=False
+    )
     file_path = Column(
       String(500),
-      nullable=False)
+      nullable=False
+    )
     status = Column(
-      Enum("ACTIVE", "WITHDRAWN", "UNKNOWN"),
+      Enum(
+        "ACTIVE",
+        "WITHDRAWN",
+        "UNKNOWN"
+      ),
       nullable=False,
-      server_default='ACTIVE')
+      server_default='ACTIVE'
+    )
     date_stamp = Column(
       TIMESTAMP(),
       nullable=False,
       server_default=current_timestamp(),
-      onupdate=datetime.datetime.now)
+      onupdate=datetime.datetime.now
+    )
 
     def __repr__(self):
         return self.analysis_name
@@ -878,23 +1044,29 @@ class ProjectIndex(AuditMixin, Model):
   project_index_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   project_tag = Column(
     String(80),
-    nullable=False)
+    nullable=False
+  )
   project_csv_data = Column(LONGTEXTType())
   update_time = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
   def __repr__(self):
     return self.project_tag
   def sample_table(self):
       url = url_for(
         'ProjectIndexView.get_index_for_project',
-        id=self.project_index_id)
-      return Markup(f'<a href="{url}">samples</a>')
+        id=self.project_index_id
+      )
+      return Markup(
+        f'<a href="{url}">samples</a>'
+      )
 
 class SampleIndex(AuditMixin, Model):
   __tablename__ = 'sample_index'
@@ -904,26 +1076,64 @@ class SampleIndex(AuditMixin, Model):
   sample_index_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
-  sample_name = Column(String(80), nullable=False)
-  igf_id = Column(String(80), nullable=True)
-  container_id = Column(String(80), nullable=True)
-  rin_score = Column(String(10), nullable=True)
-  well_position = Column(String(10), nullable=True)
-  pool_id = Column(String(10), nullable=True)
-  i7_index_name = Column(String(20), nullable=False)
-  i7_index = Column(String(20), nullable=False)
-  i5_index_name = Column(String(20), nullable=True)
-  i5_index = Column(String(20), nullable=True)
-  avg_region_molarity = Column(String(10), nullable=True)
-  avg_fragment_size = Column(INTEGER, nullable=True)
+    nullable=False
+  )
+  sample_name = Column(
+    String(80),
+    nullable=False
+  )
+  igf_id = Column(
+    String(80),
+    nullable=True
+  )
+  container_id = Column(
+    String(80),
+    nullable=True
+  )
+  rin_score = Column(
+    String(10),
+    nullable=True
+  )
+  well_position = Column(
+    String(10),
+    nullable=True
+  )
+  pool_id = Column(
+    String(10),
+    nullable=True
+  )
+  i7_index_name = Column(
+    String(20),
+    nullable=False
+  )
+  i7_index = Column(
+    String(20),
+    nullable=False
+  )
+  i5_index_name = Column(
+    String(20),
+    nullable=True
+  )
+  i5_index = Column(
+    String(20),
+    nullable=True
+  )
+  avg_region_molarity = Column(
+    String(10),
+    nullable=True
+  )
+  avg_fragment_size = Column(
+    INTEGER,
+    nullable=True
+  )
   project_index_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       "project_index.project_index_id",
       onupdate="CASCADE",
       ondelete="SET NULL"),
-    nullable=True)
+    nullable=True
+  )
   project_index = relationship('ProjectIndex')
   def __repr__(self):
     return self.sample_name
@@ -938,10 +1148,20 @@ class ProjectCleanup(AuditMixin, Model):
   project_cleanup_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
-  user_email = Column(String(80), nullable=False)
-  user_name = Column(String(40), nullable=False)
-  projects = Column(TEXT(), nullable=False)
+    nullable=False
+  )
+  user_email = Column(
+    String(80),
+    nullable=False
+  )
+  user_name = Column(
+    String(40),
+    nullable=False
+    )
+  projects = Column(
+    TEXT(),
+    nullable=False
+  )
   status = Column(
     Enum(
       'NOT_STARTED',
@@ -949,18 +1169,22 @@ class ProjectCleanup(AuditMixin, Model):
       'PROCESSING',
       'USER_NOTIFIED',
       'DB_CLEANUP_FINISHED',
-      'FILES_DELETED'),
+      'FILES_DELETED'
+    ),
     nullable=False,
-    server_default='NOT_STARTED')
+    server_default='NOT_STARTED'
+  )
   deletion_date = Column(
     TIMESTAMP(),
     nullable=True,
-    server_default=current_timestamp())
+    server_default=current_timestamp()
+  )
   update_date = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=current_timestamp())
+    onupdate=current_timestamp()
+  )
   def __repr__(self):
     return f'{self.user_name}: {self.deletion_date}'
 
@@ -997,13 +1221,40 @@ class Project(Model):
      UniqueConstraint('project_igf_id'),
      { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  project_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_igf_id = Column(String(70), nullable=False)
+  project_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  project_igf_id = Column(
+    String(70),
+    nullable=False
+  )
   project_name = Column(String(40))
-  start_timestamp = Column(TIMESTAMP(), nullable=True, server_default=current_timestamp())
+  start_timestamp = Column(
+    TIMESTAMP(),
+    nullable=True,
+    server_default=current_timestamp()
+  )
   description = Column(TEXT())
-  status = Column(Enum('ACTIVE', 'FINISHED', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
-  deliverable = Column(Enum('FASTQ', 'ALIGNMENT', 'ANALYSIS', 'COSMX'), server_default='FASTQ')
+  status = Column(
+    Enum(
+      'ACTIVE',
+      'FINISHED',
+      'WITHDRAWN'
+    ),
+    nullable=False,
+    server_default='ACTIVE'
+  )
+  deliverable = Column(
+    Enum(
+      'FASTQ',
+      'ALIGNMENT',
+      'ANALYSIS',
+      'COSMX'
+    ),
+    server_default='FASTQ'
+  )
 
   def __repr__(self):
     '''
@@ -1014,8 +1265,11 @@ class Project(Model):
   def project_info(self):
       url = url_for(
         'ProjectView.get_project_data',
-        id=self.project_id)
-      return Markup(f'<a href="{url}">{self.project_igf_id}</a>')
+        id=self.project_id
+      )
+      return Markup(
+        f'<a href="{url}">{self.project_igf_id}</a>'
+      )
 
 
 class IgfUser(Model):
@@ -1054,7 +1308,11 @@ class IgfUser(Model):
     UniqueConstraint('email_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  user_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  user_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   user_igf_id = Column(String(10))
   name = Column(String(30), nullable=False)
   email_id = Column(String(80), nullable=False)
@@ -1063,18 +1321,28 @@ class IgfUser(Model):
   twitter_user = Column(String(20))
   orcid_id = Column(String(50))
   category = Column(
-    Enum('HPC_USER','NON_HPC_USER','EXTERNAL'),
+    Enum(
+      'HPC_USER',
+      'NON_HPC_USER',
+      'EXTERNAL'
+    ),
     nullable=False,
     server_default='NON_HPC_USER')
   status = Column(
-    Enum('ACTIVE', 'BLOCKED', 'WITHDRAWN'),
+    Enum(
+      'ACTIVE',
+      'BLOCKED',
+      'WITHDRAWN'
+    ),
     nullable=False,
-    server_default='ACTIVE')
+    server_default='ACTIVE'
+  )
   date_created = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
+    onupdate=datetime.datetime.now
+  )
   password = Column(String(129))
   encryption_salt = Column(String(129))
   ht_password = Column(String(40))
@@ -1106,22 +1374,27 @@ class ProjectUser(Model):
   project_user_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   project_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       "project.project_id",
       onupdate="CASCADE",
-      ondelete="CASCADE"),
-    nullable=False)
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   project = relationship('Project')
   user_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       "user.user_id",
       onupdate="CASCADE",
-      ondelete="CASCADE"),
-    nullable=False)
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   user = relationship('IgfUser')
   data_authority = Column(Enum('T'))
 
@@ -1179,23 +1452,42 @@ class Sample(Model):
     UniqueConstraint('sample_igf_id'),
     { 'mysql_engine':'InnoDB','mysql_charset':'utf8' })
 
-  sample_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  sample_igf_id = Column(String(20), nullable=False)
+  sample_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  sample_igf_id = Column(
+    String(20),
+    nullable=False
+  )
   sample_submitter_id = Column(String(40))
-  taxon_id = Column(INTEGER(unsigned=True))
+  taxon_id = Column(
+    INTEGER(unsigned=True)
+  )
   scientific_name = Column(String(50))
   species_name = Column(String(50))
   donor_anonymized_id = Column(String(10))
   description = Column(String(50))
   phenotype = Column(String(45))
   sex = Column(
-    Enum('FEMALE', 'MALE', 'MIXED', 'UNKNOWN'),
+    Enum(
+      'FEMALE',
+      'MALE',
+      'MIXED',
+      'UNKNOWN'
+    ),
     nullable=False,
     server_default='UNKNOWN')
   status = Column(
-    Enum('ACTIVE', 'FAILED', 'WITHDRAWN'),
+    Enum(
+      'ACTIVE',
+      'FAILED',
+      'WITHDRAWN'
+    ),
     nullable=False,
-    server_default='ACTIVE')
+    server_default='ACTIVE'
+  )
   biomaterial_type = Column(
     Enum(
       'PRIMARY_TISSUE',
@@ -1203,22 +1495,27 @@ class Sample(Model):
       'PRIMARY_CELL_CULTURE',
       'CELL_LINE',
       'SINGLE_NUCLEI',
-      'UNKNOWN'),
+      'UNKNOWN'
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   cell_type = Column(String(50))
   tissue_type = Column(String(50))
   cell_line = Column(String(50))
   date_created = Column(
     TIMESTAMP(),
     nullable=False,
-    server_default=current_timestamp())
+    server_default=current_timestamp()
+  )
   project_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'project.project_id',
       onupdate="CASCADE",
-      ondelete="SET NULL"))
+      ondelete="SET NULL"
+    )
+  )
   project = relationship('Project')
 
   def __repr__(self):
@@ -1273,8 +1570,12 @@ class Platform(Model):
   platform_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
-  platform_igf_id = Column(String(10), nullable=False)
+    nullable=False
+  )
+  platform_igf_id = Column(
+    String(10),
+    nullable=False
+  )
   model_name = Column(
     Enum(
       'HISEQ2500',
@@ -1287,21 +1588,37 @@ class Platform(Model):
       'DNBSEQ-G400',
       'DNBSEQ-G50',
       'DNBSEQ-T7',
-      'SEQUEL2'),
-    nullable=False)
+      'SEQUEL2'
+    ),
+    nullable=False
+  )
   vendor_name = Column(
-    Enum('ILLUMINA','NANOPORE', 'MGI', 'PACBIO'),
-    nullable=False)
-  software_name = Column(Enum('RTA','UNKNOWN'), nullable=False)
+    Enum(
+      'ILLUMINA',
+      'NANOPORE',
+      'MGI',
+      'PACBIO'
+    ),
+    nullable=False
+  )
+  software_name = Column(
+    Enum(
+      'RTA',
+      'UNKNOWN'
+    ),
+    nullable=False
+  )
   software_version = Column(
     String(20),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   date_created = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now )
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
@@ -1338,23 +1655,39 @@ class Flowcell_barcode_rule(Model):
   flowcell_rule_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   platform_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'platform.platform_id',
       onupdate="CASCADE",
-      ondelete="SET NULL"))
+      ondelete="SET NULL"
+    )
+  )
   platform = relationship('Platform')
-  flowcell_type = Column(String(50), nullable=False)
+  flowcell_type = Column(
+    String(50),
+    nullable=False
+  )
   index_1 = Column(
-    Enum('NO_CHANGE','REVCOMP','UNKNOWN'),
+    Enum(
+      'NO_CHANGE',
+      'REVCOMP',
+      'UNKNOWN'
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
   index_2 = Column(
-    Enum('NO_CHANGE','REVCOMP','UNKNOWN'),
+    Enum(
+      'NO_CHANGE',
+      'REVCOMP',
+      'UNKNOWN'
+    ),
     nullable=False,
-    server_default='UNKNOWN')
+    server_default='UNKNOWN'
+  )
 
   def __repr__(self):
     '''
@@ -1381,24 +1714,38 @@ class Seqrun(Model):
     UniqueConstraint('seqrun_igf_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  seqrun_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  seqrun_igf_id = Column(String(50), nullable=False)
+  seqrun_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  seqrun_igf_id = Column(
+    String(50),
+    nullable=False
+  )
   reject_run = Column(
     Enum('Y','N'),
     nullable=False,
-    server_default='N')
+    server_default='N'
+  )
   date_created = Column(
     TIMESTAMP(),
     nullable=False,
     server_default=current_timestamp(),
-    onupdate=datetime.datetime.now)
-  flowcell_id = Column(String(20), nullable=False)
+    onupdate=datetime.datetime.now
+  )
+  flowcell_id = Column(
+    String(20),
+    nullable=False
+  )
   platform_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'platform.platform_id',
       onupdate="CASCADE",
-      ondelete="SET NULL"))
+      ondelete="SET NULL"
+    )
+  )
   platform = relationship('Platform')
 
   def __repr__(self):
@@ -1430,18 +1777,22 @@ class Seqrun_stats(Model):
   seqrun_stats_id = Column(
     INTEGER(unsigned=True),
     primary_key=True,
-    nullable=False)
+    nullable=False
+  )
   seqrun_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
       'seqrun.seqrun_id',
       onupdate="CASCADE",
-      ondelete="CASCADE"),
-    nullable=False)
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   seqrun = relationship('Seqrun')
   lane_number = Column(
     Enum('1', '2', '3', '4', '5', '6', '7', '8'),
-    nullable=False)
+    nullable=False
+  )
   bases_mask = Column(String(20))
   undetermined_barcodes = Column(JSONType)
   known_barcodes = Column(JSONType)
@@ -1632,38 +1983,216 @@ class Experiment(Model):
     UniqueConstraint('experiment_igf_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  experiment_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  experiment_igf_id = Column(String(40), nullable=False)
-  project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="SET NULL"))
+  experiment_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  experiment_igf_id = Column(
+    String(40),
+    nullable=False
+  )
+  project_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'project.project_id',
+      onupdate="CASCADE",
+      ondelete="SET NULL"
+    )
+  )
   project = relationship('Project')
-  sample_id = Column(INTEGER(unsigned=True), ForeignKey('sample.sample_id', onupdate="CASCADE", ondelete="SET NULL"))
+  sample_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'sample.sample_id',
+      onupdate="CASCADE",
+      ondelete="SET NULL"
+    )
+  )
   sample = relationship('Sample')
-  library_name = Column(String(50), nullable=False)
-  library_source = Column(Enum('GENOMIC', 'TRANSCRIPTOMIC' ,'GENOMIC_SINGLE_CELL', 'METAGENOMIC', 'METATRANSCRIPTOMIC',
-                               'TRANSCRIPTOMIC_SINGLE_CELL', 'SYNTHETIC', 'VIRAL_RNA', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  library_strategy = Column(Enum('WGS', 'WXS', 'WGA', 'RNA-SEQ', 'CHIP-SEQ', 'ATAC-SEQ', 'MIRNA-SEQ', 'NCRNA-SEQ',
-                                 'FL-CDNA', 'EST', 'HI-C', 'DNASE-SEQ', 'WCS', 'RAD-SEQ', 'CLONE', 'POOLCLONE',
-                                 'AMPLICON', 'CLONEEND', 'FINISHING', 'MNASE-SEQ', 'DNASE-HYPERSENSITIVITY', 'BISULFITE-SEQ',
-                                 'CTS', 'MRE-SEQ', 'MEDIP-SEQ', 'MBD-SEQ', 'TN-SEQ', 'VALIDATION', 'FAIRE-SEQ', 'SELEX',
-                                 'RIP-SEQ', 'CHIA-PET', 'SYNTHETIC-LONG-READ', 'TARGETED-CAPTURE', 'TETHERED', 'NOME-SEQ',
-                                 'CHIRP SEQ', '4-C-SEQ', '5-C-SEQ', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  experiment_type = Column(Enum('POLYA-RNA', 'POLYA-RNA-3P', 'TOTAL-RNA', 'SMALL-RNA', 'WGS', 'WGA', 'WXS', 'WXS-UTR',
-                                'RIBOSOME-PROFILING', 'RIBODEPLETION', '16S', 'NCRNA-SEQ', 'FL-CDNA', 'EST', 'HI-C',
-                                'DNASE-SEQ', 'WCS', 'RAD-SEQ', 'CLONE', 'POOLCLONE', 'AMPLICON', 'CLONEEND', 'FINISHING',
-                                'DNASE-HYPERSENSITIVITY', 'RRBS-SEQ', 'WGBS', 'CTS', 'MRE-SEQ', 'MEDIP-SEQ', 'MBD-SEQ',
-                                'TN-SEQ', 'VALIDATION', 'FAIRE-SEQ', 'SELEX', 'RIP-SEQ', 'CHIA-PET', 'SYNTHETIC-LONG-READ',
-                                'TARGETED-CAPTURE', 'TETHERED', 'NOME-SEQ', 'CHIRP-SEQ', '4-C-SEQ', '5-C-SEQ',
-                                'METAGENOMIC', 'METATRANSCRIPTOMIC', 'TF', 'H3K27ME3', 'H3K27AC', 'H3K9ME3',
-                                'H3K36ME3', 'H3F3A', 'H3K4ME1', 'H3K79ME2', 'H3K79ME3', 'H3K9ME1', 'H3K9ME2',
-                                'H4K20ME1', 'H2AFZ', 'H3AC', 'H3K4ME2', 'H3K4ME3', 'H3K9AC', 'HISTONE-NARROW',
-                                'HISTONE-BROAD', 'CHIP-INPUT', 'ATAC-SEQ', 'TENX-TRANSCRIPTOME-3P', 'TENX-TRANSCRIPTOME-5P',
-                                'DROP-SEQ-TRANSCRIPTOME', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  library_layout = Column(Enum('SINGLE', 'PAIRED', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  status = Column(Enum('ACTIVE', 'FAILED', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
-  platform_name = Column(Enum('HISEQ2500', 'HISEQ4000', 'MISEQ', 'NEXTSEQ', 'NANOPORE_MINION', 'NOVASEQ6000',
-                              'DNBSEQ-G400', 'DNBSEQ-G50', 'DNBSEQ-T7', 'NEXTSEQ2000', 'SEQUEL2',
-                              'UNKNOWN'), nullable=False, server_default='UNKNOWN')
+  library_name = Column(
+    String(50),
+    nullable=False
+  )
+  library_source = Column(
+    Enum(
+      'GENOMIC',
+      'TRANSCRIPTOMIC',
+      'GENOMIC_SINGLE_CELL',
+      'METAGENOMIC',
+      'METATRANSCRIPTOMIC',
+      'TRANSCRIPTOMIC_SINGLE_CELL',
+      'SYNTHETIC',
+      'VIRAL_RNA',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  library_strategy = Column(
+    Enum(
+      'WGS',
+      'WXS',
+      'WGA',
+      'RNA-SEQ',
+      'CHIP-SEQ',
+      'ATAC-SEQ',
+      'MIRNA-SEQ',
+      'NCRNA-SEQ',
+      'FL-CDNA',
+      'EST',
+      'HI-C',
+      'DNASE-SEQ',
+      'WCS',
+      'RAD-SEQ',
+      'CLONE',
+      'POOLCLONE',
+      'AMPLICON',
+      'CLONEEND',
+      'FINISHING',
+      'MNASE-SEQ',
+      'DNASE-HYPERSENSITIVITY',
+      'BISULFITE-SEQ',
+      'CTS',
+      'MRE-SEQ',
+      'MEDIP-SEQ',
+      'MBD-SEQ',
+      'TN-SEQ',
+      'VALIDATION',
+      'FAIRE-SEQ',
+      'SELEX',
+      'RIP-SEQ',
+      'CHIA-PET',
+      'SYNTHETIC-LONG-READ',
+      'TARGETED-CAPTURE',
+      'TETHERED',
+      'NOME-SEQ',
+      'CHIRP SEQ',
+      '4-C-SEQ',
+      '5-C-SEQ',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  experiment_type = Column(
+    Enum(
+      'POLYA-RNA',
+      'POLYA-RNA-3P',
+      'TOTAL-RNA',
+      'SMALL-RNA',
+      'WGS',
+      'WGA',
+      'WXS',
+      'WXS-UTR',
+      'RIBOSOME-PROFILING',
+      'RIBODEPLETION',
+      '16S',
+      'NCRNA-SEQ',
+      'FL-CDNA',
+      'EST',
+      'HI-C',
+      'DNASE-SEQ',
+      'WCS',
+      'RAD-SEQ',
+      'CLONE',
+      'POOLCLONE',
+      'AMPLICON',
+      'CLONEEND',
+      'FINISHING',
+      'DNASE-HYPERSENSITIVITY',
+      'RRBS-SEQ',
+      'WGBS',
+      'CTS',
+      'MRE-SEQ',
+      'MEDIP-SEQ',
+      'MBD-SEQ',
+      'TN-SEQ',
+      'VALIDATION',
+      'FAIRE-SEQ',
+      'SELEX',
+      'RIP-SEQ',
+      'CHIA-PET',
+      'SYNTHETIC-LONG-READ',
+      'TARGETED-CAPTURE',
+      'TETHERED',
+      'NOME-SEQ',
+      'CHIRP-SEQ',
+      '4-C-SEQ',
+      '5-C-SEQ',
+      'METAGENOMIC',
+      'METATRANSCRIPTOMIC',
+      'TF',
+      'H3K27ME3',
+      'H3K27AC',
+      'H3K9ME3',
+      'H3K36ME3',
+      'H3F3A',
+      'H3K4ME1',
+      'H3K79ME2',
+      'H3K79ME3',
+      'H3K9ME1',
+      'H3K9ME2',
+      'H4K20ME1',
+      'H2AFZ',
+      'H3AC',
+      'H3K4ME2',
+      'H3K4ME3',
+      'H3K9AC',
+      'HISTONE-NARROW',
+      'HISTONE-BROAD',
+      'CHIP-INPUT',
+      'ATAC-SEQ',
+      'TENX-TRANSCRIPTOME-3P',
+      'TENX-TRANSCRIPTOME-5P',
+      'DROP-SEQ-TRANSCRIPTOME',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  library_layout = Column(
+    Enum(
+      'SINGLE',
+      'PAIRED',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  status = Column(
+    Enum(
+      'ACTIVE',
+      'FAILED',
+      'WITHDRAWN'
+    ),
+    nullable=False,
+    server_default='ACTIVE'
+  )
+  date_created = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
+  platform_name = Column(
+    Enum(
+      'HISEQ2500',
+      'HISEQ4000',
+      'MISEQ',
+      'NEXTSEQ',
+      'NANOPORE_MINION',
+      'NOVASEQ6000',
+      'DNBSEQ-G400',
+      'DNBSEQ-G50',
+      'DNBSEQ-T7',
+      'NEXTSEQ2000',
+      'SEQUEL2',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
 
   def __repr__(self):
     '''
@@ -1697,15 +2226,51 @@ class Run(Model):
     UniqueConstraint('experiment_id','seqrun_id','lane_number'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  run_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  run_igf_id = Column(String(70), nullable=False)
-  experiment_id = Column(INTEGER(unsigned=True), ForeignKey('experiment.experiment_id', onupdate="CASCADE", ondelete="SET NULL"))
+  run_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  run_igf_id = Column(
+    String(70),
+    nullable=False
+  )
+  experiment_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'experiment.experiment_id',
+      onupdate="CASCADE",
+      ondelete="SET NULL"
+    )
+  )
   experiment = relationship('Experiment')
-  seqrun_id = Column(INTEGER(unsigned=True), ForeignKey('seqrun.seqrun_id', onupdate="CASCADE", ondelete="SET NULL"))
+  seqrun_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'seqrun.seqrun_id',
+      onupdate="CASCADE",
+      ondelete="SET NULL"
+    )
+  )
   seqrun = relationship('Seqrun')
-  status = Column(Enum('ACTIVE', 'FAILED', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
-  lane_number = Column(Enum('1', '2', '3', '4', '5', '6', '7', '8'), nullable=False)
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+  status = Column(
+    Enum(
+      'ACTIVE',
+      'FAILED',
+      'WITHDRAWN'
+    ),
+    nullable=False,
+    server_default='ACTIVE'
+  )
+  lane_number = Column(
+    Enum('1', '2', '3', '4', '5', '6', '7', '8'),
+    nullable=False
+  )
+  date_created = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp()
+  )
 
   def __repr__(self):
     '''
@@ -1729,11 +2294,28 @@ class Analysis(Model):
     UniqueConstraint('analysis_name','project_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  analysis_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="SET NULL"))
+  analysis_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  project_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'project.project_id',
+      onupdate="CASCADE",
+      ondelete="SET NULL"
+    )
+  )
   project = relationship('Project')
-  analysis_name = Column(String(120), nullable=False)
-  analysis_type = Column(String(120), nullable=False)
+  analysis_name = Column(
+    String(120),
+    nullable=False
+  )
+  analysis_type = Column(
+    String(120),
+    nullable=False
+  )
   analysis_description = Column(JSONType)
 
   def __repr__(self):
@@ -1761,17 +2343,45 @@ class Collection(Model):
     UniqueConstraint('name','type'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  collection_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  name = Column(String(150), nullable=False)
-  type = Column(String(150), nullable=False)
-  table = Column(Enum('sample', 'experiment', 'run', 'file', 'project', 'seqrun', 'analysis', 'unknown'), nullable=False, server_default='unknown')
-  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  collection_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  name = Column(
+    String(150),
+    nullable=False
+  )
+  type = Column(
+    String(150),
+    nullable=False
+  )
+  table = Column(
+    Enum(
+      'sample',
+      'experiment',
+      'run',
+      'file',
+      'project',
+      'seqrun',
+      'analysis',
+      'unknown'
+    ),
+    nullable=False,
+    server_default='unknown'
+  )
+  date_stamp = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
     Display Collection entry
     '''
-    return "{0}, {1}".format(self.name, self.type)
+    return f"{self.name}, {self.type}"
 
 
 class File(Model):
@@ -1806,14 +2416,44 @@ class File(Model):
     UniqueConstraint('file_path'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  file_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  file_path = Column(String(1000), nullable=False)
-  location = Column(Enum('ORWELL', 'HPC_PROJECT', 'ELIOT', 'IRODS', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  status = Column(Enum('ACTIVE', 'WITHDRAWN'), nullable=False, server_default='ACTIVE')
+  file_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  file_path = Column(
+    String(1000),
+    nullable=False
+  )
+  location = Column(
+    Enum(
+      'ORWELL',
+      'HPC_PROJECT',
+      'ELIOT',
+      'IRODS',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  status = Column(
+    Enum('ACTIVE', 'WITHDRAWN'),
+    nullable=False,
+    server_default='ACTIVE'
+  )
   md5 = Column(String(33))
   size = Column(String(15))
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
-  date_updated = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+  date_created = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp()
+  )
+  date_updated = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
@@ -1837,10 +2477,30 @@ class Collection_group(Model):
     UniqueConstraint('collection_id','file_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  collection_group_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  collection_id = Column(INTEGER(unsigned=True), ForeignKey('collection.collection_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  collection_group_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  collection_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'collection.collection_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   collection = relationship('Collection')
-  file_id = Column(INTEGER(unsigned=True), ForeignKey('file.file_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  file_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'file.file_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   file = relationship('File')
 
   def __repr__(self):
@@ -1877,15 +2537,42 @@ class Pipeline(Model):
     UniqueConstraint('pipeline_name'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  pipeline_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  pipeline_name = Column(String(120), nullable=False)
-  pipeline_db = Column(String(200), nullable=False)
+  pipeline_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  pipeline_name = Column(
+    String(120),
+    nullable=False
+  )
+  pipeline_db = Column(
+    String(200),
+    nullable=False
+  )
   pipeline_init_conf = Column(JSONType)
   pipeline_run_conf = Column(JSONType)
-  pipeline_type = Column(Enum('EHIVE', 'AIRFLOW', 'NEXTFLOW', 'UNKNOWN'), nullable=False, server_default='EHIVE')
-  is_active = Column(Enum('Y', 'N'), nullable=False, server_default='Y')
-  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
-  #pipeline_seed = relationship('Pipeline_seed', backref='pipeline')
+  pipeline_type = Column(
+    Enum(
+      'EHIVE',
+      'AIRFLOW',
+      'NEXTFLOW',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='EHIVE'
+  )
+  is_active = Column(
+    Enum('Y', 'N'),
+    nullable=False,
+    server_default='Y'
+  )
+  date_stamp = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
@@ -1921,13 +2608,57 @@ class Pipeline_seed(Model):
     UniqueConstraint('pipeline_id','seed_id','seed_table'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  pipeline_seed_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  seed_id = Column(INTEGER(unsigned=True), nullable=False)
-  seed_table = Column(Enum('project','sample','experiment','run','file','seqrun','analysis','collection','unknown'), nullable=False, server_default='unknown')
-  pipeline_id = Column(INTEGER(unsigned=True), ForeignKey('pipeline.pipeline_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  pipeline_seed_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  seed_id = Column(
+    INTEGER(unsigned=True),
+    nullable=False
+  )
+  seed_table = Column(
+    Enum(
+      'project',
+      'sample',
+      'experiment',
+      'run',
+      'file',
+      'seqrun',
+      'analysis',
+      'collection',
+      'unknown'
+    ),
+    nullable=False,
+    server_default='unknown'
+  )
+  pipeline_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'pipeline.pipeline_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   pipeline = relationship('Pipeline')
-  status = Column(Enum('SEEDED', 'RUNNING', 'FINISHED', 'FAILED', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  date_stamp = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now)
+  status = Column(
+    Enum(
+      'SEEDED',
+      'RUNNING',
+      'FINISHED',
+      'FAILED',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  date_stamp = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
@@ -1952,11 +2683,23 @@ class Project_attribute(Model):
     UniqueConstraint('project_id', 'attribute_name', 'attribute_value'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  project_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  project_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(50))
   attribute_value = Column(String(50))
-  project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-  project =relationship('Project')
+  project_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'project.project_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
+  project = relationship('Project')
 
   def __repr__(self):
     '''
@@ -1980,10 +2723,22 @@ class Experiment_attribute(Model):
     UniqueConstraint('experiment_id', 'attribute_name', 'attribute_value'),
     {  'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  experiment_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  experiment_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(30))
   attribute_value = Column(String(50))
-  experiment_id = Column(INTEGER(unsigned=True), ForeignKey('experiment.experiment_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  experiment_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'experiment.experiment_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   experiment = relationship('Experiment')
 
   def __repr__(self):
@@ -2008,10 +2763,22 @@ class Collection_attribute(Model):
     UniqueConstraint('collection_id', 'attribute_name', 'attribute_value'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  collection_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  collection_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(200))
   attribute_value = Column(String(200))
-  collection_id = Column(INTEGER(unsigned=True), ForeignKey('collection.collection_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  collection_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'collection.collection_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   collection = relationship('Collection')
 
   def __repr__(self):
@@ -2036,10 +2803,22 @@ class Sample_attribute(Model):
     UniqueConstraint('sample_id', 'attribute_name', 'attribute_value'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  sample_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  sample_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(50))
   attribute_value = Column(String(50))
-  sample_id = Column(INTEGER(unsigned=True), ForeignKey('sample.sample_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  sample_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'sample.sample_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   sample = relationship('Sample')
 
   def __repr__(self):
@@ -2064,10 +2843,22 @@ class Seqrun_attribute(Model):
   __table_args__ = (
     UniqueConstraint('seqrun_id', 'attribute_name', 'attribute_value'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-  seqrun_attribute_id  = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  seqrun_attribute_id  = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(50))
   attribute_value = Column(String(100))
-  seqrun_id = Column(INTEGER(unsigned=True), ForeignKey('seqrun.seqrun_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  seqrun_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'seqrun.seqrun_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   seqrun = relationship('Seqrun')
 
 class Run_attribute(Model):
@@ -2086,10 +2877,22 @@ class Run_attribute(Model):
     UniqueConstraint('run_id', 'attribute_name', 'attribute_value'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
 
-  run_attribute_id  = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  run_attribute_id  = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(30))
   attribute_value = Column(String(50))
-  run_id = Column(INTEGER(unsigned=True), ForeignKey('run.run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  run_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'run.run_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   run = relationship('Run')
 
   def __repr__(self):
@@ -2114,10 +2917,22 @@ class File_attribute(Model):
     UniqueConstraint('file_id', 'attribute_name', 'attribute_value'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  file_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
+  file_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
   attribute_name = Column(String(30))
   attribute_value = Column(String(50))
-  file_id = Column(INTEGER(unsigned=True), ForeignKey('file.file_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  file_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'file.file_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   file = relationship('File')
 
   def __repr__(self):
@@ -2143,10 +2958,25 @@ class Cosmx_platform(Model):
     UniqueConstraint('cosmx_platform_igf_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_platform_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_platform_igf_id = Column(String(20), nullable=False)
-  cosmx_platform_name = Column(String(20), nullable=True)
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp(), onupdate=datetime.datetime.now )
+  cosmx_platform_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_platform_igf_id = Column(
+    String(20),
+    nullable=False
+  )
+  cosmx_platform_name = Column(
+    String(20),
+    nullable=True
+  )
+  date_created = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
 
   def __repr__(self):
     '''
@@ -2171,10 +3001,28 @@ class Cosmx_run(Model):
     UniqueConstraint('cosmx_run_igf_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_run_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_run_igf_id = Column(String(200), nullable=False)
-  cosmx_run_name = Column(String(100), nullable=True)
-  project_id = Column(INTEGER(unsigned=True), ForeignKey('project.project_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_run_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_run_igf_id = Column(
+    String(200),
+    nullable=False
+  )
+  cosmx_run_name = Column(
+    String(100),
+    nullable=True
+  )
+  project_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'project.project_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   project = relationship('Project')
 
 
@@ -2208,19 +3056,65 @@ class Cosmx_slide(Model):
     UniqueConstraint('cosmx_slide_igf_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_slide_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_slide_igf_id = Column(String(100), nullable=False)
-  cosmx_slide_name = Column(String(100), nullable=True)
-  cosmx_run_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_run.cosmx_run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_slide_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_slide_igf_id = Column(
+    String(100),
+    nullable=False
+  )
+  cosmx_slide_name = Column(
+    String(100),
+    nullable=True
+  )
+  cosmx_run_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_run.cosmx_run_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_run = relationship('Cosmx_run')
-  cosmx_platform_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_platform.cosmx_platform_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_platform_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_platform.cosmx_platform_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_platform = relationship('Cosmx_platform')
-  panel_info = Column(String(200), nullable=True)
-  assay_type = Column(String(100), nullable=True)
-  version = Column(String(10), nullable=True)
-  slide_run_date = Column(DATETIME(), nullable=False, server_default=current_timestamp())
-  slide_metadata = Column(JSONType(), nullable=True)
-  date_created = Column(TIMESTAMP(), nullable=False, server_default=current_timestamp())
+  panel_info = Column(
+    String(200),
+    nullable=True
+  )
+  assay_type = Column(
+    String(100),
+    nullable=True
+  )
+  version = Column(
+    String(10),
+    nullable=True
+  )
+  slide_run_date = Column(
+    DATETIME(),
+    nullable=False,
+    server_default=current_timestamp()
+  )
+  slide_metadata = Column(
+    JSONType(),
+    nullable=True
+  )
+  date_created = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp()
+  )
 
   def __repr__(self):
     '''
@@ -2239,13 +3133,34 @@ class Cosmx_fov(Model):
     UniqueConstraint('cosmx_fov_name', 'cosmx_slide_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_fov_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_fov_name = Column(String(10), nullable=False)
-  cosmx_slide_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_slide.cosmx_slide_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_fov_name = Column(
+    String(10),
+    nullable=False
+  )
+  cosmx_slide_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_slide.cosmx_slide_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_slide = relationship('Cosmx_slide')
-  slide_type = Column(Enum('RNA', 'PROTEIN', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  # cosmx_run_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_run.cosmx_run_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-  # cosmx_run = relationship('Cosmx_run')
+  slide_type = Column(
+    Enum(
+      'RNA',
+      'PROTEIN',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
 
   def __repr__(self):
     '''
@@ -2264,13 +3179,42 @@ class Cosmx_fov_annotation(Model):
     UniqueConstraint('cosmx_fov_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_fov_annotation_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov_annotation_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_fov_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_fov.cosmx_fov_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_fov = relationship('Cosmx_fov')
-  tissue_species = Column(Enum('HUMAN', 'MOUSE', 'UNKNOWN'), nullable=False, server_default='UNKNOWN')
-  tissue_annotation = Column(String(200), nullable=True)
-  tissue_ontology = Column(String(200), nullable=True)
-  tissue_condition = Column(String(200), nullable=True)
+  tissue_species = Column(
+    Enum(
+      'HUMAN',
+      'MOUSE',
+      'UNKNOWN'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  tissue_annotation = Column(
+    String(200),
+    nullable=True
+  )
+  tissue_ontology = Column(
+    String(200),
+    nullable=True
+  )
+  tissue_condition = Column(
+    String(200),
+    nullable=True
+  )
 
   def __repr__(self):
     '''
@@ -2289,16 +3233,49 @@ class Cosmx_fov_rna_qc(Model):
     UniqueConstraint('cosmx_fov_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_fov_rna_qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov_rna_qc_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_fov_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_fov.cosmx_fov_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_fov = relationship('Cosmx_fov')
-  mean_transcript_per_cell = Column(DECIMALType(10, 2), nullable=True)
-  mean_unique_genes_per_cell = Column(DECIMALType(10, 2), nullable=True)
-  number_non_empty_cells = Column(INTEGER(unsigned=True), nullable=True)
-  pct_non_empty_cells = Column(DECIMALType(10, 2), nullable=True)
-  percentile_90_transcript_per_cell = Column(DECIMALType(10, 2), nullable=True)
-  percentile_10_transcript_per_cell = Column(DECIMALType(10, 2), nullable=True)
-  mean_negprobe_counts_per_cell = Column(DECIMALType(10, 3), nullable=True)
+  mean_transcript_per_cell = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  mean_unique_genes_per_cell = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  number_non_empty_cells = Column(
+    INTEGER(unsigned=True),
+    nullable=True
+  )
+  pct_non_empty_cells = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  percentile_90_transcript_per_cell = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  percentile_10_transcript_per_cell = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  mean_negprobe_counts_per_cell = Column(
+    DECIMALType(10, 3),
+    nullable=True
+  )
 
   def __repr__(self):
     '''
@@ -2317,16 +3294,49 @@ class Cosmx_fov_protein_qc(Model):
     UniqueConstraint('cosmx_fov_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_fov_protein_qc_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov_protein_qc_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  cosmx_fov_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_fov.cosmx_fov_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_fov = relationship('Cosmx_fov')
-  mean_fluorescence_intensity = Column(INTEGER, nullable=True)
-  mean_unique_genes_per_cell = Column(INTEGER, nullable=True)
-  number_non_empty_cells = Column(INTEGER, nullable=True)
-  pct_non_empty_cells = Column(DECIMALType(10, 2), nullable=True)
-  percentile_10_fluorescence_intensity = Column(DECIMALType(10, 2), nullable=True)
-  percentile_90_fluorescence_intensity = Column(DECIMALType(10, 2), nullable=True)
-  fluorescence_intensity_mean_igg_control_intensity = Column(DECIMALType(10, 3), nullable=True)
+  mean_fluorescence_intensity = Column(
+    INTEGER,
+    nullable=True
+  )
+  mean_unique_genes_per_cell = Column(
+    INTEGER,
+    nullable=True
+  )
+  number_non_empty_cells = Column(
+    INTEGER,
+    nullable=True
+  )
+  pct_non_empty_cells = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  percentile_10_fluorescence_intensity = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  percentile_90_fluorescence_intensity = Column(
+    DECIMALType(10, 2),
+    nullable=True
+  )
+  fluorescence_intensity_mean_igg_control_intensity = Column(
+    DECIMALType(10, 3),
+    nullable=True
+  )
 
   def __repr__(self):
     '''
@@ -2351,10 +3361,27 @@ class Cosmx_slide_attribute(Model):
     UniqueConstraint('cosmx_slide_id', 'attribute_name'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_slide_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  attribute_name = Column(String(200), nullable=False)
-  attribute_value = Column(JSONType(), nullable=True)
-  cosmx_slide_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_slide.cosmx_slide_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_slide_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  attribute_name = Column(
+    String(200),
+    nullable=False
+  )
+  attribute_value = Column(
+    JSONType(),
+    nullable=True)
+  cosmx_slide_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_slide.cosmx_slide_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
   cosmx_slide = relationship('Cosmx_slide')
 
   def __repr__(self):
@@ -2379,10 +3406,24 @@ class Cosmx_fov_attribute(Model):
     UniqueConstraint('cosmx_fov_id', 'attribute_name'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
 
-  cosmx_fov_attribute_id = Column(INTEGER(unsigned=True), primary_key=True, nullable=False)
-  attribute_name = Column(String(200), nullable=False)
-  attribute_value = Column(JSONType(), nullable=True)
-  cosmx_fov_id = Column(INTEGER(unsigned=True), ForeignKey('cosmx_fov.cosmx_fov_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+  cosmx_fov_attribute_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False)
+  attribute_name = Column(
+    String(200),
+    nullable=False)
+  attribute_value = Column(
+    JSONType(),
+    nullable=True)
+  cosmx_fov_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      'cosmx_fov.cosmx_fov_id',
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False)
   cosmx_fov = relationship('Cosmx_fov')
 
   def __repr__(self):
