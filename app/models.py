@@ -316,7 +316,14 @@ class RawMetadataModel(Model):
     nullable=False)
   report = Column(LONGTEXTType())
   status = Column(
-    Enum("UNKNOWN", "FAILED", "VALIDATED", "REJECTED", "READY", "SYNCHED"),
+    Enum(
+      "UNKNOWN",
+      "FAILED",
+      "VALIDATED",
+      "REJECTED",
+      "READY",
+      "SYNCHED"
+    ),
     nullable=False,
     server_default='UNKNOWN')
   update_time = Column(
@@ -347,7 +354,13 @@ class RawSeqrun(Model):
     String(30),
     nullable=True)
   status = Column(
-    Enum("ACTIVE", "REJECTED", "PREDEMULT", "READY", "FINISHED"),
+    Enum(
+      "ACTIVE",
+      "REJECTED",
+      "PREDEMULT",
+      "READY",
+      "FINISHED"
+    ),
     nullable=False,
     server_default='ACTIVE')
   date_stamp = Column(
@@ -381,6 +394,7 @@ class RawSeqrun(Model):
 """
   List of raw MGI seqrun
 """
+
 class RawMgiSeqrun(Model):
   __tablename__ = 'raw_mgi_seqrun'
   __table_args__ = (
@@ -394,7 +408,13 @@ class RawMgiSeqrun(Model):
     String(80),
     nullable=False)
   status = Column(
-    Enum("ACTIVE", "REJECTED", "PREDEMULT", "READY", "FINISHED"),
+    Enum(
+      "ACTIVE",
+      "REJECTED",
+      "PREDEMULT",
+      "READY",
+      "FINISHED"
+    ),
     nullable=False,
     server_default='ACTIVE')
   date_stamp = Column(
@@ -411,111 +431,6 @@ class RawMgiSeqrun(Model):
 
   def __repr__(self):
     return self.raw_mgi_seqrun_igf_id
-
-
-"""
-  Raw analysis
-"""
-
-# class RawAnalysis(Model):
-#   __tablename__ = 'raw_analysis'
-#   __table_args__ = (
-#     UniqueConstraint('analysis_name', 'project_id'),
-#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-#   raw_analysis_id = Column(
-#     INTEGER(unsigned=True),
-#     primary_key=True,
-#     nullable=False)
-#   project_id = Column(
-#     INTEGER(unsigned=True),
-#     ForeignKey(
-#       'project.project_id',
-#       onupdate="CASCADE",
-#       ondelete="SET NULL"))
-#   project = relationship('Project')
-#   pipeline_id = Column(
-#     INTEGER(unsigned=True),
-#     ForeignKey(
-#       'pipeline.pipeline_id',
-#       onupdate="CASCADE",
-#       ondelete="SET NULL"))
-#   pipeline = relationship('Pipeline')
-#   analysis_name = Column(
-#     String(120),
-#     nullable=False)
-#   analysis_yaml = Column(
-#     LONGTEXTType(),
-#     nullable=True)
-#   status = Column(
-#     Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"),
-#     nullable=False,
-#     server_default='UNKNOWN')
-#   report = Column(LONGTEXTType())
-#   date_stamp = Column(
-#     TIMESTAMP(),
-#     nullable=False,
-#     server_default=current_timestamp(),
-#     onupdate=datetime.datetime.now)
-#   def __repr__(self):
-#     return self.analysis_name
-
-
-"""
-  Raw analysis validation schema
-"""
-
-# class RawAnalysisValidationSchema(Model):
-#   __tablename__ = 'raw_analysis_validation_schema'
-#   __table_args__ = (
-#     UniqueConstraint('pipeline_id'),
-#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-#   raw_analysis_schema_id = Column(
-#     INTEGER(unsigned=True),
-#     primary_key=True,
-#     nullable=False)
-#   pipeline_id = Column(
-#     INTEGER(unsigned=True),
-#     ForeignKey(
-#       'pipeline.pipeline_id',
-#       onupdate="CASCADE",
-#       ondelete="SET NULL"),
-#     nullable=True)
-#   pipeline = relationship('Pipeline')
-#   json_schema = Column(JSONType)
-#   status = Column(
-#     Enum("VALIDATED", "FAILED", "REJECTED", "SYNCHED", "UNKNOWN"),
-#     nullable=False,
-#     server_default='UNKNOWN')
-#   date_stamp = Column(
-#     TIMESTAMP(),
-#     nullable=False,
-#     server_default=current_timestamp(),
-#     onupdate=datetime.datetime.now)
-#   def __repr__(self):
-#     return self.pipeline.pipeline_name
-
-
-"""
-  Raw analysis template
-"""
-# class RawAnalysisTemplate(Model):
-#   __tablename__ = 'raw_analysis_template'
-#   __table_args__ = (
-#     UniqueConstraint('template_tag'),
-#     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
-#   template_id = Column(
-#     INTEGER(unsigned=True),
-#     primary_key=True,
-#     nullable=False)
-#   template_tag = Column(
-#     String(80),
-#     nullable=False)
-#   template_data = Column(
-#     LONGTEXTType(),
-#     nullable=False)
-
-#   def __repr__(self):
-#     return self.template_tag
 
 """
   Raw analysis V2 with Raw Project and Raw Pipeline
@@ -557,7 +472,12 @@ class RawPipeline(Model):
   pipeline_init_conf = Column(JSONType)
   pipeline_run_conf = Column(JSONType)
   pipeline_type = Column(
-    Enum('EHIVE', 'AIRFLOW', 'NEXTFLOW', 'UNKNOWN'),
+    Enum(
+      'EHIVE',
+      'AIRFLOW',
+      'NEXTFLOW',
+      'UNKNOWN'
+    ),
     nullable=False,
     server_default='EHIVE')
   is_active = Column(
@@ -619,11 +539,20 @@ class RawProject(Model):
     server_default=current_timestamp())
   description = Column(TEXT())
   status = Column(
-    Enum('ACTIVE', 'FINISHED', 'WITHDRAWN'),
+    Enum(
+      'ACTIVE',
+      'FINISHED',
+      'WITHDRAWN'
+    ),
     nullable=False,
     server_default='ACTIVE')
   deliverable = Column(
-    Enum('FASTQ', 'ALIGNMENT', 'ANALYSIS', 'COSMX'),
+    Enum(
+      'FASTQ',
+      'ALIGNMENT',
+      'ANALYSIS',
+      'COSMX'
+    ),
     server_default='FASTQ')
 
   def __repr__(self):
@@ -631,6 +560,71 @@ class RawProject(Model):
     Display RawProject entry
     '''
     return  self.project_igf_id
+
+class RawIgfUser(Model):
+
+  '''
+  A table for loading raw user information
+
+  :param user_id: An integer id for user table
+  :param user_igf_id: An optional string as user id specific to IGF team, allowed length 10
+  :param name: A required string as user name, allowed length 30
+  :param email_id: A required string as email id, allowed length 40
+  :param username: A required string as IGF username, allowed length 20
+  :param hpc_username: An optional string as Imperial College's HPC login name, allowed length 20
+  :param twitter_user: An optional string as twitter user name, allowed length 20
+  :param category: An optional enum list as user category, default NON_HPC_USER, allowed values are
+
+    * HPC_USER
+    * NON_HPC_USER
+    * EXTERNAL
+
+  :param status: An optional enum list as user status, default is ACTIVE, allowed values are
+
+    * ACTIVE
+    * BLOCKED
+    * WITHDRAWN
+
+  :param date_created: An optional timestamp, default current timestamp
+  '''
+  __tablename__ = 'raw_user'
+  __table_args__ = (
+    UniqueConstraint('username'),
+    UniqueConstraint('email_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+
+  user_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False)
+  user_igf_id = Column(String(10))
+  name = Column(String(30), nullable=False)
+  email_id = Column(String(80), nullable=False)
+  username = Column(String(20))
+  hpc_username = Column(String(20))
+  twitter_user = Column(String(20))
+  orcid_id = Column(String(50))
+  category = Column(
+    Enum(
+      'HPC_USER',
+      'NON_HPC_USER',
+      'EXTERNAL'
+    ),
+    nullable=False,
+    server_default='NON_HPC_USER')
+  status = Column(
+    Enum(
+      'ACTIVE',
+      'BLOCKED',
+      'WITHDRAWN'
+    ),
+    nullable=False,
+    server_default='ACTIVE')
+  date_created = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now)
 
 
 class RawAnalysisV2(Model):
@@ -732,6 +726,35 @@ class RawAnalysisTemplateV2(Model):
 """
   Raw COSMX metadata registration
 """
+
+class RawCosMxMetadataBuilder(Model):
+  __tablename__ = 'raw_cosmx_metadata_builder'
+  __table_args__ = (
+    UniqueConstraint('cosmx_metadata_tag'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+  raw_cosmx_metadata_builder_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False)
+  cosmx_metadata_tag = Column(
+    String(80),
+    nullable=False)
+  name = Column(
+    String(30),
+    nullable=True)
+  email_id = Column(
+    String(80),
+    nullable=True)
+  username = Column(String(20))
+  raw_user_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      "raw_user.user_id",
+      onupdate="CASCADE",
+      ondelete="CASCADE"),
+    nullable=True)
+  user = relationship('RawIgfUser')
+  
 
 class RawCosMxMetadataModel(Model):
   __tablename__ = 'raw_cosmx_metadata_entry'
