@@ -887,6 +887,16 @@ class RawCosMxMetadataBuilder(Model):
     nullable=True
   )
   user = relationship('RawIgfUser')
+  report = Column(LONGTEXTType())
+  status = Column(
+    Enum(
+      "UNKNOWN",
+      "FAILED",
+      "VALIDATED",
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
   
 
 class RawCosMxMetadataModel(Model):
