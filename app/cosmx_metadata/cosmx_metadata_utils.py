@@ -7,6 +7,10 @@ from pydantic import (
 )
 from typing import Optional
 import re
+from app import db
+from app.models import (
+    RawIgfUser
+)
 
 class User(BaseModel):
     name: str = Field(min_length=5, description="User's full name (minimum 5 characters)")
@@ -45,3 +49,18 @@ def check_user_data_validation(
     except Exception as e:
         raise ValueError(
             f"Failed to check validation error, error: {e}")
+
+
+def raw_user_query(db):
+    try:
+        results = db.session.query(
+            RawIgfUser
+        ).filter(
+            RawIgfUser.status=='ACTIVE'
+        ).order_by(
+            RawIgfUser.user_id.desc()
+        ).all()
+        return results
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get project list, error: {e}")

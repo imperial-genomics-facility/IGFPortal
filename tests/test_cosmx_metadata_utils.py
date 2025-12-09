@@ -1,5 +1,6 @@
 from app.cosmx_metadata.cosmx_metadata_utils import (
-    check_user_data_validation
+    check_user_data_validation,
+    raw_user_query
 )
 
 def test_check_user_data_validation():
