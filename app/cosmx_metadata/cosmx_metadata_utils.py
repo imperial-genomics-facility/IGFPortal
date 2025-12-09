@@ -13,16 +13,25 @@ from app.models import (
 )
 
 class User(BaseModel):
-    name: str = Field(min_length=5, description="User's full name (minimum 5 characters)")
-    email: EmailStr = Field(description="User's email address")
-    username: Optional[str] = Field(None, min_length=5, description="Optional username (a-z, A-Z, 0-9, ., -), minimum 5 characters")
+    name: str = Field(
+        min_length=5,
+        description="User's full name (minimum 5 characters)"
+    )
+    email: EmailStr = Field(
+        description="User's email address"
+    )
+    username: Optional[str] = Field(
+        None,
+        min_length=5,
+        description="Optional username (a-z, 0-9, ., -), minimum 5 characters"
+    )
 
     @field_validator('username')
     @classmethod
     def validate_username(cls, v):
         if v is not None:
-            if not re.match(r'^[a-zA-Z0-9.-]+$', v):
-                raise ValueError('Username must only contain letters (a-z, A-Z), numbers (0-9), dots (.), and hyphens (-)')
+            if not re.match(r'^[a-z0-9.-]+$', v):
+                raise ValueError('Username must only contain letters (a-z), numbers (0-9), dots (.), and hyphens (-)')
         return v
 
     @field_validator('name')
@@ -51,7 +60,7 @@ def check_user_data_validation(
             f"Failed to check validation error, error: {e}")
 
 
-def raw_user_query(db):
+def raw_user_query():
     try:
         results = db.session.query(
             RawIgfUser
