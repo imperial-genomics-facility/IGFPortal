@@ -1,9 +1,12 @@
 from app.cosmx_metadata.cosmx_metadata_utils import (
     check_user_data_validation,
-    raw_user_query
+    raw_user_query,
+    fetch_raw_cosmx_builder_data
 )
 from app.models import (
-    RawIgfUser
+    RawIgfUser,
+    RawCosMxMetadataBuilder,
+    RawCosMxMetadataModel
 )
 
 
@@ -46,22 +49,22 @@ def test_check_user_data_validation():
 
 
 def test_raw_user_query(db):
-    user1 = \
-        RawIgfUser(
-            user_id=1,
-            name="test1",
-            email_id="test1")
-    user2 = \
-        RawIgfUser(
-            user_id=2,
-            name="test2",
-            email_id="test2")
-    user3 = \
-        RawIgfUser(
-            user_id=3,
-            name="test3",
-            email_id="test3",
-            status="WITHDRAWN")
+    user1 = RawIgfUser(
+        user_id=1,
+        name="test1",
+        email_id="test1"
+    )
+    user2 = RawIgfUser(
+        user_id=2,
+        name="test2",
+        email_id="test2"
+    )
+    user3 = RawIgfUser(
+        user_id=3,
+        name="test3",
+        email_id="test3",
+        status="WITHDRAWN"
+    )
     try:
         db.session.add(user1)
         db.session.add(user2)
@@ -77,3 +80,49 @@ def test_raw_user_query(db):
     user_ids = [entry.user_id for entry in records]
     assert 3 not in user_ids
     assert 2 in user_ids
+
+def test_fetch_raw_cosmx_builder_data(db):
+    raw_user1 = RawIgfUser(
+        user_id=1,
+        name="test1",
+        email_id="test1"
+    )
+    raw_data1 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=1,
+        cosmx_metadata_tag="test_prj_1",
+        name="My Name",
+        email_id="my@email.com",
+    )
+    raw_data2 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=2,
+        cosmx_metadata_tag="test_prj_2",
+        raw_user_id=raw_user1.user_id
+    )
+    try:
+        db.session.add(raw_user1)
+        db.session.add(raw_data1)
+        db.session.add(raw_data2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    data = fetch_raw_cosmx_builder_data(
+        raw_cosmx_id=raw_data1.raw_cosmx_metadata_builder_id
+    )
+    assert data is not None
+    assert isinstance(data, RawCosMxMetadataBuilder)
+    assert data.cosmx_metadata_tag == "test_prj_1"
+    data = fetch_raw_cosmx_builder_data(
+        raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
+    )
+    assert data is not None
+    assert isinstance(data, RawCosMxMetadataBuilder)
+    assert data.cosmx_metadata_tag == "test_prj_2"
+    assert data.raw_user_id == 1
+    data = fetch_raw_cosmx_builder_data(
+        raw_cosmx_id=3
+    )
+    assert data is None
+
+

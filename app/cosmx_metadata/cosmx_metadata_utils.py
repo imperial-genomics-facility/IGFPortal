@@ -9,7 +9,9 @@ from typing import Optional
 import re
 from app import db
 from app.models import (
-    RawIgfUser
+    RawIgfUser,
+    RawCosMxMetadataBuilder,
+    RawCosMxMetadataModel
 )
 
 class User(BaseModel):
@@ -73,3 +75,45 @@ def raw_user_query():
     except Exception as e:
         raise ValueError(
             f"Failed to get project list, error: {e}")
+
+def fetch_raw_cosmx_builder_data(
+    raw_cosmx_id: int
+) -> RawCosMxMetadataBuilder|None:
+    try:
+        entry = (
+            db.session.query(
+                RawCosMxMetadataBuilder
+            )
+            .filter(
+                RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id == raw_cosmx_id
+            ).
+            one_or_none()
+        )
+        return entry
+    except Exception as e:
+        raise ValueError(
+            f"Failed to fetch raw data from builder table, error: {e}"
+        )
+
+
+def validate_raw_cosmx_metadata_and_add_to_loader_table(
+        raw_cosmx_id: int,
+        failed_status: str = 'FAILED',
+        validated_status: str = 'VALIDATED',
+        ready_status: str = 'READY'
+) -> str:
+    try:
+        status = failed_status
+        ## step 1: fetch raw cosmx metadata
+        ## step 2: check if raw metadata already present on the loader table
+        ## step 3: check for required info
+        ## step 4: validate project info
+        ## step 5: validate new user info
+        ## step 6: add validation error to the reports
+        ## step 7: add new records to loader table
+        ## step 8: trigger pipeline
+        return status
+    except Exception as e:
+        raise ValueError(
+            f"Failed to validate raw cosmx metadata, error: {e}"
+        )
