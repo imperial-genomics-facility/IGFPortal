@@ -391,25 +391,27 @@ def validate_raw_cosmx_metadata_and_add_to_loader_table(
     ready_status: str = 'READY'
 ) -> tuple[str, list[str]]:
     try:
-        status = failed_status
         error_list = list()
         ## step 1: get validation errors
         error_list = validate_raw_cosmx_metadata(
             raw_cosmx_id=raw_cosmx_id
         )
-        ## step 2: add validation error to the reports
-        add_failed_reports_to_builder_table(
-            raw_cosmx_id=raw_cosmx_id,
-            error_list=error_list,
-            failed_status=failed_status
-        )
-        ## step 3: add new records to loader table
-        build_metadata_and_load_raw_metadata_for_pipeline(
-            raw_cosmx_id=raw_cosmx_id,
-            ready_status=ready_status,
-            validated_status=validated_status
-        )
-        return status, error_list
+        if len(error_list) > 0:
+            ## step 2: add validation error to the reports
+            add_failed_reports_to_builder_table(
+                raw_cosmx_id=raw_cosmx_id,
+                error_list=error_list,
+                failed_status=failed_status
+            )
+            return failed_status, error_list
+        else:
+            ## step 3: add new records to loader table
+            build_metadata_and_load_raw_metadata_for_pipeline(
+                raw_cosmx_id=raw_cosmx_id,
+                ready_status=ready_status,
+                validated_status=validated_status
+            )
+            return validated_status, error_list            
     except Exception as e:
         raise ValueError(
             "Failed to validate raw cosmx metadata, error: "

@@ -290,11 +290,6 @@ def test_validate_raw_cosmx_metadata(db):
     assert len(error_list) == 3
 
 def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
-    raw_user1 = RawIgfUser(
-        user_id=1,
-        name="test1",
-        email_id="test1"
-    )
     raw_data1 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=1,
         cosmx_metadata_tag="test_prj_1",
@@ -303,11 +298,11 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
-        cosmx_metadata_tag="test_prj_2",
-        raw_user_id=raw_user1.user_id
+        cosmx_metadata_tag="test",
+        name="My",
+        email_id="myemail.com",
     )
     try:
-        db.session.add(raw_user1)
         db.session.add(raw_data1)
         db.session.add(raw_data2)
         db.session.flush()
@@ -315,7 +310,32 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
     except:
         db.session.rollback()
         raise
-    status = validate_raw_cosmx_metadata_and_add_to_loader_table(
+    status, error_list = validate_raw_cosmx_metadata_and_add_to_loader_table(
         raw_cosmx_id=raw_data1.raw_cosmx_metadata_builder_id
     )
-    assert status is not "FAILED"
+    assert status == "VALIDATED"
+    assert len(error_list) == 0
+    record = (
+        db.session.query(RawCosMxMetadataModel)
+        .filter(
+            RawCosMxMetadataModel.cosmx_metadata_tag
+            == raw_data1.cosmx_metadata_tag
+        )
+        .one_or_none()
+    )
+    assert record is not None
+    assert record.status == 'READY'
+    status, error_list = validate_raw_cosmx_metadata_and_add_to_loader_table(
+        raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
+    )
+    assert status == "FAILED"
+    assert len(error_list) > 0
+    record = (
+        db.session.query(RawCosMxMetadataModel)
+        .filter(
+            RawCosMxMetadataModel.cosmx_metadata_tag
+            == raw_data2.cosmx_metadata_tag
+        )
+        .one_or_none()
+    )
+    assert record is None
