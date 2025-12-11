@@ -1,7 +1,13 @@
 from app.cosmx_metadata.cosmx_metadata_utils import (
+    check_project_data_validation,
     check_user_data_validation,
     raw_user_query,
-    fetch_raw_cosmx_builder_data
+    fetch_raw_cosmx_builder_data,
+    check_metadata_on_loader_table,
+    validate_raw_cosmx_metadata,
+    add_failed_reports_to_builder_table,
+    build_metadata_and_load_raw_metadata_for_pipeline,
+    validate_raw_cosmx_metadata_and_add_to_loader_table
 )
 from app.models import (
     RawIgfUser,
@@ -125,4 +131,48 @@ def test_fetch_raw_cosmx_builder_data(db):
     )
     assert data is None
 
+def test_check_project_data_validation():
+    assert False "Not implemented yet"
 
+def test_validate_raw_cosmx_metadata():
+    assert False "Not implemented yet"
+
+def test_check_metadata_on_loader_table():
+    assert False "Not implemented yet"
+
+def test_add_failed_reports_to_builder_table():
+    assert False "Not implemented yet"
+
+def test_build_metadata_and_load_raw_metadata_for_pipeline():
+    assert False "Not implemented yet"
+
+def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
+    raw_user1 = RawIgfUser(
+        user_id=1,
+        name="test1",
+        email_id="test1"
+    )
+    raw_data1 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=1,
+        cosmx_metadata_tag="test_prj_1",
+        name="My Name",
+        email_id="my@email.com",
+    )
+    raw_data2 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=2,
+        cosmx_metadata_tag="test_prj_2",
+        raw_user_id=raw_user1.user_id
+    )
+    try:
+        db.session.add(raw_user1)
+        db.session.add(raw_data1)
+        db.session.add(raw_data2)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    status = validate_raw_cosmx_metadata_and_add_to_loader_table(
+        raw_cosmx_id=raw_data1.raw_cosmx_metadata_builder_id
+    )
+    assert status is not "FAILED"
