@@ -34,9 +34,9 @@ class Project(BaseModel):
         return v
 
 def check_project_data_validation(
-        project_igf_id: str,
-        project_igf_id_tag: str = 'project_igf_id'
-    ) -> list:
+    project_igf_id: str,
+    project_igf_id_tag: str = 'project_igf_id'
+) -> list:
     try:
         error_list = list()
         try:
@@ -57,7 +57,7 @@ class User(BaseModel):
         min_length=5,
         description="User's full name (minimum 5 characters)"
     )
-    email: EmailStr = Field(
+    email_id: EmailStr = Field(
         description="User's email address"
     )
     username: Optional[str] = Field(
@@ -84,11 +84,12 @@ class User(BaseModel):
             if not re.match(r'^[a-zA-Z-\s]+$', v):
                 raise ValueError(
                     'Name must only contain letters (a-z, A-Z), '
-                    + 'white spaces and hyphens (-)')
+                    + 'white spaces and hyphens (-)'
+                )
         return v
 
 def check_user_data_validation(
-        user_info_dictionary: dict[str, str]
+    user_info_dictionary: dict[str, str]
     ) -> list:
     try:
         error_list = list()
@@ -102,16 +103,16 @@ def check_user_data_validation(
         return error_list
     except Exception as e:
         raise ValueError(
-            f"Failed to check validation error, error: {e}")
+            "Failed to check validation error, error: "
+            + str(e)
+        )
 
 
 def raw_user_query():
     try:
         results = (
             db.session
-            .query(
-                RawIgfUser
-            )
+            .query(RawIgfUser)
             .filter(
                 RawIgfUser.status=='ACTIVE'
             )
@@ -123,7 +124,9 @@ def raw_user_query():
         return results
     except Exception as e:
         raise ValueError(
-            f"Failed to get project list, error: {e}")
+            "Failed to get project list, error: "
+            + str(e)
+        )
 
 
 def fetch_raw_cosmx_builder_data(
@@ -131,23 +134,24 @@ def fetch_raw_cosmx_builder_data(
 ) -> RawCosMxMetadataBuilder|None:
     try:
         entry = (
-            db.session.query(
-                RawCosMxMetadataBuilder
-            )
+            db.session
+            .query(RawCosMxMetadataBuilder)
             .filter(
-                RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id == raw_cosmx_id
-            ).
-            one_or_none()
+                RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id
+                == raw_cosmx_id
+            )
+            .one_or_none()
         )
         return entry
     except Exception as e:
         raise ValueError(
-            f"Failed to fetch raw data from builder table, error: {e}"
+            "Failed to fetch raw data from builder table, error: "
+            + str(e)
         )
 
 
 def check_required_raw_cosmx_metadata(
-        raw_cosmx_data: RawCosMxMetadataBuilder
+    raw_cosmx_data: RawCosMxMetadataBuilder
 ) -> list[str]:
     try:
         errors = list()
@@ -179,22 +183,22 @@ def check_required_raw_cosmx_metadata(
         return errors
     except Exception as e:
         raise ValueError(
-            f"Failed to check required raw metadata on builder table, error: {e}"
+            "Failed to check required raw metadata on builder table, error: "
+            + str(e)
         )
 
 
 def check_metadata_on_loader_table(
-        cosmx_metadata_tag: str
+    cosmx_metadata_tag: str
 ) -> list[str]:
     try:
         error_list = list()
         record = (
-            db.sesssion
-            .query(
-                RawCosMxMetadataModel
-            )
+            db.session
+            .query(RawCosMxMetadataModel)
             .filter(
-                RawCosMxMetadataModel.cosmx_metadata_tag==cosmx_metadata_tag
+                RawCosMxMetadataModel.cosmx_metadata_tag
+                == cosmx_metadata_tag
             )
             .one_or_none()
         )
@@ -205,12 +209,13 @@ def check_metadata_on_loader_table(
         return error_list
     except Exception as e:
         raise ValueError(
-            f"Failed to check raw data on loader table, error: {e}"
+            "Failed to check raw data on loader table, error: "
+            + str(e)
         )
 
 
 def validate_raw_cosmx_metadata(
-        raw_cosmx_id: int
+    raw_cosmx_id: int
 ) -> list[str]:
     try:
         ## step 1: fetch raw cosmx metadata
@@ -245,21 +250,22 @@ def validate_raw_cosmx_metadata(
         return error_list
     except Exception as e:
         raise ValueError(
-            f"Failed to check raw data on loader table, error: {e}"
+            "Failed to check raw data on loader table, error: "
+            + str(e)
         )
 
 
 def add_failed_reports_to_builder_table(
-        raw_cosmx_id: int,
-        error_list: list[str],
-        failed_status: str = 'FAILED'
+    raw_cosmx_id: int,
+    error_list: list[str],
+    failed_status: str = 'FAILED'
 ) -> None:
     try:
-        errors = fetch_raw_cosmx_builder_data(
+        raw_metadata_entry = fetch_raw_cosmx_builder_data(
             raw_cosmx_id=raw_cosmx_id
         )
         if (
-            len(errors) == 0
+            raw_metadata_entry is not None
             and len(error_list) > 0
         ):
             try:
@@ -267,7 +273,8 @@ def add_failed_reports_to_builder_table(
                     db.session
                     .query(RawCosMxMetadataBuilder)
                     .filter(
-                        RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id==raw_cosmx_id
+                        RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id
+                        == raw_cosmx_id
                     )
                     .update({
                         "report": "\n".join(error_list),
@@ -278,7 +285,8 @@ def add_failed_reports_to_builder_table(
             except Exception as e:
                 db.session.rollback()
                 raise ValueError(
-                    f"Failed to update failed reports, error: {e}"
+                    "Failed to update failed reports, error: "
+                    + str(e)
                 )
     except Exception as e:
         raise ValueError(
@@ -288,13 +296,13 @@ def add_failed_reports_to_builder_table(
 
 
 def build_metadata_and_load_raw_metadata_for_pipeline(
-        raw_cosmx_id: int,
-        ready_status: str = 'READY',
-        validated_status: str = 'VALIDATED',
-        project_igf_id_tag: str = "project_igf_id",
-        name_tag: str = "name",
-        email_id_tag: str = "email_id",
-        username_tag: str = "username"
+    raw_cosmx_id: int,
+    ready_status: str = 'READY',
+    validated_status: str = 'VALIDATED',
+    project_igf_id_tag: str = "project_igf_id",
+    name_tag: str = "name",
+    email_id_tag: str = "email_id",
+    username_tag: str = "username"
 ) -> None:
     try:
         ## step 1: fetch raw cosmx metadata
@@ -320,9 +328,7 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
         else:
             raw_user_record = (
                 db.session
-                .query(
-                    RawIgfUser
-                )
+                .query(RawIgfUser)
                 .filter(
                     RawIgfUser.user_id==raw_metadata_entry.raw_user_id
                 )
@@ -330,7 +336,8 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
             )
             if raw_user_record is None:
                 raise ValueError(
-                    f"No entry for user {raw_metadata_entry.raw_user_id} found in db"
+                    "No entry for user "
+                    + f"{raw_metadata_entry.raw_user_id} found in db"
                 )
             metadata = {
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
@@ -340,7 +347,7 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
         ## step 2: load data and change status
         try:
             csv_data = (
-                pd.DataFrame(metadata)
+                pd.DataFrame([metadata])
                 .to_csv(index=False)
             )
             ## update loader table
@@ -356,9 +363,11 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 db.session
                 .query(RawCosMxMetadataBuilder)
                 .filter(
-                    RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id==raw_cosmx_id
+                    RawCosMxMetadataBuilder.raw_cosmx_metadata_builder_id
+                    == raw_cosmx_id
                 )
                 .update({
+                    "report": "",
                     "status": validated_status
                 })
             )
@@ -376,10 +385,10 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
         )
 
 def validate_raw_cosmx_metadata_and_add_to_loader_table(
-        raw_cosmx_id: int,
-        failed_status: str = 'FAILED',
-        validated_status: str = 'VALIDATED',
-        ready_status: str = 'READY'
+    raw_cosmx_id: int,
+    failed_status: str = 'FAILED',
+    validated_status: str = 'VALIDATED',
+    ready_status: str = 'READY'
 ) -> tuple[str, list[str]]:
     try:
         status = failed_status
@@ -403,5 +412,6 @@ def validate_raw_cosmx_metadata_and_add_to_loader_table(
         return status, error_list
     except Exception as e:
         raise ValueError(
-            f"Failed to validate raw cosmx metadata, error: {e}"
+            "Failed to validate raw cosmx metadata, error: "
+            + str(e)
         )

@@ -915,7 +915,7 @@ class RawCosMxMetadataModel(Model):
   )                                     # 2 ^ 24
   formatted_csv_data = Column(
     LONGTEXTType(),
-    nullable=False
+    nullable=True
   )
   report = Column(LONGTEXTType())
   status = Column(
