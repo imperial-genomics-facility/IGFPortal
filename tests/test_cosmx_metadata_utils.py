@@ -15,6 +15,23 @@ from app.models import (
     RawCosMxMetadataModel
 )
 
+def test_check_project_data_validation():
+    project_igf_id = "IGFQ001"
+    err_list = check_project_data_validation(
+        project_igf_id=project_igf_id
+    )
+    assert len(err_list) == 0
+    project_igf_id = "IGFQ"
+    err_list = check_project_data_validation(
+        project_igf_id=project_igf_id
+    )
+    assert len(err_list) == 1
+    project_igf_id = "IGFQ(a)"
+    err_list = check_project_data_validation(
+        project_igf_id=project_igf_id
+    )
+    assert len(err_list) == 1
+
 
 def test_check_user_data_validation():
     user_data1 = {
@@ -131,19 +148,36 @@ def test_fetch_raw_cosmx_builder_data(db):
     )
     assert data is None
 
-def test_check_project_data_validation():
-    assert False "Not implemented yet"
-
-def test_validate_raw_cosmx_metadata():
-    assert False "Not implemented yet"
-
-def test_check_metadata_on_loader_table():
-    assert False "Not implemented yet"
+def test_check_metadata_on_loader_table(db):
+    raw_metadata1 = RawCosMxMetadataModel(
+        cosmx_metadata_tag="test1",
+    )
+    raw_metadata2 = RawCosMxMetadataModel(
+        cosmx_metadata_tag="test2",
+    )
+    try:
+        db.session.add(raw_metadata1)
+        db.session.add(raw_metadata2)
+        db.session.flush()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    erros = check_metadata_on_loader_table(
+        cosmx_metadata_tag="test1"
+    )
+    assert len(erros) == 1
+    erros = check_metadata_on_loader_table(
+        cosmx_metadata_tag="test2"
+    )
+    assert len(erros) == 0
 
 def test_add_failed_reports_to_builder_table():
     assert False "Not implemented yet"
 
 def test_build_metadata_and_load_raw_metadata_for_pipeline():
+    assert False "Not implemented yet"
+
+def test_validate_raw_cosmx_metadata():
     assert False "Not implemented yet"
 
 def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):

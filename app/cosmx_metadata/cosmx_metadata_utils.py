@@ -350,6 +350,7 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 status=ready_status
             )
             db.session.add(raw_metadata)
+            db.session.flush()
             ## change status at builder table
             (
                 db.session
