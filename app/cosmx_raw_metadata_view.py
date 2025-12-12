@@ -17,8 +17,8 @@ from app.file_download_util import prepare_file_for_download
 from .airflow.airflow_api_utils import trigger_airflow_pipeline
 from .airflow.airflow_api_utils import get_airflow_dag_id
 from app.cosmx_metadata.cosmx_metadata_utils import (
-    check_user_data_validation,
-    raw_user_query
+    raw_user_query,
+    validate_raw_cosmx_metadata_and_add_to_loader_table
 )
 
 
@@ -30,6 +30,30 @@ COSMX_METADATA_REGISTRATION_DAG_TAG = 'cosmx_metadata_registration_dag'
 def async_validate_and_register_cosmx_metadata(self, id_list):
     try:
         results = list()
+        for raw_cosmx_id in id_list:
+            status, error_list = validate_raw_cosmx_metadata_and_add_to_loader_table(
+                raw_cosmx_id=raw_cosmx_id
+            )
+            results.append(status)
+            if len(error_list) == 0:
+                airflow_dag_id = get_airflow_dag_id(
+                    airflow_conf_file=os.environ['AIRFLOW_CONF_FILE'],
+                    dag_tag=COSMX_METADATA_REGISTRATION_DAG_TAG)
+                if airflow_dag_id is None:
+                    log.error(
+                        "Failed to get airflow dag id for "
+                        + str(COSMX_METADATA_REGISTRATION_DAG_TAG)
+                    )
+                else:
+                    res = trigger_airflow_pipeline(
+                        dag_id=airflow_dag_id,
+                        conf_data={"raw_cosmx_metadata_id": raw_cosmx_id},
+                        airflow_conf_file=os.environ['AIRFLOW_CONF_FILE']
+                    )
+                    log.info(
+                        "Triggered analysis registration for "
+                        + f"{raw_cosmx_id} with res {res}"
+                    )
         return dict(zip(id_list, results))
     except Exception as e:
         log.error(
@@ -37,8 +61,8 @@ def async_validate_and_register_cosmx_metadata(self, id_list):
 
 
 def action_validate_and_register_cosmx_metadata(
-    item: list[RawCosMxMetadataBuilder] | RawCosMxMetadataBuilder) \
-        -> Tuple[list[str], dict[int, Any]]:
+    item: list[RawCosMxMetadataBuilder] | RawCosMxMetadataBuilder
+) -> tuple[list[str], dict[int, Any]]:
     try:
         id_list = list()
         project_list = list()
