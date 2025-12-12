@@ -303,8 +303,9 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
     name_tag: str = "name",
     email_id_tag: str = "email_id",
     username_tag: str = "username"
-) -> None:
+) -> int|None:
     try:
+        raw_cosmx_metadata_id = None
         ## step 1: fetch raw cosmx metadata
         raw_metadata_entry = fetch_raw_cosmx_builder_data(
             raw_cosmx_id=raw_cosmx_id
@@ -372,12 +373,14 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 })
             )
             db.session.commit()
+            raw_cosmx_metadata_id = raw_metadata.raw_cosmx_metadata_id
         except Exception as e:
             db.session.rollback()
             raise ValueError(
                 "Failed to transfer data to loader table. error: "
                 + str(e)
             )
+        return raw_cosmx_metadata_id
     except Exception as e:
         raise ValueError(
             "Failed to build and load raw metadata for loader table: error: "
@@ -389,7 +392,7 @@ def validate_raw_cosmx_metadata_and_add_to_loader_table(
     failed_status: str = 'FAILED',
     validated_status: str = 'VALIDATED',
     ready_status: str = 'READY'
-) -> tuple[str, list[str]]:
+) -> tuple[str, list[str], int|None]:
     try:
         error_list = list()
         ## step 1: get validation errors
@@ -403,15 +406,15 @@ def validate_raw_cosmx_metadata_and_add_to_loader_table(
                 error_list=error_list,
                 failed_status=failed_status
             )
-            return failed_status, error_list
+            return failed_status, error_list, None
         else:
             ## step 3: add new records to loader table
-            build_metadata_and_load_raw_metadata_for_pipeline(
+            metadata_id = build_metadata_and_load_raw_metadata_for_pipeline(
                 raw_cosmx_id=raw_cosmx_id,
                 ready_status=ready_status,
                 validated_status=validated_status
             )
-            return validated_status, error_list            
+            return validated_status, error_list, metadata_id
     except Exception as e:
         raise ValueError(
             "Failed to validate raw cosmx metadata, error: "

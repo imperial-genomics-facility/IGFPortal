@@ -243,7 +243,7 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
     assert record.status == 'READY'
     assert "project_igf_id,name,email_id" in record.formatted_csv_data
     assert "test_prj_1,My Name,my@email.com" in record.formatted_csv_data
-    build_metadata_and_load_raw_metadata_for_pipeline(
+    metadata_id = build_metadata_and_load_raw_metadata_for_pipeline(
         raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
     )
     record = (
@@ -256,6 +256,7 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
     )
     assert record is not None
     assert record.status == 'READY'
+    assert record.raw_cosmx_metadata_id == metadata_id
     assert "project_igf_id,name,email_id" in record.formatted_csv_data
     assert "test_prj_2,test1,test1" in record.formatted_csv_data
 
@@ -310,7 +311,7 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
     except:
         db.session.rollback()
         raise
-    status, error_list = validate_raw_cosmx_metadata_and_add_to_loader_table(
+    status, error_list, metadata_id = validate_raw_cosmx_metadata_and_add_to_loader_table(
         raw_cosmx_id=raw_data1.raw_cosmx_metadata_builder_id
     )
     assert status == "VALIDATED"
@@ -325,10 +326,12 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
     )
     assert record is not None
     assert record.status == 'READY'
-    status, error_list = validate_raw_cosmx_metadata_and_add_to_loader_table(
+    assert record.raw_cosmx_metadata_id == metadata_id
+    status, error_list, metadata_id = validate_raw_cosmx_metadata_and_add_to_loader_table(
         raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
     )
     assert status == "FAILED"
+    assert metadata_id is None
     assert len(error_list) > 0
     record = (
         db.session.query(RawCosMxMetadataModel)
