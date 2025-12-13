@@ -85,6 +85,16 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_list",
+                    "RawCosMxMetadataBuilderView"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_list",
+                    "RawCosMxMetadataModelView"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_list",
                     "ProjectIndexView"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
@@ -226,6 +236,14 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_mark_raw_metadata_as_synced", "RawMetadataDataApi"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_get_raw_metadata", "RawCosMxMetadataApi"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_mark_raw_metadata_as_synced", "RawCosMxMetadataApi"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
