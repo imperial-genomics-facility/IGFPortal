@@ -225,7 +225,7 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
         db.session.add(raw_data2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     build_metadata_and_load_raw_metadata_for_pipeline(
@@ -278,7 +278,7 @@ def test_validate_raw_cosmx_metadata(db):
         db.session.add(raw_data2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     error_list = validate_raw_cosmx_metadata(
@@ -308,7 +308,7 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
         db.session.add(raw_data2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     status, error_list, metadata_id = validate_raw_cosmx_metadata_and_add_to_loader_table(
