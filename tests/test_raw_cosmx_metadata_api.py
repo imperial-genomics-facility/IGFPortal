@@ -1,6 +1,4 @@
 import json
-import os
-from io import BytesIO
 from app.models import (
     RawCosMxMetadataModel
 )

@@ -1,7 +1,12 @@
 import os
 import logging
-from typing import Tuple, Any
-from app import db, celery
+from typing import Any
+from app import celery
+from flask import (
+    redirect,
+    flash,
+    url_for
+)
 from flask_appbuilder.actions import action
 from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
@@ -12,16 +17,12 @@ from app.models import (
 )
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask import redirect, flash, url_for, send_file
-from app.asyncio_util import run_async
-from app.file_download_util import prepare_file_for_download
-from .airflow.airflow_api_utils import trigger_airflow_pipeline
-from .airflow.airflow_api_utils import get_airflow_dag_id
+from app.airflow.airflow_api_utils import trigger_airflow_pipeline
+from app.airflow.airflow_api_utils import get_airflow_dag_id
 from app.cosmx_metadata.cosmx_metadata_utils import (
     raw_user_query,
     validate_raw_cosmx_metadata_and_add_to_loader_table
 )
-
 
 log = logging.getLogger(__name__)
 
