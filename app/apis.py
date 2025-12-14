@@ -8,6 +8,7 @@ from .raw_seqrun_api import RawSeqrunApi
 # from .raw_analysis_api import RawAnalysisApi
 from .raw_analysis_api_v2 import RawAnalysisV2Api
 from .project_cleanup_api import ProjectCleanupApi
+from .raw_cosmx_metadata_api import RawCosMxMetadataApi
 
 
 """
@@ -22,3 +23,4 @@ appbuilder.add_api(RawSeqrunApi)
 # appbuilder.add_api(RawAnalysisApi)
 appbuilder.add_api(RawAnalysisV2Api)
 appbuilder.add_api(ProjectCleanupApi)
+appbuilder.add_api(RawCosMxMetadataApi)

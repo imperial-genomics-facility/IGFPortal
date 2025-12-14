@@ -8,18 +8,16 @@ from app.airflow.airflow_api_utils import (
     trigger_airflow_pipeline
 )
 
-@patch(
-    'app.airflow.airflow_api_utils.requests',
-    return_value=requests.patch(
-        'https://httpbin.org/patch',
-        timeout=5,
-        data ={'key': 'value'},
-        headers={'Content-Type': 'application/json'}
-    )
-)
-def test_get_airflow_dag_id(
-    mock_object,
-    tmp_path):
+@patch('app.airflow.airflow_api_utils.requests')
+def test_get_airflow_dag_id(mock_requests, tmp_path):
+    # Create a mock response
+    mock_response = mock_requests.get.return_value
+    mock_response.json.return_value = {
+        "dags": [
+            {"dag_id": "dag23_test_bclconvert_demult", "tags": [{"name": "de_multiplexing_test_barcode_dag"}]},
+            {"dag_id": "dag24_build_bclconvert_dynamic_dags", "tags": [{"name": "de_multiplexing_production_dag"}]}
+        ]
+    }
     config_file_path = os.path.join(
         tmp_path,
         'airflow_conf.json'
@@ -45,16 +43,12 @@ def test_get_airflow_dag_id(
     assert dag_id is None
 
 
-@patch(
-    'app.airflow.airflow_api_utils.requests',
-    return_value=requests.patch(
-        'https://httpbin.org/patch',
-        timeout=5,
-        data=json.dumps({'key': 'value'}),
-        headers={'Content-Type': 'application/json'}
-    )
-)
-def test_post_to_airflow_api(mock_object, tmp_path):
+@patch('app.airflow.airflow_api_utils.requests')
+def test_post_to_airflow_api(mock_requests, tmp_path):
+    # Create a mock response
+    mock_response = mock_requests.post.return_value
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"key": "response"}
     config_file_path = os.path.join(
         tmp_path,
         'airflow_conf.json'
@@ -75,8 +69,8 @@ def test_post_to_airflow_api(mock_object, tmp_path):
         data={"key": "val"},
         dry_run=True
     )
-    mock_object.post.assert_called_once()
-    mock_object.post.assert_called_with(
+    mock_requests.post.assert_called_once()
+    mock_requests.post.assert_called_with(
         url="https://airflow.test/api/v1/test",
         data=json.dumps({"key": "val"}),
         headers={"Content-Type": "application/json"},
@@ -85,16 +79,12 @@ def test_post_to_airflow_api(mock_object, tmp_path):
     )
 
 
-@patch(
-    'app.airflow.airflow_api_utils.requests',
-    return_value=requests.patch(
-        'https://httpbin.org/patch',
-        timeout=5,
-        data ={'key': 'value'},
-        headers={'Content-Type': 'application/json'}
-    )
-)
-def test_trigger_airflow_pipeline(mock_object, tmp_path):
+@patch('app.airflow.airflow_api_utils.requests')
+def test_trigger_airflow_pipeline(mock_requests, tmp_path):
+    # Create a mock response
+    mock_response = mock_requests.post.return_value
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"dag_run_id": "test_run_123"}
     config_file_path = os.path.join(
         tmp_path,
         'airflow_conf.json'
@@ -115,8 +105,8 @@ def test_trigger_airflow_pipeline(mock_object, tmp_path):
         airflow_conf_file=config_file_path,
         dry_run=True
     )
-    mock_object.post.assert_called_once()
-    mock_object.post.assert_called_with(
+    mock_requests.post.assert_called_once()
+    mock_requests.post.assert_called_with(
         url="https://airflow.test/api/v1/dags/dag23_test_bclconvert_demult/dagRuns",
         data=json.dumps({"conf": {"key": "value"}}),
         headers={"Content-Type": "application/json"},
