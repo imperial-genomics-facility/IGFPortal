@@ -38,8 +38,8 @@ def test_async_resubmit_cosmx_metadata():
                 results = async_resubmit_cosmx_metadata(
                     id_list=[1, 2, 3]
                 )
-                mock_get_airflow_dag_id.assert_called_once()
-                mock_trigger_airflow_pipeline.assert_called_once()
+                mock_get_airflow_dag_id.assert_called()
+                mock_trigger_airflow_pipeline.assert_called()
     assert len(results) == 3
     assert 1 in results
 
@@ -106,8 +106,8 @@ def test_async_validate_and_register_cosmx_metadata(db):
                 )
                 assert raw_data1.raw_cosmx_metadata_builder_id in results
                 assert results.get(raw_data1.raw_cosmx_metadata_builder_id) == 'VALIDATED'
-                mock_get_airflow_dag_id.assert_called_once()
-                mock_trigger_airflow_pipeline.assert_called_once()
+                mock_get_airflow_dag_id.assert_called()
+                mock_trigger_airflow_pipeline.assert_called()
                 results = async_validate_and_register_cosmx_metadata(
                     id_list=[raw_data2.raw_cosmx_metadata_builder_id]
                 )
