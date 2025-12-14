@@ -105,7 +105,8 @@ class RawCosMxMetadataBuilderView(ModelView):
     }
     list_columns = [
         "cosmx_metadata_tag",
-        "status"]
+        "status"
+    ]
     base_permissions = [
         "can_list",
         "can_show",
@@ -169,9 +170,9 @@ def async_resubmit_cosmx_metadata(self, id_list):
         for raw_cosmx_id in id_list:
             res = trigger_airflow_pipeline(
                 dag_id=airflow_dag_id,
-                    conf_data={"raw_cosmx_metadata_id": raw_cosmx_id},
-                    airflow_conf_file=os.environ['AIRFLOW_CONF_FILE']
-                )
+                conf_data={"raw_cosmx_metadata_id": raw_cosmx_id},
+                airflow_conf_file=os.environ['AIRFLOW_CONF_FILE']
+            )
             results.append(res)
             log.info(
                 "Triggered analysis registration for "
@@ -209,7 +210,7 @@ def action_resubmit_cosmx_metadata(
     except Exception as e:
         raise ValueError(
             f"Failed to run action for json validation, error: {e}")
-    
+
 
 class RawCosMxMetadataModelView(ModelView):
     datamodel = SQLAInterface(RawCosMxMetadataModel)
@@ -220,7 +221,8 @@ class RawCosMxMetadataModelView(ModelView):
     }
     list_columns = [
         "cosmx_metadata_tag",
-        "status"]
+        "status"
+    ]
     base_permissions = [
         "can_list",
         "can_show"
@@ -242,12 +244,14 @@ class RawCosMxMetadataModelView(ModelView):
                 action_resubmit_cosmx_metadata(item)
             flash(
                 f"Submitted jobs for {', '.join(project_list)}",
-                "info")
+                "info"
+            )
             self.update_redirect()
             return redirect(url_for('RawCosMxMetadataModelView.list'))
         except Exception as e:
             log.error(e)
             flash(
                 'Failed to re-register cosmx metadata',
-                'danger')
+                'danger'
+            )
             return redirect(url_for('RawCosMxMetadataModelView.list'))

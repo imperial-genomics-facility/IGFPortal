@@ -38,6 +38,8 @@ def test_async_resubmit_cosmx_metadata():
                 results = async_resubmit_cosmx_metadata(
                     id_list=[1, 2, 3]
                 )
+                mock_get_airflow_dag_id.assert_called_once()
+                mock_trigger_airflow_pipeline.assert_called_once()
     assert len(results) == 3
     assert 1 in results
 
@@ -60,19 +62,18 @@ def test_action_validate_and_register_cosmx_metadata(db):
         db.session.add(raw_data2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     with patch(
         'app.cosmx_raw_metadata_view.async_validate_and_register_cosmx_metadata',
         return_values={"AAA": "BBB"}
     ):
-        project_list, response_dict = action_validate_and_register_cosmx_metadata(
+        project_list, _ = action_validate_and_register_cosmx_metadata(
             item=[raw_data1, raw_data2]
         )
     assert len(project_list) == 2
     assert raw_data1.cosmx_metadata_tag in project_list
-        
 
 
 def test_async_validate_and_register_cosmx_metadata(db):
@@ -93,7 +94,7 @@ def test_async_validate_and_register_cosmx_metadata(db):
         db.session.add(raw_data2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     ## valid design status

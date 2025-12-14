@@ -897,7 +897,6 @@ class RawCosMxMetadataBuilder(Model):
     nullable=False,
     server_default='UNKNOWN'
   )
-  
 
 class RawCosMxMetadataModel(Model):
   __tablename__ = 'raw_cosmx_metadata_entry'

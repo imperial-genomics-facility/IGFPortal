@@ -70,7 +70,7 @@ class RawCosMxMetadataApi(ModelRestApi):
                 )
                 db.session.commit()
                 return self.response(200, message='metadata synced')
-            except:
+            except Exception:
                 db.session.rollback()
                 raise
         except Exception as e:
