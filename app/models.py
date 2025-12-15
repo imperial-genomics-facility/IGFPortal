@@ -720,6 +720,12 @@ class RawIgfUser(Model):
     onupdate=datetime.datetime.now
   )
 
+  def __repr__(self):
+    '''
+    Display RawUser email
+    '''
+    return  self.email_id
+
 
 class RawAnalysisV2(Model):
   __tablename__ = 'raw_analysis_v2'
