@@ -99,13 +99,27 @@ class RawCosMxMetadataBuilderView(ModelView):
         "name": "Full name",
         "email_id": "Email",
         "username": "Globus username",
-        "raw_user.name": "Existing user",
+        "user": "Existing user",
         "status": "Status",
         "report": "Validation report",
     }
     list_columns = [
         "cosmx_metadata_tag",
         "status"
+    ]
+    add_columns = [
+        "cosmx_metadata_tag",
+        "name",
+        "email_id",
+        "username",
+        "user"
+    ]
+    edit_columns = [
+        "cosmx_metadata_tag",
+        "name",
+        "email_id",
+        "username",
+        "user"
     ]
     base_permissions = [
         "can_list",
