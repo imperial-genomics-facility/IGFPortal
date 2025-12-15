@@ -302,7 +302,9 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
     project_igf_id_tag: str = "project_igf_id",
     name_tag: str = "name",
     email_id_tag: str = "email_id",
-    username_tag: str = "username"
+    username_tag: str = "username",
+    deliverable_tag: str = "deliverable",
+    deliverable_type: str = "COSMX"
 ) -> int|None:
     try:
         raw_cosmx_metadata_id = None
@@ -320,7 +322,8 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
             metadata = {
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
                 name_tag: raw_metadata_entry.name,
-                email_id_tag: raw_metadata_entry.email_id
+                email_id_tag: raw_metadata_entry.email_id,
+                deliverable_tag: deliverable_type
             }
             if raw_metadata_entry.username is not None:
                 metadata.update({
@@ -343,7 +346,8 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
             metadata = {
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
                 name_tag: raw_user_record.name,
-                email_id_tag: raw_user_record.email_id
+                email_id_tag: raw_user_record.email_id,
+                deliverable_tag: deliverable_type
             }
         ## step 2: load data and change status
         try:
