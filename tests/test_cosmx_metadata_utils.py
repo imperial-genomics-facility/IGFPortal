@@ -273,9 +273,21 @@ def test_validate_raw_cosmx_metadata(db):
         name="My",
         email_id="myemail.com",
     )
+    raw_user1 = RawIgfUser(
+        user_id=1,
+        name="test1",
+        email_id="test1"
+    )
+    raw_data3 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=3,
+        cosmx_metadata_tag="test_prj_2",
+        raw_user_id=raw_user1.user_id
+    )
     try:
         db.session.add(raw_data1)
         db.session.add(raw_data2)
+        db.session.add(raw_user1)
+        db.session.add(raw_data3)
         db.session.flush()
         db.session.commit()
     except Exception:
@@ -289,6 +301,10 @@ def test_validate_raw_cosmx_metadata(db):
         raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
     )
     assert len(error_list) == 3
+    error_list = validate_raw_cosmx_metadata(
+        raw_cosmx_id=raw_data3.raw_cosmx_metadata_builder_id
+    )
+    assert len(error_list) == 0
 
 def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
     raw_data1 = RawCosMxMetadataBuilder(
@@ -303,9 +319,21 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
         name="My",
         email_id="myemail.com",
     )
+    raw_user1 = RawIgfUser(
+        user_id=1,
+        name="test1",
+        email_id="test1"
+    )
+    raw_data3 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=3,
+        cosmx_metadata_tag="test_prj_2",
+        raw_user_id=raw_user1.user_id
+    )
     try:
         db.session.add(raw_data1)
         db.session.add(raw_data2)
+        db.session.add(raw_user1)
+        db.session.add(raw_data3)
         db.session.flush()
         db.session.commit()
     except Exception:
@@ -342,3 +370,19 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
         .one_or_none()
     )
     assert record is None
+    status, error_list, metadata_id = validate_raw_cosmx_metadata_and_add_to_loader_table(
+        raw_cosmx_id=raw_data3.raw_cosmx_metadata_builder_id
+    )
+    assert status == "VALIDATED"
+    assert len(error_list) == 0
+    record = (
+        db.session.query(RawCosMxMetadataModel)
+        .filter(
+            RawCosMxMetadataModel.cosmx_metadata_tag
+            == raw_data3.cosmx_metadata_tag
+        )
+        .one_or_none()
+    )
+    assert record is not None
+    assert record.status == 'READY'
+    assert record.raw_cosmx_metadata_id == metadata_id
