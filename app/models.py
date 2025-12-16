@@ -863,7 +863,6 @@ class RawAnalysisTemplateV2(Model):
 class RawCosMxMetadataBuilder(Model):
   __tablename__ = 'raw_cosmx_metadata_builder'
   __table_args__ = (
-    UniqueConstraint('cosmx_metadata_tag'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
   raw_cosmx_metadata_builder_id = Column(
     INTEGER(unsigned=True),

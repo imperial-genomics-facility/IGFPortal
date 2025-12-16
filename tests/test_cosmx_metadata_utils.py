@@ -7,13 +7,83 @@ from app.cosmx_metadata.cosmx_metadata_utils import (
     validate_raw_cosmx_metadata,
     add_failed_reports_to_builder_table,
     build_metadata_and_load_raw_metadata_for_pipeline,
-    validate_raw_cosmx_metadata_and_add_to_loader_table
+    validate_raw_cosmx_metadata_and_add_to_loader_table,
+    check_metadata_conflict
 )
 from app.models import (
+    Project,
+    IgfUser,
     RawIgfUser,
     RawCosMxMetadataBuilder,
     RawCosMxMetadataModel
 )
+
+def test_check_metadata_conflict(db):
+    project1 = Project(
+        project_igf_id="Existing_project"
+    )
+    user1 = IgfUser(
+        name="Existing user",
+        email_id="my@email.id",
+        username="myuser"
+    )
+    user2 = IgfUser(
+        name="Existing user2",
+        email_id="my2@email.id",
+        username="myuser2"
+    )
+    raw_data1 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=1,
+        cosmx_metadata_tag="test_prj_1",
+        name="My Name",
+        email_id="my11@email.com",
+        username="test2123"
+    )
+    raw_data2 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=2,
+        cosmx_metadata_tag="Existing_project",
+        name="My Name",
+        email_id="my@email.com",
+        username="test2123"
+    )
+    raw_data3 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=3,
+        cosmx_metadata_tag="test_prj_2",
+        name="Existing user",
+        email_id="my@email.id",
+        username="myuser"
+    )
+    raw_data4 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=4,
+        cosmx_metadata_tag="test_prj_3",
+        name="Existing user3",
+        email_id="my3@email.id",
+        username="myuser2"
+    )
+    try:
+        db.session.add(project1)
+        db.session.add(user1)
+        db.session.add(user2)
+        db.session.add(raw_data1)
+        db.session.add(raw_data2)
+        db.session.add(raw_data3)
+        db.session.add(raw_data4)
+        db.session.flush()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    errs = check_metadata_conflict(raw_data1)
+    assert len(errs) == 0
+    errs = check_metadata_conflict(raw_data2)
+    assert len(errs) == 1
+    errs = check_metadata_conflict(raw_data3)
+    assert len(errs) == 1
+    errs = check_metadata_conflict(raw_data4)
+    assert len(errs) == 1
+
+
+
 
 def test_check_project_data_validation():
     project_igf_id = "IGFQ001"
@@ -68,24 +138,27 @@ def test_check_user_data_validation():
     err_list = check_user_data_validation(
         user_info_dictionary=user_data4
     )
-    assert len(err_list) == 0
+    assert len(err_list) == 1
 
 
 def test_raw_user_query(db):
     user1 = RawIgfUser(
         user_id=1,
         name="test1",
-        email_id="test1"
+        email_id="test1",
+        username="test1123"
     )
     user2 = RawIgfUser(
         user_id=2,
         name="test2",
-        email_id="test2"
+        email_id="test2",
+        username="test2123"
     )
     user3 = RawIgfUser(
         user_id=3,
         name="test3",
         email_id="test3",
+        username="test3123",
         status="WITHDRAWN"
     )
     try:
@@ -108,13 +181,15 @@ def test_fetch_raw_cosmx_builder_data(db):
     raw_user1 = RawIgfUser(
         user_id=1,
         name="test1",
-        email_id="test1"
+        email_id="test1",
+        username="test1123"
     )
     raw_data1 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=1,
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test2123"
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
@@ -173,6 +248,7 @@ def test_add_failed_reports_to_builder_table(db):
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test1123"
     )
     try:
         db.session.add(raw_data1)
@@ -208,11 +284,13 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test1123"
     )
     raw_user1 = RawIgfUser(
         user_id=1,
         name="test1",
-        email_id="test1"
+        email_id="test1",
+        username="test2123"
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
@@ -241,8 +319,8 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
     )
     assert record is not None
     assert record.status == 'READY'
-    assert "project_igf_id,name,email_id,deliverable" in record.formatted_csv_data
-    assert "test_prj_1,My Name,my@email.com,COSMX" in record.formatted_csv_data
+    assert "project_igf_id,name,email_id,username,deliverable" in record.formatted_csv_data
+    assert "test_prj_1,My Name,my@email.com,test1123,COSMX" in record.formatted_csv_data
     metadata_id = build_metadata_and_load_raw_metadata_for_pipeline(
         raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
     )
@@ -257,8 +335,8 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
     assert record is not None
     assert record.status == 'READY'
     assert record.raw_cosmx_metadata_id == metadata_id
-    assert "project_igf_id,name,email_id,deliverable" in record.formatted_csv_data
-    assert "test_prj_2,test1,test1,COSMX" in record.formatted_csv_data
+    assert "project_igf_id,name,email_id,username,deliverable" in record.formatted_csv_data
+    assert "test_prj_2,test1,test1,test2123,COSMX" in record.formatted_csv_data
 
 def test_validate_raw_cosmx_metadata(db):
     raw_data1 = RawCosMxMetadataBuilder(
@@ -266,17 +344,20 @@ def test_validate_raw_cosmx_metadata(db):
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test1123"
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
         cosmx_metadata_tag="test",
         name="My",
         email_id="myemail.com",
+        username="test2123"
     )
     raw_user1 = RawIgfUser(
         user_id=1,
         name="test1",
-        email_id="test1"
+        email_id="test1",
+        username="test3123"
     )
     raw_data3 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=3,
@@ -312,17 +393,20 @@ def test_validate_raw_cosmx_metadata_and_add_to_loader_table(db):
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test1123"
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
         cosmx_metadata_tag="test",
         name="My",
         email_id="myemail.com",
+        username="test2123"
     )
     raw_user1 = RawIgfUser(
         user_id=1,
         name="test1",
-        email_id="test1"
+        email_id="test1",
+        username="test3123"
     )
     raw_data3 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=3,

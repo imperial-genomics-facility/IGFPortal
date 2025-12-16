@@ -5,17 +5,20 @@ from pydantic import (
     field_validator,
     ValidationError
 )
+from sqlalchemy import or_
 from typing import Optional
 import re
 import pandas as pd
 from app import db
 from app.models import (
+    IgfUser,
+    Project,
     RawIgfUser,
     RawCosMxMetadataBuilder,
     RawCosMxMetadataModel
 )
 
-class Project(BaseModel):
+class Project_data(BaseModel):
     project_igf_id: str = Field(
         min_length=5,
         max_length=70,
@@ -40,7 +43,7 @@ def check_project_data_validation(
     try:
         error_list = list()
         try:
-            _ = Project(**{project_igf_id_tag: project_igf_id})
+            _ = Project_data(**{project_igf_id_tag: project_igf_id})
         except ValidationError as e:
             for error in e.errors():
                 error_list.append(
@@ -60,10 +63,9 @@ class User(BaseModel):
     email_id: EmailStr = Field(
         description="User's email address"
     )
-    username: Optional[str] = Field(
-        None,
+    username: str = Field(
         min_length=5,
-        description="Optional username (a-z, 0-9, ., -), minimum 5 characters"
+        description="Username (a-z, 0-9, ., -), minimum 5 characters"
     )
 
     @field_validator('username')
@@ -149,6 +151,45 @@ def fetch_raw_cosmx_builder_data(
             + str(e)
         )
 
+def check_metadata_conflict(
+    raw_cosmx_data: RawCosMxMetadataBuilder
+) -> list[str]:
+    try:
+        error_list = list()
+        project_record = (
+            db.session.query(Project)
+            .filter(
+                Project.project_igf_id
+                == raw_cosmx_data.cosmx_metadata_tag
+            )
+            .all()
+        )
+        if len(project_record) > 0:
+            error_list.append(
+                f"Project {raw_cosmx_data.cosmx_metadata_tag} already in db!"
+            )
+        if raw_cosmx_data.raw_user_id is None:
+            user_record = (
+                db.session.query(IgfUser)
+                .filter(
+                    or_(
+                        IgfUser.name == raw_cosmx_data.name,
+                        IgfUser.email_id == raw_cosmx_data.email_id,
+                        IgfUser.username == raw_cosmx_data.username
+                    )
+                )
+                .all()
+            )
+            if len(user_record) > 0:
+                error_list.append(
+                    f"User {raw_cosmx_data.email_id} already in db!"
+                )
+        return error_list
+    except Exception as e:
+        raise ValueError(
+            "Failed to check new metadata with existing records, error: "
+            + str(e)
+        )
 
 def check_required_raw_cosmx_metadata(
     raw_cosmx_data: RawCosMxMetadataBuilder
@@ -169,12 +210,9 @@ def check_required_raw_cosmx_metadata(
         if raw_cosmx_data.raw_user_id is None:
             user_info_dictionary = {
                 "name": raw_cosmx_data.name,
-                "email_id": raw_cosmx_data.email_id
+                "email_id": raw_cosmx_data.email_id,
+                "username": raw_cosmx_data.username
             }
-            if raw_cosmx_data.username is not None:
-                user_info_dictionary.update({
-                    "username": raw_cosmx_data.username
-                })
             new_user_errors = check_user_data_validation(
                 user_info_dictionary=user_info_dictionary
             )
@@ -243,6 +281,14 @@ def validate_raw_cosmx_metadata(
         ## step 3: check if raw metadata already present on the loader table
         errors = check_metadata_on_loader_table(
             cosmx_metadata_tag=raw_metadata_entry.cosmx_metadata_tag
+        )
+        if len(errors) > 0:
+            error_list.extend(
+                errors
+            )
+        ## step 4: check for metadata conflict
+        errors = check_metadata_conflict(
+            raw_cosmx_data=raw_metadata_entry
         )
         if len(errors) > 0:
             error_list.extend(
@@ -324,12 +370,9 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
                 name_tag: raw_metadata_entry.name,
                 email_id_tag: raw_metadata_entry.email_id,
+                username_tag: raw_metadata_entry.username,
                 deliverable_tag: deliverable_type
             }
-            if raw_metadata_entry.username is not None:
-                metadata.update({
-                    username_tag: raw_metadata_entry.username
-                })
         else:
             raw_user_record = (
                 db.session
@@ -348,6 +391,7 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
                 name_tag: raw_user_record.name,
                 email_id_tag: raw_user_record.email_id,
+                username_tag: raw_user_record.username,
                 deliverable_tag: deliverable_type
             }
         ## step 2: load data and change status

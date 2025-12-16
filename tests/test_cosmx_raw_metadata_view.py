@@ -50,12 +50,14 @@ def test_action_validate_and_register_cosmx_metadata(db):
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test1123"
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
         cosmx_metadata_tag="test",
         name="My",
         email_id="myemail.com",
+        username="test"
     )
     try:
         db.session.add(raw_data1)
@@ -82,12 +84,14 @@ def test_async_validate_and_register_cosmx_metadata(db):
         cosmx_metadata_tag="test_prj_1",
         name="My Name",
         email_id="my@email.com",
+        username="test1123"
     )
     raw_data2 = RawCosMxMetadataBuilder(
         raw_cosmx_metadata_builder_id=2,
         cosmx_metadata_tag="test",
         name="My",
         email_id="myemail.com",
+        username="test"
     )
     try:
         db.session.add(raw_data1)
