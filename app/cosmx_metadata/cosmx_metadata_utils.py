@@ -5,17 +5,20 @@ from pydantic import (
     field_validator,
     ValidationError
 )
+from sqlalchemy import or_
 from typing import Optional
 import re
 import pandas as pd
 from app import db
 from app.models import (
+    IgfUser,
+    Project,
     RawIgfUser,
     RawCosMxMetadataBuilder,
     RawCosMxMetadataModel
 )
 
-class Project(BaseModel):
+class Project_data(BaseModel):
     project_igf_id: str = Field(
         min_length=5,
         max_length=70,
@@ -40,7 +43,7 @@ def check_project_data_validation(
     try:
         error_list = list()
         try:
-            _ = Project(**{project_igf_id_tag: project_igf_id})
+            _ = Project_data(**{project_igf_id_tag: project_igf_id})
         except ValidationError as e:
             for error in e.errors():
                 error_list.append(
@@ -148,6 +151,45 @@ def fetch_raw_cosmx_builder_data(
             + str(e)
         )
 
+def check_metadata_conflict(
+    raw_cosmx_data: RawCosMxMetadataBuilder
+) -> list[str]:
+    try:
+        error_list = list()
+        project_record = (
+            db.session.query(Project)
+            .filter(
+                Project.project_igf_id
+                == raw_cosmx_data.cosmx_metadata_tag
+            )
+            .all()
+        )
+        if len(project_record) > 0:
+            error_list.append(
+                f"Project {raw_cosmx_data.cosmx_metadata_tag} already in db!"
+            )
+        if raw_cosmx_data.raw_user_id is None:
+            user_record = (
+                db.session.query(IgfUser)
+                .filter(
+                    or_(
+                        IgfUser.name == raw_cosmx_data.name,
+                        IgfUser.email_id == raw_cosmx_data.email_id,
+                        IgfUser.username == raw_cosmx_data.username
+                    )
+                )
+                .all()
+            )
+            if len(user_record) > 0:
+                error_list.append(
+                    f"User {raw_cosmx_data.email_id} already in db!"
+                )
+        return error_list 
+    except Exception as e:
+        raise ValueError(
+            "Failed to check new metadata with existing records, error: "
+            + str(e)
+        )
 
 def check_required_raw_cosmx_metadata(
     raw_cosmx_data: RawCosMxMetadataBuilder

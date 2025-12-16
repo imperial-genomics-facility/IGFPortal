@@ -7,13 +7,83 @@ from app.cosmx_metadata.cosmx_metadata_utils import (
     validate_raw_cosmx_metadata,
     add_failed_reports_to_builder_table,
     build_metadata_and_load_raw_metadata_for_pipeline,
-    validate_raw_cosmx_metadata_and_add_to_loader_table
+    validate_raw_cosmx_metadata_and_add_to_loader_table,
+    check_metadata_conflict
 )
 from app.models import (
+    Project,
+    IgfUser,
     RawIgfUser,
     RawCosMxMetadataBuilder,
     RawCosMxMetadataModel
 )
+
+def test_check_metadata_conflict(db):
+    project1 = Project(
+        project_igf_id="Existing_project"
+    )
+    user1 = IgfUser(
+        name="Existing user",
+        email_id="my@email.id",
+        username="myuser"
+    )
+    user2 = IgfUser(
+        name="Existing user2",
+        email_id="my2@email.id",
+        username="myuser2"
+    )
+    raw_data1 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=1,
+        cosmx_metadata_tag="test_prj_1",
+        name="My Name",
+        email_id="my11@email.com",
+        username="test2123"
+    )
+    raw_data2 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=2,
+        cosmx_metadata_tag="Existing_project",
+        name="My Name",
+        email_id="my@email.com",
+        username="test2123"
+    )
+    raw_data3 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=3,
+        cosmx_metadata_tag="test_prj_2",
+        name="Existing user",
+        email_id="my@email.id",
+        username="myuser"
+    )
+    raw_data4 = RawCosMxMetadataBuilder(
+        raw_cosmx_metadata_builder_id=4,
+        cosmx_metadata_tag="test_prj_3",
+        name="Existing user3",
+        email_id="my3@email.id",
+        username="myuser2"
+    )
+    try:
+        db.session.add(project1)
+        db.session.add(user1)
+        db.session.add(user2)
+        db.session.add(raw_data1)
+        db.session.add(raw_data2)
+        db.session.add(raw_data3)
+        db.session.add(raw_data4)
+        db.session.flush()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    errs = check_metadata_conflict(raw_data1)
+    assert len(errs) == 0
+    errs = check_metadata_conflict(raw_data2)
+    assert len(errs) == 1
+    errs = check_metadata_conflict(raw_data3)
+    assert len(errs) == 1
+    errs = check_metadata_conflict(raw_data4)
+    assert len(errs) == 1
+
+
+
 
 def test_check_project_data_validation():
     project_igf_id = "IGFQ001"
