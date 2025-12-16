@@ -184,7 +184,7 @@ def check_metadata_conflict(
                 error_list.append(
                     f"User {raw_cosmx_data.email_id} already in db!"
                 )
-        return error_list 
+        return error_list
     except Exception as e:
         raise ValueError(
             "Failed to check new metadata with existing records, error: "
