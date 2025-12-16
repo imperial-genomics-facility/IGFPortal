@@ -60,10 +60,9 @@ class User(BaseModel):
     email_id: EmailStr = Field(
         description="User's email address"
     )
-    username: Optional[str] = Field(
-        None,
+    username: str = Field(
         min_length=5,
-        description="Optional username (a-z, 0-9, ., -), minimum 5 characters"
+        description="Username (a-z, 0-9, ., -), minimum 5 characters"
     )
 
     @field_validator('username')
@@ -169,12 +168,9 @@ def check_required_raw_cosmx_metadata(
         if raw_cosmx_data.raw_user_id is None:
             user_info_dictionary = {
                 "name": raw_cosmx_data.name,
-                "email_id": raw_cosmx_data.email_id
+                "email_id": raw_cosmx_data.email_id,
+                "username": raw_cosmx_data.username
             }
-            if raw_cosmx_data.username is not None:
-                user_info_dictionary.update({
-                    "username": raw_cosmx_data.username
-                })
             new_user_errors = check_user_data_validation(
                 user_info_dictionary=user_info_dictionary
             )
@@ -324,12 +320,9 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
                 name_tag: raw_metadata_entry.name,
                 email_id_tag: raw_metadata_entry.email_id,
+                username_tag: raw_metadata_entry.username,
                 deliverable_tag: deliverable_type
             }
-            if raw_metadata_entry.username is not None:
-                metadata.update({
-                    username_tag: raw_metadata_entry.username
-                })
         else:
             raw_user_record = (
                 db.session
@@ -348,6 +341,7 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 project_igf_id_tag: raw_metadata_entry.cosmx_metadata_tag,
                 name_tag: raw_user_record.name,
                 email_id_tag: raw_user_record.email_id,
+                username_tag: raw_user_record.username,
                 deliverable_tag: deliverable_type
             }
         ## step 2: load data and change status
