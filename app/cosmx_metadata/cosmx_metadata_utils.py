@@ -286,6 +286,14 @@ def validate_raw_cosmx_metadata(
             error_list.extend(
                 errors
             )
+        ## step 4: check for metadata conflict
+        errors = check_metadata_conflict(
+            raw_cosmx_data=raw_metadata_entry
+        )
+        if len(errors) > 0:
+            error_list.extend(
+                errors
+            )
         return error_list
     except Exception as e:
         raise ValueError(
