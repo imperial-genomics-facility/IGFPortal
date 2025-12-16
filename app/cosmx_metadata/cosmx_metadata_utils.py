@@ -161,7 +161,8 @@ def check_required_raw_cosmx_metadata(
         )
         if (
             raw_cosmx_data.email_id is None
-            and raw_cosmx_data.raw_user_id is None):
+            and raw_cosmx_data.raw_user_id is None
+        ):
             errors.append(
                 "Enter new user or select existing user info"
             )
