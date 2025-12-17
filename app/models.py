@@ -14,7 +14,8 @@ from sqlalchemy import (
     TIMESTAMP,
     TEXT,
     UniqueConstraint,
-    DATETIME)
+    DATETIME,
+    DATE)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy import UnicodeText
@@ -1149,7 +1150,7 @@ class CosMxMasterTableSlide(Model):
     nullable=True
   )
   scan_date = Column(
-    DATETIME(),
+    DATE(),
     nullable=True
   )
   def atomx_url(self):
