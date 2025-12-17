@@ -1149,7 +1149,7 @@ class CosMxMasterTableSlide(Model):
     nullable=True
   )
   scan_date = Column(
-    TIMESTAMP(),
+    DATETIME(),
     nullable=True
   )
   def atomx_url(self):
