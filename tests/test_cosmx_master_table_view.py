@@ -6,8 +6,7 @@ from app.cosmx_master_table_view import (
 from app.models import (
     CosMxMasterTableUser,
     CosMxMasterTablePanel,
-    CosMxMasterTableTissue,
-    CosMxMasterTableSlide
+    CosMxMasterTableTissue
 )
 
 def test_user_query(db):

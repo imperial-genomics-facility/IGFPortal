@@ -2,7 +2,6 @@ import logging
 from app import db
 from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_appbuilder.fieldwidgets import Select2Widget
-from flask_appbuilder.models.sqla.filters import FilterInFunction
 from flask_appbuilder import ModelView
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from app.models import (
