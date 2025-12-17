@@ -1048,11 +1048,11 @@ class CosMxMasterTableSlide(Model):
   )
   collaborator_pi = relationship('CosMxMasterTableUser')
   assay_type = Column(
-      Enum(
-        'UNKNOWN',
-        'RNA',
-        'PROTEIN',
-        'MULTIOME'
+    Enum(
+      'UNKNOWN',
+      'RNA',
+      'PROTEIN',
+      'MULTIOME'
     ),
     nullable=False,
     server_default='UNKNOWN'
@@ -1072,10 +1072,10 @@ class CosMxMasterTableSlide(Model):
     nullable=True
   )
   ffpe_ff = Column(
-      Enum(
-        'UNKNOWN',
-        'FFPE',
-        'FF'
+    Enum(
+      'UNKNOWN',
+      'FFPE',
+      'FF'
     ),
     nullable=False,
     server_default='UNKNOWN'
@@ -1085,10 +1085,10 @@ class CosMxMasterTableSlide(Model):
     nullable=True
   )
   true_view_applied = Column(
-      Enum(
-        'UNKNOWN',
-        'NO',
-        'YES'
+    Enum(
+      'UNKNOWN',
+      'NO',
+      'YES'
     ),
     nullable=False,
     server_default='UNKNOWN'
