@@ -976,7 +976,7 @@ class CosMxMasterTablePanel(Model):
       nullable=False
     )
     panel_type = Column(
-      String(100),
+      String(200),
       nullable=False
     )
 
@@ -1036,7 +1036,10 @@ class CosMxMasterTableSlide(Model):
     ),
     nullable=False
   )
-  collaborator = relationship('CosMxMasterTableUser')
+  collaborator = relationship(
+    'CosMxMasterTableUser',
+    foreign_keys=[collaborator_id]
+  )
   collaborator_pi_id = Column(
     INTEGER(unsigned=True),
     ForeignKey(
@@ -1046,7 +1049,10 @@ class CosMxMasterTableSlide(Model):
     ),
     nullable=False
   )
-  collaborator_pi = relationship('CosMxMasterTableUser')
+  collaborator_pi = relationship(
+    'CosMxMasterTableUser',
+    foreign_keys=[collaborator_pi_id]
+  )
   assay_type = Column(
     Enum(
       'UNKNOWN',
@@ -1071,6 +1077,16 @@ class CosMxMasterTableSlide(Model):
     String(200),
     nullable=True
   )
+  tissue_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      "cosmx_master_tissue.tissue_id",
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
+  tissue = relationship('CosMxMasterTableTissue')
   ffpe_ff = Column(
     Enum(
       'UNKNOWN',
@@ -1093,6 +1109,25 @@ class CosMxMasterTableSlide(Model):
     nullable=False,
     server_default='UNKNOWN'
   )
+  slide_status = Column(
+    Enum(
+      "PASSED",
+      "QC_FAILED",
+      "ABORTED",
+      "UNKNOWN"
+    ),
+    nullable=False,
+    server_default='PASSED'
+  )
+  atomx_status = Column(
+    Enum(
+      "UNKNOWN",
+      "AVAILABLE",
+      "DELETED"
+    ),
+    nullable=False,
+    server_default='AVAILABLE'
+  )
   pre_bleaching_profile = Column(
     String(5),
     nullable=True
@@ -1113,7 +1148,7 @@ class CosMxMasterTableSlide(Model):
     String(500),
     nullable=True
   )
-  scanning_started = Column(
+  scan_date = Column(
     TIMESTAMP(),
     nullable=True
   )
