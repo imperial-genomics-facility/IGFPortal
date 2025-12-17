@@ -1066,6 +1066,7 @@ class CosMxMasterTableSlide(Model):
     ),
     nullable=False
   )
+  panel = relationship('CosMxMasterTablePanel')
   condition = Column(
     String(200),
     nullable=True
