@@ -944,11 +944,223 @@ class RawCosMxMetadataModel(Model):
   def __repr__(self):
     return self.cosmx_metadata_tag
 
+"""
+COSMX master list
+"""
+class CosMxMasterTableUser(Model):
+    __tablename__ = 'cosmx_master_user'
+    __table_args__ = (
+        UniqueConstraint('name'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    user_id = Column(
+      INTEGER(unsigned=True),
+      primary_key=True,
+      nullable=False
+    )
+    name = Column(
+      String(70),
+      nullable=False
+    )
+
+    def __repr__(self):
+        return self.name
+
+class CosMxMasterTablePanel(Model):
+    __tablename__ = 'cosmx_master_panel'
+    __table_args__ = (
+        UniqueConstraint('panel_type'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    panel_id = Column(
+      INTEGER(unsigned=True),
+      primary_key=True,
+      nullable=False
+    )
+    panel_type = Column(
+      String(200),
+      nullable=False
+    )
+
+    def __repr__(self):
+        return self.panel_type
+
+class CosMxMasterTableTissue(Model):
+    __tablename__ = 'cosmx_master_tissue'
+    __table_args__ = (
+        UniqueConstraint('tissue_name'),
+        { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+    tissue_id = Column(
+      INTEGER(unsigned=True),
+      primary_key=True,
+      nullable=False
+    )
+    tissue_name = Column(
+      String(200),
+      nullable=False
+    )
+    tissue_ontology = Column(
+      String(500),
+      nullable=True
+    )
+
+    def __repr__(self):
+        return self.tissue_name
+
+class CosMxMasterTableSlide(Model):
+  __tablename__ = 'cosmx_master_slide'
+  __table_args__ = (
+  UniqueConstraint('slide_name'),
+  { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8' })
+  slide_id = Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  slide_name = Column(
+    String(200),
+    nullable=False
+  )
+  project_name = Column(
+    String(200),
+    nullable=False
+  )
+  run_name = Column(
+    String(200),
+    nullable=True
+  )
+  collaborator_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      "cosmx_master_user.user_id",
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
+  collaborator = relationship(
+    'CosMxMasterTableUser',
+    foreign_keys=[collaborator_id]
+  )
+  collaborator_pi_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      "cosmx_master_user.user_id",
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
+  collaborator_pi = relationship(
+    'CosMxMasterTableUser',
+    foreign_keys=[collaborator_pi_id]
+  )
+  assay_type = Column(
+    Enum(
+      'UNKNOWN',
+      'RNA',
+      'PROTEIN',
+      'MULTIOME'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  panel_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      "cosmx_master_panel.panel_id",
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
+  panel = relationship('CosMxMasterTablePanel')
+  condition = Column(
+    String(200),
+    nullable=True
+  )
+  tissue_id = Column(
+    INTEGER(unsigned=True),
+    ForeignKey(
+      "cosmx_master_tissue.tissue_id",
+      onupdate="CASCADE",
+      ondelete="CASCADE"
+    ),
+    nullable=False
+  )
+  tissue = relationship('CosMxMasterTableTissue')
+  ffpe_ff = Column(
+    Enum(
+      'UNKNOWN',
+      'FFPE',
+      'FF'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  tissue_per_slide =  Column(
+    INTEGER(unsigned=True),
+    nullable=True
+  )
+  true_view_applied = Column(
+    Enum(
+      'UNKNOWN',
+      'NO',
+      'YES'
+    ),
+    nullable=False,
+    server_default='UNKNOWN'
+  )
+  slide_status = Column(
+    Enum(
+      "PASSED",
+      "QC_FAILED",
+      "ABORTED",
+      "UNKNOWN"
+    ),
+    nullable=False,
+    server_default='PASSED'
+  )
+  atomx_status = Column(
+    Enum(
+      "UNKNOWN",
+      "AVAILABLE",
+      "DELETED"
+    ),
+    nullable=False,
+    server_default='AVAILABLE'
+  )
+  pre_bleaching_profile = Column(
+    String(5),
+    nullable=True
+  )
+  cell_segmentation_profile = Column(
+    String(5),
+    nullable=True
+  )
+  no_fov_count = Column(
+    INTEGER(unsigned=True),
+    nullable=True
+  )
+  smi = Column(
+    String(5),
+    nullable=True
+  )
+  url = Column(
+    String(500),
+    nullable=True
+  )
+  scan_date = Column(
+    TIMESTAMP(),
+    nullable=True
+  )
+  def atomx_url(self):
+    return Markup(f'<a href="{self.url}">AtoMx SIP</a>')
+
+  def __repr__(self):
+    return self.slide_name
 
 """
   QC reports view tables
 """
-
 
 class CosmxSlideQCData(Model):
     __tablename__ = 'cosmx_slide_qc_data'
