@@ -1144,7 +1144,7 @@ class CosMxMasterTableSlide(Model):
     String(5),
     nullable=True
   )
-  url = Column(
+  url_link = Column(
     String(500),
     nullable=True
   )
@@ -1153,7 +1153,7 @@ class CosMxMasterTableSlide(Model):
     nullable=True
   )
   def atomx_url(self):
-    return Markup(f'<a href="{self.url}">AtoMx SIP</a>')
+    return Markup(f'<a href="{self.url_link}">AtoMx SIP</a>')
 
   def __repr__(self):
     return self.slide_name

@@ -26,6 +26,12 @@ from app.cosmx_raw_metadata_view import (
     RawCosMxMetadataBuilderView,
     RawCosMxMetadataModelView
 )
+from app.cosmx_master_table_view import (
+    CosMxMasterTableUserView,
+    CosMxMasterTableTissueView,
+    CosMxMasterTablePanelView,
+    CosMxMasterTableSlideView
+)
 """
     Application wide 404 error handler
 """
@@ -188,6 +194,34 @@ appbuilder.add_view(
     "Metadata queue",
     category_icon="fa-flask",
     icon="fa fa-th-list",
+    category="CosMX"
+)
+appbuilder.add_view(
+    CosMxMasterTableSlideView,
+    "Slide information",
+    category_icon="fa-flask",
+    icon="fa-table",
+    category="CosMX"
+)
+appbuilder.add_view(
+    CosMxMasterTablePanelView,
+    "Panel type list",
+    category_icon="fa-flask",
+    icon="fa-cubes",
+    category="CosMX"
+)
+appbuilder.add_view(
+    CosMxMasterTableTissueView,
+    "Tissue type list",
+    category_icon="fa-flask",
+    icon="fa-address-card-o",
+    category="CosMX"
+)
+appbuilder.add_view(
+    CosMxMasterTableUserView,
+    "User list",
+    category_icon="fa-flask",
+    icon="fa-user-o",
     category="CosMX"
 )
 """
