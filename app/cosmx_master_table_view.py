@@ -251,44 +251,44 @@ class CosMxMasterTableSlideView(ModelView):
     base_order = ("slide_id", "desc")
     add_form_extra_fields = {
         "collaborator": QuerySelectField(
-            "CosMxMasterTableUser",
+            "Collaborator name",
             query_factory=user_query,
             widget=Select2Widget()
         ),
         "collaborator_pi": QuerySelectField(
-            "CosMxMasterTableUser",
+            "Collaborator PI",
             query_factory=user_query,
             widget=Select2Widget()
         ),
         "panel": QuerySelectField(
-            "CosMxMasterTablePanel",
+            "Panel type",
             query_factory=panel_query,
             widget=Select2Widget()
         ),
         "tissue": QuerySelectField(
-            "CosMxMasterTabletissue",
+            "Tissue name",
             query_factory=tissue_query,
             widget=Select2Widget()
         ),
     }
     edit_form_extra_fields = {
         "collaborator": QuerySelectField(
-            "CosMxMasterTableUser",
+            "Collaborator name",
             query_factory=user_query,
             widget=Select2Widget()
         ),
         "collaborator_pi": QuerySelectField(
-            "CosMxMasterTableUser",
+            "Collaborator PI",
             query_factory=user_query,
             widget=Select2Widget()
         ),
         "panel": QuerySelectField(
-            "CosMxMasterTablePanel",
+            "Panel type",
             query_factory=panel_query,
             widget=Select2Widget()
         ),
         "tissue": QuerySelectField(
-            "CosMxMasterTabletissue",
+            "Tissue name",
             query_factory=tissue_query,
             widget=Select2Widget()
         ),
