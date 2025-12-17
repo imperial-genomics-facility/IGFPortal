@@ -163,7 +163,7 @@ class CosMxMasterTableSlideView(ModelView):
         "cell_segmentation_profile": "Cell segmentation profile",
         "no_fov_count": "No fov count",
         "smi": "SMI",
-        "url": "AtoMx URL",
+        "url_link": "AtoMx URL",
         "atomx_url": "AtoMx SIP",
         "scan_date": "Scan date",
         "slide_status": "Slide QC status",
@@ -218,7 +218,7 @@ class CosMxMasterTableSlideView(ModelView):
         "no_fov_count",
         "smi",
         "scan_date",
-        "url"
+        "url_link"
     ]
     edit_columns = [
         "slide_name",
@@ -239,8 +239,8 @@ class CosMxMasterTableSlideView(ModelView):
         "smi",
         "scan_date",
         "slide_status",
-        "atomx_status"
-        "url"
+        "atomx_status",
+        "url_link"
     ]
     base_permissions = [
         "can_list",
