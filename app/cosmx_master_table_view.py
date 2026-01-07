@@ -161,7 +161,7 @@ class CosMxMasterTableSlideView(ModelView):
         "true_view_applied": "True view applied",
         "pre_bleaching_profile": "Pre bleaching profile",
         "cell_segmentation_profile": "Cell segmentation profile",
-        "no_fov_count": "No fov count",
+        "no_fov_count": "Fov count",
         "smi": "SMI",
         "url_link": "AtoMx URL",
         "atomx_url": "AtoMx SIP",
@@ -171,10 +171,13 @@ class CosMxMasterTableSlideView(ModelView):
     }
     list_columns = [
         "slide_name",
-        "project_name",
+        "collaborator",
+        "panel",
         "assay_type",
-        "scan_date",
+        "ffpe_ff",
+        "no_fov_count",
         "tissue",
+        "scan_date",
         "slide_status",
         "atomx_status"
     ]
