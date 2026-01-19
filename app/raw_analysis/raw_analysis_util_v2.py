@@ -421,6 +421,8 @@ def _fetch_all_samples_for_project(project_igf_id: str) -> list:
             Project, Project.project_id==Sample.project_id
         ).filter(
             Project.project_igf_id==project_igf_id
+        ).order_by(
+            Sample.sample_id.asc()
         ).all()
         sample_ids = [
             sample_id for (sample_id,) in samples
