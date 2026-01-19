@@ -1489,6 +1489,8 @@ def test_fetch_all_samples_for_project(db):
     assert len(sample_ids) == 2
     assert 'IGF111' in sample_ids
     assert 'IGF112' in sample_ids
+    assert sample_ids[0] == 'IGF111'
+    assert sample_ids[1] == 'IGF112'
     sample_ids = \
         _fetch_all_samples_for_project(
             project_igf_id='project2')
