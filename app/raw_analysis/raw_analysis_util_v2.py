@@ -422,7 +422,7 @@ def _fetch_all_samples_for_project(project_igf_id: str) -> list:
         ).filter(
             Project.project_igf_id==project_igf_id
         ).order_by(
-            Sample.sample_id.asc()
+            Sample.sample_igf_id.asc()
         ).all()
         sample_ids = [
             sample_id for (sample_id,) in samples
