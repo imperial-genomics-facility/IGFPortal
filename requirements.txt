@@ -20,7 +20,7 @@ lxml==6.0.1
 numpy==2.3.3
 pandas==2.3.2
 pandas-datareader==0.10.0
-Pillow==11.3.0
+Pillow==12.1.1
 plotly==6.3.0
 pydantic==2.11.7
 PyMySQL==1.1.2
