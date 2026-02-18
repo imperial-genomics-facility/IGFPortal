@@ -6,7 +6,7 @@ from pydantic import (
     ValidationError
 )
 from sqlalchemy import or_
-from typing import Optional
+from typing import Literal
 import re
 import pandas as pd
 from app import db
@@ -66,6 +66,10 @@ class User(BaseModel):
     username: str = Field(
         min_length=5,
         description="Username (a-z, 0-9, ., -), minimum 5 characters"
+    )
+    category: Literal["HPC_USER", "NON_HPC_USER", ""] | None = Field(
+        default=None,
+        description="User category: 'HPC_USER', 'NON_HPC_USER', '' or None"
     )
 
     @field_validator('username')
@@ -192,7 +196,8 @@ def check_metadata_conflict(
         )
 
 def check_required_raw_cosmx_metadata(
-    raw_cosmx_data: RawCosMxMetadataBuilder
+    raw_cosmx_data: RawCosMxMetadataBuilder,
+    hpc_user_category: str = "HPC_USER"
 ) -> list[str]:
     try:
         errors = list()
@@ -213,6 +218,10 @@ def check_required_raw_cosmx_metadata(
                 "email_id": raw_cosmx_data.email_id,
                 "username": raw_cosmx_data.username
             }
+            if raw_cosmx_data.username is not None:
+                user_info_dictionary.update({
+                    "category": hpc_user_category
+                })
             new_user_errors = check_user_data_validation(
                 user_info_dictionary=user_info_dictionary
             )
