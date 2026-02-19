@@ -67,9 +67,9 @@ class User(BaseModel):
         min_length=5,
         description="Username (a-z, 0-9, ., -), minimum 5 characters"
     )
-    category: Literal["HPC_USER", "NON_HPC_USER", ""] | None = Field(
+    category: Literal["HPC_USER", "NON_HPC_USER", ""] = Field(
         default=None,
-        description="User category: 'HPC_USER', 'NON_HPC_USER', '' or None"
+        description="User category: 'HPC_USER', 'NON_HPC_USER', or ''"
     )
 
     @field_validator('username')
@@ -360,7 +360,9 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
     email_id_tag: str = "email_id",
     username_tag: str = "username",
     deliverable_tag: str = "deliverable",
-    deliverable_type: str = "COSMX"
+    deliverable_type: str = "COSMX",
+    categoty_tag: str = "category",
+    category_type: str = "HPC_USER"
 ) -> int|None:
     try:
         raw_cosmx_metadata_id = None
@@ -380,7 +382,8 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 name_tag: raw_metadata_entry.name,
                 email_id_tag: raw_metadata_entry.email_id,
                 username_tag: raw_metadata_entry.username,
-                deliverable_tag: deliverable_type
+                deliverable_tag: deliverable_type,
+                categoty_tag: category_type
             }
         else:
             raw_user_record = (
@@ -401,7 +404,8 @@ def build_metadata_and_load_raw_metadata_for_pipeline(
                 name_tag: raw_user_record.name,
                 email_id_tag: raw_user_record.email_id,
                 username_tag: raw_user_record.username,
-                deliverable_tag: deliverable_type
+                deliverable_tag: deliverable_type,
+                categoty_tag: category_type
             }
         ## step 2: load data and change status
         try:
