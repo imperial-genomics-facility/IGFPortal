@@ -319,8 +319,8 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
     )
     assert record is not None
     assert record.status == 'READY'
-    assert "project_igf_id,name,email_id,username,deliverable" in record.formatted_csv_data
-    assert "test_prj_1,My Name,my@email.com,test1123,COSMX" in record.formatted_csv_data
+    assert "project_igf_id,name,email_id,username,deliverable,category" in record.formatted_csv_data
+    assert "test_prj_1,My Name,my@email.com,test1123,COSMX,HPC_USER" in record.formatted_csv_data
     metadata_id = build_metadata_and_load_raw_metadata_for_pipeline(
         raw_cosmx_id=raw_data2.raw_cosmx_metadata_builder_id
     )
@@ -335,8 +335,8 @@ def test_build_metadata_and_load_raw_metadata_for_pipeline(db):
     assert record is not None
     assert record.status == 'READY'
     assert record.raw_cosmx_metadata_id == metadata_id
-    assert "project_igf_id,name,email_id,username,deliverable" in record.formatted_csv_data
-    assert "test_prj_2,test1,test1,test2123,COSMX" in record.formatted_csv_data
+    assert "project_igf_id,name,email_id,username,deliverable,category" in record.formatted_csv_data
+    assert "test_prj_2,test1,test1,test2123,COSMX,HPC_USER" in record.formatted_csv_data
 
 def test_validate_raw_cosmx_metadata(db):
     raw_data1 = RawCosMxMetadataBuilder(
