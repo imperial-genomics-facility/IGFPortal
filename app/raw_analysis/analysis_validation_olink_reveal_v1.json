@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+  "title": "Seqrun Analysis Schema",
+  "type": "object",
+  "required": ["seqrun_design", "analysis_design"],
+  "additionalProperties": false,
+  "properties": {
+    "seqrun_design": {
+      "type": "array",
+      "description": "Sequence run design identifiers. Must contain exactly one entry.",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z0-9_]+$",
+        "description": "Only uppercase A-Z, digits 0-9, and underscores are allowed."
+      }
+    },
+    "analysis_design": {
+      "type": "object",
+      "description": "Analysis design configuration. All fields are required.",
+      "required": [
+        "run_base_dir",
+        "reveal_fixed_lod_csv",
+        "sample_type",
+        "index_plate",
+        "dataAnalysisRefIds",
+        "panelDataArchive",
+        "plate_design_csv"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "run_base_dir": {
+          "type": "string",
+          "description": "Base directory for the run."
+        },
+        "reveal_fixed_lod_csv": {
+          "type": "string",
+          "description": "Path to the Reveal Fixed LOD CSV file."
+        },
+        "sample_type": {
+          "type": "string",
+          "description": "Sample type descriptor."
+        },
+        "dataAnalysisRefIds": {
+          "type": "string",
+          "enum": ["R10001", "R10002", "R10003"],
+          "description": "Reference ID for data analysis. Must be one of R10001, R10002, or R10003."
+        },
+        "panelDataArchive": {
+          "type": "string",
+          "description": "Path to the panel data archive file."
+        },
+        "plate_design_csv": {
+          "type": "array",
+          "description": "Plate design as a list of CSV rows. First row must be the header.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "type": "string",
+              "const": "well_id;sample_id;sample_type",
+              "description": "Header row must be exactly 'well_id;sample_id;sample_type'."
+            }
+          ],
+          "items": {
+            "type": "string",
+            "description": "Each data row must follow the format: <well_id>;<sample_id>;<sample_type>",
+            "pattern": "^[A-H](?:[1-9]|1[0-2]);[A-Za-z0-9_]+;(EMPTY|SAMPLE|CONTROL|SAMPLE_CONTROL|PLATE_CONTROL|NEGATIVE_CONTROL)$"
+          }
+        }
+      }
+    }
+  }
+}
