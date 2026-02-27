@@ -23,6 +23,7 @@
       "required": [
         "run_base_dir",
         "reveal_fixed_lod_csv",
+        "indexPlate",
         "sample_type",
         "index_plate",
         "dataAnalysisRefIds",
@@ -42,6 +43,11 @@
         "sample_type": {
           "type": "string",
           "description": "Sample type descriptor."
+        },
+        "indexPlate": {
+          "type": "string",
+          "enum": ["A", "B"],
+          "description": "IndexPlate ID for data analysis. Must be one of A or B."
         },
         "dataAnalysisRefIds": {
           "type": "string",
