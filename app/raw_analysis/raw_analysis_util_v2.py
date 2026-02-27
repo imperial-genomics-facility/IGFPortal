@@ -266,7 +266,10 @@ def _get_sample_metadata_checks_for_analysis(
             f"Failed to check sample metadata, error: {e}")
 
 
-def _get_validation_errors_for_analysis_design(raw_analysis_id: int) -> List[str]:
+def _get_validation_errors_for_analysis_design(
+        raw_analysis_id: int,
+        sample_metadata_key: str = "sample_metadata",
+        seqrun_metadata_key: str = "seqrun_metadata") -> List[str]:
     try:
         error_list = list()
         project_igf_id = ''
@@ -333,8 +336,13 @@ def _get_validation_errors_for_analysis_design(raw_analysis_id: int) -> List[str
                    deliverable == 'FASTQ':
                     json_data = \
                         load(analysis_yaml, Loader=SafeLoader)
+                    ## override for OLINK
+                    if seqrun_metadata_key in json_data:
+                        # no further checks are required
+                        return error_list
+                    ## continue with sample_metadata validation
                     sample_metadata = \
-                        json_data.get('sample_metadata')
+                        json_data.get(sample_metadata_key)
                     if sample_metadata is None:
                         error_list.append(
                             'sample_metadata missing after validation checks ??')
