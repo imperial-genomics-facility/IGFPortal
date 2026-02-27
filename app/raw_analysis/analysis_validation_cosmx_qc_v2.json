@@ -1,0 +1,80 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "id": "https://github.com/imperial-genomics-facility/IGFPortal",
+    "title": "IGF COSMX QC analysis validation schema",
+    "description": "Schema for validation of COSMX QC analysis yaml file",
+    "type" : "object",
+    "version": "0.0.2",
+    "properties": {
+        "run_metadata": {
+            "type": "array",
+            "uniqueItems": true,
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "uniqueItems": true,
+                "properties": {
+                    "cosmx_run_id": {
+                        "type": "string",
+                        "pattern": "^IGF[A-Za-z0-9_]+$"
+                    },
+                    "export_directory_path": {
+                        "type": "string",
+                        "pattern": "^IGF[A-Za-z0-9_]+$"
+                    }
+                },
+                "required": [
+            	    "cosmx_run_id",
+            	    "export_directory_path"
+                ]
+            }
+        },
+        "analysis_metadata": {
+            "type": "object",
+            "properties": {
+                "run_type": {
+                    "type": "string",
+                    "enum": ["RNA", "PROTEIN", "MULTIOME"]
+                },
+                "annotation": {
+                	"type": "array",
+                	"uniqueItems": true,
+                	"minItems": 1,
+                	"items": {
+                		"type": "object",
+                		"uniqueItems": true,
+                		"properties": {
+                			"cosmx_slide_id": {
+                				"type": "string",
+                    			"pattern": "^[A-Za-z0-9_]+$"
+                			},
+                			"tissue_annotation": {
+                				"type": "string"
+                			},
+                			"tissue_ontology": {
+                				"type": "string"
+                			},
+                			"tissue_condition": {
+                				"type": "string"
+                			}
+                		},
+                		"required": [
+                			"cosmx_slide_id",
+                			"tissue_annotation",
+                			"tissue_ontology",
+                			"tissue_condition"
+                		]
+                	}
+                }
+            },
+            "required": [
+            	"run_type",
+            	"annotation"
+            ]
+        }
+    },
+    "required": [
+    	"run_metadata",
+    	"analysis_metadata"
+    ]
+}
