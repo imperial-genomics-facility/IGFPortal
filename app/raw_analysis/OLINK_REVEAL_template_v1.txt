@@ -1,0 +1,12 @@
+seqrun_metadata:
+  - REPLACE_THIS_LINE_WITH_SEQRUN_ID_HERE,PORTAL_WILL_NOT_CHECK_IF_IT_IS_CORRECT
+analysis_metadata:
+  run_base_dir: /rds/general/project/genomics-facility-archive-2019/ephemeral/
+  reveal_fixed_lod_csv: /rds/general/project/genomics-facility-archive-2019/live/OLINK_DATA/reference/Reveal_Fixed_LOD.csv
+  sample_type: GENERIC_SAMPLE
+  dataAnalysisRefIds: R10003
+  indexPlate: A
+  panelDataArchive: /rds/general/project/genomics-facility-archive-2019/live/OLINK_DATA/reference/NPXMap_PanelDataArchive_2.0.0.dat
+  plate_design_csv:
+    - well_id;sample_id;sample_type
+    - A1-H12;SAMPLE_NAME;SAMPLE / CONTROL / PLATE_CONTROL / NEGATIVE_CONTROL
