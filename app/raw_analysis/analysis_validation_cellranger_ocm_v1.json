@@ -175,9 +175,6 @@
                             "$ref": "#/$defs/referencePattern"
                         },
                         {
-                            "$ref": "#/$defs/probeSetPattern"
-                        },
-                        {
                             "$ref": "#/$defs/samplesSection"
                         },
                         {
