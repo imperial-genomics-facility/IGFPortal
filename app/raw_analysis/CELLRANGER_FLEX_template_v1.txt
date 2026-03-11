@@ -8,10 +8,12 @@ analysis_metadata:
     - "[gene-expression]"
     - "## DON'T UNCOMMENT THIS LINE. FOR HUMAN GEX REF - UNCOMMENT NEXT TWO LINES"
     - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_REF/GRCH38/refdata-gex-GRCh38-2024-A"
-    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/CELLRANGER/cellranger-9.0.1/probe_sets/Chromium_Human_Transcriptome_Probe_Set_v1.1.0_GRCh38-2024-A.csv"
+    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/CELLRANGER/cellranger-10.0.0/probe_sets/Chromium_Human_Transcriptome_Probe_Set_v2.0.0_GRCh38-2024-A.csv"
+    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/CELLRANGER_PROBE_SETS/flex-v2-384.txt"
     - "## DON'T UNCOMMENT THIS LINE. FOR MOUSE GEX REF - UNCOMMENT NEXT TWO LINES"
     - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_REF/GRCM39/refdata-gex-GRCm39-2024-A"
-    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/CELLRANGER/cellranger-9.0.1/probe_sets/Chromium_Mouse_Transcriptome_Probe_Set_v1.1.1_GRCm39-2024-A.csv"
+    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/CELLRANGER/cellranger-10.0.0/probe_sets/Chromium_Mouse_Transcriptome_Probe_Set_v2.0.0_GRCm39-2024-A.csv"
+    - "# probe-set,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/CELLRANGER_PROBE_SETS/flex-v2-384.txt"
     - "create-bam,true"
     - "# filter-probes,<true|false>"
     - "# r1-length,<int>"
@@ -24,7 +26,7 @@ analysis_metadata:
     - "# include-introns,<true|false>"
     - "[feature]"
     - "## DON'T UNCOMMENT THIS LINE. FOR TotalSeqC, USE THIS FILE"
-    - "reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/CELLRANGER_FEATURE_BARCODES/TotalSeqC_feature_ref.csv"
+    - "reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/CELLRANGER_FEATURE_BARCODES/TotalSeq_C_Human_Universal_v2_399910_Antibody_reference_UMI_counting_cellranger.csv"
     - "# r1-length,<int> # feature R1 length"
     - "# r2-length,<int> # feature R2 length"
     - "[samples]"
@@ -34,7 +36,7 @@ analysis_metadata:
     - "TEST_SMAPLE_3,BC00X+AB00Y OR BC00X|BC00Y,OPTIONAL_SAMPLE_DESC"
     - "TEST_SMAPLE_4,BC00X+AB00Y OR BC00X|BC00Y,OPTIONAL_SAMPLE_DESC"
   scanpy_config:
-    TEMPLATE_FILE: /rds/general/project/genomics-facility-archive-2019/live/tgu/software/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.3.ipynb
+    TEMPLATE_FILE: /rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.4.ipyn
     IMAGE_FILE: /rds/general/project/genomics-facility-archive-2019/live/tgu/resources/pipeline_resource/singularity_images/scanpy-notebook-image/scanpy-notebook-image_v0.0.4.sif
     "## DON'T UNCOMMENT THIS LINE. SET MT- FOR HUMAN and mt- FOR MOUSE": ""
     MITO_PREFIX: MT-
