@@ -46,7 +46,7 @@ class Cosmx_rna_merged_view(BaseView):
         rows = (
             db.session.execute(
                 stmt
-                .orderby(CosMxMasterTableSlide.scan_date)
+                .order_by(CosMxMasterTableSlide.scan_date)
                 .offset(offset)
                 .limit(per_page))
             .all()
