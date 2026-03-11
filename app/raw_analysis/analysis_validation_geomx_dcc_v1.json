@@ -26,7 +26,8 @@
             "type": "object",
             "properties": {
                 "config_zip_file": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^(/[A-Za-z0-9_\\-\\.]+)+$"
                 },
                 "geomx_dcc_params": {
                     "type": "array",
