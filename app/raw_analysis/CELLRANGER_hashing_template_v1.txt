@@ -1,0 +1,55 @@
+sample_metadata:
+{% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
+    feature_types: Gene Expression/Antibody Capture/VDJ
+    cellranger_group: {{ SAMPLE_ID }} OR GROUP_NAME
+{% endfor -%}
+analysis_metadata:
+  cellranger_multi_config:
+    - "[gene-expression]"
+    - "## FOR HUMAN GEX REF - UNCOMMENT NEXT LINE"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_REF/GRCH38/refdata-gex-GRCh38-2024-A"
+    - "## FOR MOUSE GEX REF - UNCOMMENT NEXT LINE"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_REF/GRCM39/refdata-gex-GRCm39-2024-A"
+    - "create-bam,false"
+    - "# r1-length,<int>"
+    - "# r2-length,<int>"
+    - "# chemistry,<auto>"
+    - "# expect-cells,<int>"
+    - "# force-cells,<int>"
+    - "# no-secondary,<true|false>"
+    - "# check-library-compatibility,<true|false>"
+    - "# include-introns,<true|false>"
+    - "# UNCOMMENT NEXT LINE FOR VDJ SAMPLES (FOR TCR AND BCR ONLY)"
+    - "# [vdj]"
+    - "## FOR HUMAN VDJ REF - UNCOMMENT NEXT LINE"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_VDJ_REF/GRCH38/refdata-cellranger-vdj-GRCh38-alts-ensembl-7.1.0"
+    - "## FOR MOUSE VDJ REF - UNCOMMENT NEXT LINE"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/REF_GENOME/CELLRANGER_VDJ_REF/GRCM39/refdata-cellranger-vdj-GRCm38-alts-ensembl-7.0.0"
+    - "# inner-enrichment-primers,/path/to/primers"
+    - "# r1-length,<int> # vdj R1 length"
+    - "# r2-length,<int> # vdj R2 length"
+    - "# UNCOMMENT NEXT LINE FOR FEATURE BARCODE SAMPLES"
+    - "# [feature] # For Feature Barcode libraries only"
+    - "## GET PATH FOR CORRECT FEATURE REFERENCE, CHANGE FILE_NAME WITH ACTUAL NAME"
+    - "# reference,/rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/CELLRANGER_FEATURE_BARCODES/FILE_NAME"
+    - "# r1-length,<int> # feature R1 length"
+    - "# r2-length,<int> # feature R2 length"
+    - "[samples]"
+    - "sample_id,hashtag_ids"
+    - "sample1,TotalSeqB_Hashtag_1/TotalSeqC_Hashtag_1"
+    - "sample2,TotalSeqB_Hashtag_2/TotalSeqC_Hashtag_2"
+    - "sample3,TotalSeqB_Hashtag_3/TotalSeqC_Hashtag_3"
+    - "sample4,TotalSeqB_Hashtag_4/TotalSeqC_Hashtag_4"
+  scanpy_config:
+    TEMPLATE_FILE: /rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.4.ipynb
+    IMAGE_FILE: rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/SINGULARITY_IMAGES/SCANPY/scanpy-notebook-image_v0.0.4.sif
+    "# SET MT- FOR HUMAN and mt- FOR MOUSE": ""
+    MITO_PREFIX: MT-
+    RUN_SCRUBLET: false
+    RUN_CELLCYCLE_SCORE: true
+    CELL_MARKER_LIST: /rds/general/project/genomics-facility-archive-2019/live/tgu/resources/pipeline_resource/cell_markers/PangaloDB/PanglaoDB_markers_27_Mar_2020.tsv
+    "# SET HG38 FOR HUMAN and MM10 FOR MOUSE": ""
+    CELL_MARKER_SPECIES: HG38
+    S_GENES: ""
+    G2M_GENES: ""
+    CELL_MARKER_MODE: NON-VDJ
