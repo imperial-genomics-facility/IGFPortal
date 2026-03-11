@@ -49,13 +49,16 @@
                     			"pattern": "^[A-Za-z0-9_]+$"
                 			},
                 			"tissue_annotation": {
-                				"type": "string"
+                				"type": "string",
+                                "pattern": "^[A-Z_- ]+$"
                 			},
                 			"tissue_ontology": {
-                				"type": "string"
+                				"type": "string",
+                                "pattern": "^[A-Za-z0-9_-:/]+$"
                 			},
                 			"tissue_condition": {
-                				"type": "string"
+                				"type": "string",
+                                "pattern": "^[A-Z_- ]+$"
                 			}
                 		},
                 		"required": [
