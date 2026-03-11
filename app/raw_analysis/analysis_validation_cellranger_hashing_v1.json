@@ -82,7 +82,7 @@
         },
         "referencePattern": {
             "contains": {
-                "pattern": "^\\s?reference"
+                "pattern": "^(?!#)\\s?reference"
             },
             "minContains": 1,
             "maxContains": 2
