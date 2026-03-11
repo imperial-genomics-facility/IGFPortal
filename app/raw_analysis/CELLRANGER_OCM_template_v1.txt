@@ -1,6 +1,6 @@
 sample_metadata:
 {% for SAMPLE_ID in SAMPLE_ID_LIST %}  {{ SAMPLE_ID }}:
-    feature_types: Gene Expression/Antibody Capture/VDJ-B/VDJ-T/VDJ-T-GD
+    feature_types: Gene Expression/Antibody Capture/VDJ-B/VDJ-T
     cellranger_group: {{ SAMPLE_ID }} OR GROUP_NAME
 {% endfor -%}
 analysis_metadata:
