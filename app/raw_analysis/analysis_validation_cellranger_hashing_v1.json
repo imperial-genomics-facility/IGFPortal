@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "id": "https://github.com/imperial-genomics-facility/IGFPortal",
-    "title": "IGF Cellranger Multi analysis validation schema for OCM analysis",
-    "description": "Schema for validation of Cellranger multi OCM analysis yaml file",
+    "title": "IGF Cellranger Multi analysis validation schema for hashing analysis",
+    "description": "Schema for validation of Cellranger multi hashing analysis yaml file",
     "type": "object",
     "version": "0.0.1",
     "$defs": {
