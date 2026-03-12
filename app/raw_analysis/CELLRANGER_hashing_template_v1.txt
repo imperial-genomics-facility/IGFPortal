@@ -42,7 +42,7 @@ analysis_metadata:
     - "sample4,TotalSeqB_Hashtag_4/TotalSeqC_Hashtag_4"
   scanpy_config:
     TEMPLATE_FILE: /rds/general/project/genomics-facility-archive-2019/live/SOFTWARE/scanpy-notebook-image/templates/scanpy_single_sample_analysis_v0.0.6.4.ipynb
-    IMAGE_FILE: rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/SINGULARITY_IMAGES/SCANPY/scanpy-notebook-image_v0.0.4.sif
+    IMAGE_FILE: /rds/general/project/genomics-facility-archive-2019/live/PIPELINE_RESOURCES/SINGULARITY_IMAGES/SCANPY/scanpy-notebook-image_v0.0.4.sif
     "# SET MT- FOR HUMAN and mt- FOR MOUSE": ""
     MITO_PREFIX: MT-
     RUN_SCRUBLET: false
