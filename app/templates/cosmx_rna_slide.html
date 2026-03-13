@@ -29,29 +29,31 @@
       </form>
     </div>
 
-    <div class="col-md-4 text-right">
+    <!--div class="col-md-4 text-right">
       
-      <a  href="{{ url_for('Cosmx_rna_merged_view.export', search=search) }}"
+      <a  href="{{ url_for('Cosmx_slide_view.export', search=search) }}"
         class="btn btn-success"
       >
         <i class="fa fa-download"></i> Export to CSV
       </a>
     </div>
-  </div>
+  </div-->
 
   <!-- Table -->
   <table class="table table-bordered table-striped">
     <thead class="thead-dark">
       <tr>
         <th>AtoMX slide id</th>
-        <th>Original slide id</th>
+        <th>Mean transcript per cell</th>
+        <th>Slide run date</th>
       </tr>
     </thead>
     <tbody>
       {% for row in rows %}
       <tr>
-        <td>{{ row.atomx_slide_id }}</td>
-        <td>{{ row.original_slide_id }}</td>>
+        <td>{{ row.cosmx_slide_igf_id }}</td>
+        <td>{{ row.mean_transcript_per_cell }}</td>>
+        <td>{{ row.slide_run_date }}</td>>
       </tr>
       {% else %}
       <tr><td colspan="4" class="text-center">No records found.</td></tr>

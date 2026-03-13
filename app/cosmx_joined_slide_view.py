@@ -35,8 +35,9 @@ class Cosmx_slide_view(BaseView):
             select(
                 Cosmx_slide.cosmx_slide_igf_id
                 .label("cosmx_slide_igf_id"),
+                Cosmx_slide.slide_run_date,
                 func.avg(Cosmx_fov_rna_qc.mean_transcript_per_cell)
-                .label("mean_transcript_per_cell"),
+                .label("mean_transcript_per_cell")
             )
             .join(
                 Cosmx_fov,
