@@ -44,7 +44,7 @@ class Cosmx_slide_view(BaseView):
             )
             .join(
                 Cosmx_fov_rna_qc,
-                Cosmx_fov_rna_qc.cosmx_fov_id == Cosmx_slide.cosmx_fov_id
+                Cosmx_fov_rna_qc.cosmx_fov_id == Cosmx_fov.cosmx_fov_id
             )
             .group_by(Cosmx_slide.cosmx_slide_id)
         )
