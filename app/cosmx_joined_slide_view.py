@@ -93,7 +93,7 @@ class Cosmx_slide_view(BaseView):
 
 class Cosmx_rna_merged_view(BaseView):
     default_view = "list"
-    route_base = "/cosmx_rnaseq_merged"
+    route_base = "/cosmx_rna_merged/view"
 
     def _cosmx_rna_merged_rows(self, search: str, offset: int, per_page: int):
         stmt = (
