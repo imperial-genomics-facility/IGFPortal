@@ -11,6 +11,7 @@ from app.models import (
     CosMxMasterTableSlide,
     Cosmx_platform,
     Cosmx_slide,
+    Cosmx_fov,
     Cosmx_fov_rna_qc,
     Cosmx_fov_protein_qc
 )
@@ -19,6 +20,75 @@ from flask_appbuilder import BaseView, expose, has_access
 log = logging.getLogger(__name__)
 
 PAGE_SIZE = 100
+
+class Cosmx_slide_view(BaseView):
+    default_view = "list"
+    route_base = "/cosmx_rna_slide_view"
+
+    def _cosmx_slide_merged_rows(
+        self,
+        search: str,
+        offset: int,
+        per_page: int
+    ):
+        stmt = (
+            select(
+                Cosmx_slide.cosmx_slide_igf_id
+                .label("cosmx_slide_igf_id"),
+                func.avg(Cosmx_fov_rna_qc.mean_transcript_per_cell)
+                .label("mean_transcript_per_cell"),
+            )
+            .join(
+                Cosmx_fov,
+                Cosmx_fov.cosmx_slide_id == Cosmx_slide.cosmx_slide_id
+            )
+            .join(
+                Cosmx_fov_rna_qc,
+                Cosmx_fov_rna_qc.cosmx_fov_id == Cosmx_slide.cosmx_fov_id
+            )
+            .group_by(Cosmx_slide.cosmx_slide_id)
+        )
+        if search and search != "":
+            like = f"%{search}%"
+            stmt = stmt.where(
+                or_(
+                    Cosmx_slide.cosmx_slide_igf_id.ilike(like)
+                )
+            )
+        rows = (
+            db.session.execute(
+                stmt
+                .order_by(Cosmx_slide.slide_run_date)
+                .offset(offset)
+                .limit(per_page))
+            .all()
+        )
+        return rows
+
+    @expose("/list/")
+    @has_access
+    def list(self):
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", PAGE_SIZE, type=int)
+        search = request.args.get("search", "").strip()
+        offset = (page - 1) * per_page
+        rows = self._cosmx_slide_merged_rows(search, offset, per_page)
+        count_stmt = select(func.count()).select_from(
+            select(Cosmx_slide.cosmx_slide_id)
+            .subquery()
+        )
+        total = db.session.execute(count_stmt).scalar()
+        total_pages = max(1, (total + per_page - 1) // per_page)
+        return self.render_template(
+            "cosmx_rna_slide.html",
+            rows=rows,
+            page=page,
+            per_page=per_page,
+            total=total,
+            total_pages=total_pages,
+            search=search,
+        )
+
 
 class Cosmx_rna_merged_view(BaseView):
     default_view = "list"
@@ -72,7 +142,7 @@ class Cosmx_rna_merged_view(BaseView):
         total = db.session.execute(count_stmt).scalar()
         total_pages = max(1, (total + per_page - 1) // per_page)
         return self.render_template(
-            "cosmx_rnaseq_merged.html",
+            "cosmx_rna_merged.html",
             rows=rows,
             page=page,
             per_page=per_page,

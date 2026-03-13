@@ -33,7 +33,8 @@ from app.cosmx_master_table_view import (
     CosMxMasterTableSlideView
 )
 from app.cosmx_joined_slide_view import (
-    Cosmx_rna_merged_view
+    Cosmx_rna_merged_view,
+    Cosmx_slide_view
 )
 """
     Application wide 404 error handler
@@ -228,8 +229,8 @@ appbuilder.add_view(
     category="CosMX"
 )
 appbuilder.add_view(
-    Cosmx_rna_merged_view,
-    "Merged view",
+    Cosmx_slide_view,
+    "RNA Slide view",
     category_icon="fa-flask",
     icon="fa-cubes",
     category="CosMX"
