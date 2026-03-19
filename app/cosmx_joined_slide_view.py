@@ -40,36 +40,30 @@ class Cosmx_slide_view(BaseView):
     ):
         stmt = (
             select(
-                Project.project_igf_id
-                .label("Project name"),
-                Cosmx_slide.cosmx_slide_igf_id
-                .label("Slide id"),
-                Cosmx_slide.slide_run_date
-                .label("Date"),
-                Cosmx_slide.assay_type
-                .label("Assay"),
+                Project.project_igf_id,
+                Cosmx_slide.cosmx_slide_igf_id,
+                Cosmx_slide.slide_run_date,
+                Cosmx_slide.assay_type,
                 func.count(Cosmx_fov.cosmx_fov_id)
-                .label("FOVs"),
+                .label("fov_count"),
                 func.avg(Cosmx_fov_rna_qc.mean_transcript_per_cell)
-                .label("Mean transcript per cell"),
+                .label("mean_transcript_per_cell"),
                 func.avg(Cosmx_fov_rna_qc.mean_unique_genes_per_cell)
-                .label("Mean unique genes per cell"),
+                .label("mean_unique_genes_per_cell"),
                 func.group_concat(
                     func.distinct(
                         Cosmx_fov_annotation.tissue_annotation
                     )
                 )
-                .label("Annotation"),
+                .label("annotation"),
                 func.group_concat(
                     func.distinct(
                         Cosmx_fov_annotation.tissue_condition
                     )
                 )
-                .label("Condition"),
+                .label("condition"),
                 Cosmx_slide.panel_info
-                .label("Panel"),
-
-
+                .label("panel")
             )
             .join(
                 Cosmx_run,

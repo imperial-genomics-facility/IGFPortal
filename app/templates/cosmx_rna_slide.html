@@ -35,17 +35,31 @@
   <table class="table table-bordered table-striped">
     <thead class="thead-dark">
       <tr>
-        <th>AtoMX slide id</th>
+        <th>Project name</th>
+        <th>Slide id</th>
+        <th>Date</th>
+        <th>Assay</th>
+        <th>FOVs</th>
         <th>Mean transcript per cell</th>
-        <th>Slide run date</th>
+        <th>Mean unique genes per cell</th>
+        <th>Annotation</th>
+        <th>Condition</th>
+        <th>Panel</th>
       </tr>
     </thead>
     <tbody>
       {% for row in rows %}
       <tr>
-        <td>{{ row.atomx_slide_id }}</td>
+        <td>{{ row.project_igf_id }}</td>
+        <td>{{ row.cosmx_slide_igf_id }}</td>
+        <td>{{ row.slide_run_date }}</td>
+        <td>{{ row.assay_type }}</td>
+        <td>{{ row.fov_count }}</td>
         <td>{{ row.mean_transcript_per_cell }}</td>>
-        <td>{{ row.slide_run_date }}</td>>
+        <td>{{ row.mean_unique_genes_per_cell }}</td>>
+        <td>{{ row.annotation }}</td>>
+        <td>{{ row.condition }}</td>>
+        <td>{{ row.panel }}</td>>
       </tr>
       {% else %}
       <tr><td colspan="4" class="text-center">No records found.</td></tr>
