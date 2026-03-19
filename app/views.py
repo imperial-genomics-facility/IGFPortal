@@ -33,7 +33,6 @@ from app.cosmx_master_table_view import (
     CosMxMasterTableSlideView
 )
 from app.cosmx_joined_slide_view import (
-    Cosmx_rna_merged_view,
     Cosmx_slide_view
 )
 """
