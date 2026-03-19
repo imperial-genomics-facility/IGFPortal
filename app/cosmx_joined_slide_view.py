@@ -1,7 +1,7 @@
 import logging
 from app import db
 from flask import request
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, desc
 from app.models import (
     Project,
     Cosmx_run,
@@ -89,7 +89,7 @@ class Cosmx_slide_view(BaseView):
                 Cosmx_slide.cosmx_slide_id
                 )
             .order_by(
-                func.desc(
+                desc(
                     Cosmx_slide.slide_run_date
                 )
             )
