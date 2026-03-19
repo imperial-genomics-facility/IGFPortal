@@ -11,7 +11,8 @@
             "enum": [
                 "Gene Expression",
                 "Antibody Capture",
-                "VDJ"
+                "VDJ-B",
+                "VDJ-T"
             ]
         },
         "cellrangerGroup": {
@@ -85,7 +86,7 @@
                 "pattern": "^(?!#)\\s?reference"
             },
             "minContains": 1,
-            "maxContains": 2
+            "maxContains": 3
         },
         "geneExpressionSection": {
             "contains": {

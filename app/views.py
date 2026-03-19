@@ -32,6 +32,9 @@ from app.cosmx_master_table_view import (
     CosMxMasterTablePanelView,
     CosMxMasterTableSlideView
 )
+from app.cosmx_joined_slide_view import (
+    Cosmx_slide_view
+)
 """
     Application wide 404 error handler
 """
@@ -222,6 +225,13 @@ appbuilder.add_view(
     "User list",
     category_icon="fa-flask",
     icon="fa-user-o",
+    category="CosMX"
+)
+appbuilder.add_view(
+    Cosmx_slide_view,
+    "RNA Slide view",
+    category_icon="fa-flask",
+    icon="fa-cubes",
     category="CosMX"
 )
 """

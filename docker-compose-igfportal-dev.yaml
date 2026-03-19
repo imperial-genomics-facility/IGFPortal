@@ -1,7 +1,7 @@
 x-images:
   portal_db_image: &portal_db_image mysql:9.4
   redis_image: &redis_image redis:8.2
-  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v3.2.10
+  igfportal_image: &igfportal_image imperialgenomicsfacility/igfportal:v3.2.10.1
   nginx_image: &nginx_image nginx:1.29.1
   adminer_image: &adminer_image adminer:latest
 
@@ -110,6 +110,7 @@ services:
       - portal_network
     volumes: *redis-volume
   webserver:
+    build: .
     image: *igfportal_image
     env_file: *igfportal-env-file
     user: "${PORTAL_UID}:${GID}"
@@ -144,6 +145,7 @@ services:
     networks:
       - portal_network
   celery_worker1:
+    build: .
     image: *igfportal_image
     env_file: *igfportal-env-file
     user: "${PORTAL_UID}:${GID}"
@@ -161,6 +163,7 @@ services:
     networks:
       - portal_network
   celery_flower:
+    build: .
     image: *igfportal_image
     env_file: *igfportal-env-file
     restart: unless-stopped
