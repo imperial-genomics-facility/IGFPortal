@@ -110,6 +110,7 @@ services:
       - portal_network
     volumes: *redis-volume
   webserver:
+    build: .
     image: *igfportal_image
     env_file: *igfportal-env-file
     user: "${PORTAL_UID}:${GID}"
@@ -144,6 +145,7 @@ services:
     networks:
       - portal_network
   celery_worker1:
+    build: .
     image: *igfportal_image
     env_file: *igfportal-env-file
     user: "${PORTAL_UID}:${GID}"
@@ -161,6 +163,7 @@ services:
     networks:
       - portal_network
   celery_flower:
+    build: .
     image: *igfportal_image
     env_file: *igfportal-env-file
     restart: unless-stopped
