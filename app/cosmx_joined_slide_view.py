@@ -98,7 +98,11 @@ class Cosmx_slide_view(BaseView):
             like = f"%{search}%"
             stmt = stmt.where(
                 or_(
-                    Cosmx_slide.cosmx_slide_igf_id.ilike(like)
+                    Cosmx_slide.cosmx_slide_igf_id.ilike(like),
+                    Project.project_igf_id.ilike(like),
+                    Cosmx_fov_annotation.tissue_annotation.ilike(like),
+                    Cosmx_fov_annotation.tissue_condition.ilike(like),
+                    Cosmx_slide.panel_info.ilike(like)
                 )
             )
         rows = (
