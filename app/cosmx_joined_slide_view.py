@@ -89,7 +89,9 @@ class Cosmx_slide_view(BaseView):
                 Cosmx_slide.cosmx_slide_id
                 )
             .order_by(
-                Cosmx_slide.slide_run_date
+                func.desc(
+                    Cosmx_slide.slide_run_date
+                )
             )
         )
         if search and search != "":
