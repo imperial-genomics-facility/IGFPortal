@@ -3,9 +3,12 @@ from app import db
 from flask import request
 from sqlalchemy import select, func, or_
 from app.models import (
+    Project,
+    Cosmx_run,
     Cosmx_slide,
     Cosmx_fov,
-    Cosmx_fov_rna_qc
+    Cosmx_fov_rna_qc,
+    Cosmx_fov_annotation
 )
 from flask_appbuilder import BaseView, expose, has_access
 
@@ -37,21 +40,63 @@ class Cosmx_slide_view(BaseView):
     ):
         stmt = (
             select(
+                Project.project_igf_id
+                .label("Project name"),
                 Cosmx_slide.cosmx_slide_igf_id
-                .label("cosmx_slide_igf_id"),
-                Cosmx_slide.slide_run_date,
+                .label("Slide id"),
+                Cosmx_slide.slide_run_date
+                .label("Date"),
+                Cosmx_slide.assay_type
+                .label("Assay"),
+                func.count(Cosmx_fov.cosmx_fov_id)
+                .label("FOVs"),
                 func.avg(Cosmx_fov_rna_qc.mean_transcript_per_cell)
-                .label("mean_transcript_per_cell")
+                .label("Mean transcript per cell"),
+                func.avg(Cosmx_fov_rna_qc.mean_unique_genes_per_cell)
+                .label("Mean unique genes per cell"),
+                func.group_concat(
+                    func.distinct(
+                        Cosmx_fov_annotation.tissue_annotation
+                    )
+                )
+                .label("Annotation"),
+                func.group_concat(
+                    func.distinct(
+                        Cosmx_fov_annotation.tissue_condition
+                    )
+                )
+                .label("Condition"),
+                Cosmx_slide.panel_info
+                .label("Panel"),
+
+
+            )
+            .join(
+                Cosmx_run,
+                Project.project_id == Cosmx_run.project_id
+            )
+            .join(
+                Cosmx_slide,
+                Cosmx_run.cosmx_run_id == Cosmx_slide.cosmx_run_id
             )
             .join(
                 Cosmx_fov,
                 Cosmx_fov.cosmx_slide_id == Cosmx_slide.cosmx_slide_id
             )
             .join(
+                Cosmx_fov_annotation,
+                Cosmx_fov.cosmx_fov_id == Cosmx_fov_annotation.cosmx_fov_id
+            )
+            .join(
                 Cosmx_fov_rna_qc,
                 Cosmx_fov_rna_qc.cosmx_fov_id == Cosmx_fov.cosmx_fov_id
             )
-            .group_by(Cosmx_slide.cosmx_slide_id)
+            .group_by(
+                Cosmx_slide.cosmx_slide_id
+                )
+            .order_by(
+                Cosmx_slide.slide_run_date
+            )
         )
         if search and search != "":
             like = f"%{search}%"
