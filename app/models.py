@@ -455,6 +455,46 @@ class RawSeqrun(Model):
   def __repr__(self):
     return self.raw_seqrun_igf_id
 
+"""
+  List of raw external seqrun
+"""
+
+class RawExternalSeqrun(Model):
+  __tablename__ = 'raw_external_seqrun'
+  __table_args__ = (
+    UniqueConstraint('raw_external_seqrun_igf_id'),
+    { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
+  raw_external_seqrun_igf_id =  Column(
+    INTEGER(unsigned=True),
+    primary_key=True,
+    nullable=False
+  )
+  raw_external_seqrun_igf_id = Column(
+    String(80),
+    nullable=False
+  )
+  status = Column(
+    Enum(
+      "UNKNOWN",
+      "CHECKING",
+      "READY",
+      "REJECTED"
+    ),
+    nullable=False,
+    server_default='ACTIVE'
+  )
+  date_stamp = Column(
+    TIMESTAMP(),
+    nullable=False,
+    server_default=current_timestamp(),
+    onupdate=datetime.datetime.now
+  )
+
+
+
+  def __repr__(self):
+    return self.raw_mgi_seqrun_igf_id
+
 
 """
   List of raw MGI seqrun
