@@ -35,6 +35,9 @@ from app.cosmx_master_table_view import (
 from app.cosmx_joined_slide_view import (
     Cosmx_slide_view
 )
+from app.external_raw_seqrun_view import (
+    RawExternalSeqrunView
+)
 """
     Application wide 404 error handler
 """
@@ -118,6 +121,13 @@ appbuilder.add_view(
     "Assign samplesheet to run",
     category_icon="fa-database",
     icon="fa-pencil-square-o",
+    category="Sequencing runs"
+)
+appbuilder.add_view(
+    RawExternalSeqrunView,
+    "Add external run",
+    category_icon="fa-database",
+    icon="fa-line-chart",
     category="Sequencing runs"
 )
 """
