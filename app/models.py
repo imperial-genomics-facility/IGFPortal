@@ -464,7 +464,7 @@ class RawExternalSeqrun(Model):
   __table_args__ = (
     UniqueConstraint('raw_external_seqrun_igf_id'),
     { 'mysql_engine':'InnoDB', 'mysql_charset':'utf8'  })
-  raw_external_seqrun_igf_id =  Column(
+  raw_external_seqrun_id =  Column(
     INTEGER(unsigned=True),
     primary_key=True,
     nullable=False
@@ -476,12 +476,12 @@ class RawExternalSeqrun(Model):
   status = Column(
     Enum(
       "UNKNOWN",
-      "CHECKING",
-      "READY",
+      "LOADING",
+      "FINISHED",
       "REJECTED"
     ),
     nullable=False,
-    server_default='ACTIVE'
+    server_default='UNKNOWN'
   )
   date_stamp = Column(
     TIMESTAMP(),
