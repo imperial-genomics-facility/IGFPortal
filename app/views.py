@@ -127,8 +127,8 @@ appbuilder.add_view(
     RawExternalSeqrunView,
     "Add external run",
     category_icon="fa-database",
-    icon="fa-line-chart",
-    category="External runs"
+    icon="fa-upload",
+    category="Sequencing runs"
 )
 """
     Metadata upload
