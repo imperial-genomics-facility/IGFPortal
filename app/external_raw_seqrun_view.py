@@ -5,15 +5,15 @@ import logging
 from typing import Any
 from datetime import datetime
 from flask_appbuilder import ModelView
-from .models import RawExternalSeqrun, Platform
+from app.models import RawExternalSeqrun, Platform
 from flask import redirect, flash, url_for
 from flask_appbuilder.actions import action
 from flask_appbuilder.models.sqla.filters import FilterInFunction
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from . import db
-from . import celery
-from .airflow.airflow_api_utils import trigger_airflow_pipeline
-from .airflow.airflow_api_utils import get_airflow_dag_id
+from app import db
+from app import celery
+from app.airflow.airflow_api_utils import trigger_airflow_pipeline
+from app.airflow.airflow_api_utils import get_airflow_dag_id
 
 
 DAG_TAG = 'register_external_seqrun_dag'
@@ -24,19 +24,18 @@ log = logging.getLogger(__name__)
 def async_trigger_airflow_pipeline(
     self,
     dag_id,
-    run_list,
-    update_trigger_date=False
+    run_list
 ) -> dict:
     try:
         results = list()
         run_id_list = list()
-        for entry in run_list:
+        for run_id in run_list:
             run_id_list.append(
-                entry.get('seqrun_id')
+                run_id
             )
             res = trigger_airflow_pipeline(
                 dag_id=dag_id,
-                conf_data=entry,
+                conf_data={'external_seqrun_id': run_id},
                 airflow_conf_file=os.environ['AIRFLOW_CONF_FILE']
             )
             time.sleep(2)
@@ -50,7 +49,7 @@ def async_trigger_airflow_pipeline(
 
 def action_reject_raw_external_seqrun(
     item: RawExternalSeqrun|list[RawExternalSeqrun],
-    reject_tag: str = 'REJECTED') -> Any:
+    reject_tag: str = 'REJECTED') -> None:
     try:
         if isinstance(item, list):
             try:
@@ -58,7 +57,9 @@ def action_reject_raw_external_seqrun(
                     (
                         db.session
                         .query(RawExternalSeqrun)
-                        .filter(RawExternalSeqrun.raw_external_seqrun_id==i.raw_external_seqrun_id)
+                        .filter(
+                            RawExternalSeqrun.raw_external_seqrun_id==i.raw_external_seqrun_id
+                        )
                         .update({'status': reject_tag})
                     )
                 db.session.commit()
@@ -70,7 +71,9 @@ def action_reject_raw_external_seqrun(
                 (
                     db.session
                     .query(RawExternalSeqrun)
-                    .filter(RawExternalSeqrun.raw_external_seqrun_id==i.raw_external_seqrun_id)
+                    .filter(
+                        RawExternalSeqrun.raw_external_seqrun_id==item.raw_external_seqrun_id
+                    )
                     .update({'status': reject_tag})
                 )
                 db.session.commit()
@@ -111,7 +114,7 @@ def _check_registered_seqrun_platform(
             db.session
             .query(Platform.platform_igf_id)
             .filter(Platform.platform_igf_id==platform_name)
-            .all
+            .all()
         )
         if platform_records:
             return True
@@ -156,34 +159,35 @@ def action_add_raw_external_seqrun(
                     )
                     next
                 run_list.append(i.raw_external_seqrun_igf_id)
-                
         elif isinstance(item, RawExternalSeqrun):
             platform_name = _extract_platform_name_from_seqrun_id(
-                seqrun_name=i.raw_external_seqrun_igf_id
+                seqrun_name=item.raw_external_seqrun_igf_id
             )
             if platform_name is None:
                 errors.append(
                     f'Unknown run id {item.raw_external_seqrun_igf_id}'
                 )
-            else:
-                registered_platform = _check_registered_seqrun_platform(
-                    platform_name=platform_name
+                return run_list, errors
+            registered_platform = _check_registered_seqrun_platform(
+                platform_name=platform_name
+            )
+            if not registered_platform:
+                errors.append(
+                    f'Unknown platform {platform_name}'
                 )
-                if not registered_platform:
-                    errors.append(
-                        f'Unknown platform {platform_name}'
-                    )
-                else:
-                    run_list.append(
-                        i.raw_external_seqrun_igf_id
-                    )
+                return run_list, errors
+            run_list.append(
+                item.raw_external_seqrun_igf_id
+            )
         else:
             raise TypeError(
                 f"Wrong data type, {type}"
             )
         if len(run_list) > 0:
-            _ = async_trigger_airflow_pipeline.\
-                apply_async(args=[airflow_dag_id, run_list, True])
+            _ = (
+                async_trigger_airflow_pipeline
+                .apply_async(args=[airflow_dag_id, run_list, True])
+            )
         return run_list, errors
     except Exception as e:
         raise ValueError(
@@ -198,22 +202,20 @@ class RawExternalSeqrunView(ModelView):
         "status",
         "date_stamp"
     ]
-    show_columns = [
-        "raw_external_seqrun_igf_id",
-        "status",
-        "date_stamp"
-    ]
     label_columns = {
         "raw_external_seqrun_igf_id": "Run id",
         "status": "Status",
         "date_stamp": "Date"
     }
+    add_columns = [
+        "raw_external_seqrun_igf_id"
+    ]
     edit_columns = [
         "raw_external_seqrun_igf_id"
     ]
     base_permissions = [
+        "can_add",
         "can_list",
-        "can_show",
         "can_edit"
     ]
     base_filters = [
