@@ -2,8 +2,6 @@ import os
 import re
 import time
 import logging
-from typing import Any
-from datetime import datetime
 from flask_appbuilder import ModelView
 from app.models import RawExternalSeqrun, Platform
 from flask import redirect, flash, url_for
@@ -103,7 +101,8 @@ def _extract_platform_name_from_seqrun_id(
         return platform_name
     except Exception as e:
         raise ValueError(
-            f"Failed to extract platform name for seqrun {seqrun_name}"
+            f"Failed to extract platform name for seqrun {seqrun_name}," +
+            f" error: {e}"
         )
 
 def _check_registered_seqrun_platform(
@@ -149,7 +148,7 @@ def action_add_raw_external_seqrun(
                     errors.append(
                         f'Unknown run id {i.raw_external_seqrun_igf_id}'
                     )
-                    next
+                    continue
                 registered_platform = _check_registered_seqrun_platform(
                     platform_name=platform_name
                 )
@@ -157,7 +156,7 @@ def action_add_raw_external_seqrun(
                     errors.append(
                         f'Unknown platform {platform_name}'
                     )
-                    next
+                    continue
                 run_list.append(i.raw_external_seqrun_igf_id)
         elif isinstance(item, RawExternalSeqrun):
             platform_name = _extract_platform_name_from_seqrun_id(
@@ -263,5 +262,5 @@ class RawExternalSeqrunView(ModelView):
             return redirect(url_for('RawExternalSeqrunView.list'))
         except Exception as e:
             log.error(e)
-            flash(f"Failed to register external runs", "danger")
+            flash("Failed to register external runs", "danger")
             return redirect(url_for('RawExternalSeqrunView.list'))

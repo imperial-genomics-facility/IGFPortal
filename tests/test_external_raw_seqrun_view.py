@@ -118,9 +118,19 @@ def test_action_add_raw_external_seqrun(
         raw_external_seqrun_igf_id="EEFFGGHH",
         status="UNKNOWN"
     )
+    raw_run3 = RawExternalSeqrun(
+        raw_external_seqrun_igf_id="260124_AABBCCDD_101_EEFFGGHH110",
+        status="UNKNOWN"
+    )
+    raw_run4 = RawExternalSeqrun(
+        raw_external_seqrun_igf_id="EEFFGGHHI",
+        status="UNKNOWN"
+    )
     db.session.add(platform1)
     db.session.add(raw_run1)
     db.session.add(raw_run2)
+    db.session.add(raw_run3)
+    db.session.add(raw_run4)
     db.session.flush()
     db.session.commit()
     with patch.dict('os.environ', {'AIRFLOW_CONF_FILE': 'test_conf'}):
@@ -134,5 +144,17 @@ def test_action_add_raw_external_seqrun(
                 run_list2, errors2 = action_add_raw_external_seqrun(
                     raw_run2
                 )
+                run_list3, errors3 = action_add_raw_external_seqrun(
+                    [raw_run3]
+                )
+                run_list4, errors4 = action_add_raw_external_seqrun(
+                    [raw_run4]
+                )
+    assert len(run_list1) == 1
+    assert len(errors1) == 0
     assert len(run_list2) == 0
     assert len(errors2) == 1
+    assert len(run_list3) == 1
+    assert len(errors3) == 0
+    assert len(run_list4) == 0
+    assert len(errors4) == 1
