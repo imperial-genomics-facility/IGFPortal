@@ -75,6 +75,11 @@ def test_client(db):
                 admin_role,
                 app.appbuilder.sm.add_permission_view_menu(
                     "can_list",
+                    "RawExternalSeqrunView"))
+            app.appbuilder.sm.add_permission_role(
+                admin_role,
+                app.appbuilder.sm.add_permission_view_menu(
+                    "can_list",
                     "RawMetadataValidationView"))
             app.appbuilder.sm.add_permission_role(
                 admin_role,
