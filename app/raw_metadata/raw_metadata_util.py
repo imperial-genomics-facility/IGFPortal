@@ -1031,6 +1031,7 @@ def parse_and_add_new_raw_metadata(
                             synchronize_session='fetch'
                         )
                     )
+                    db.session.flush()
             
             db.session.commit()
         except:
