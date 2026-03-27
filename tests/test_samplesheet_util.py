@@ -1,5 +1,5 @@
-import os, unittest, tempfile
-from app import db
+import os
+import tempfile
 import pandas as pd
 from app.models import SampleSheetModel, Project, Sample
 from app.samplesheet.samplesheet_util import SampleSheet

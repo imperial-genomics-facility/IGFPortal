@@ -13,18 +13,19 @@ from app.rehydrate_metadata_view import (
     return_value=requests.patch(
         'https://httpbin.org/patch',
         data={'key': 'value'},
+        timeout=5,
         headers={'Content-Type': 'application/json'}))
 def test_async_trigger_airflow_pipeline(mock_object, db):
     try:
-        project = \
-            Project(
-                project_igf_id='test_project_1',
-                deliverable='FASTQ',
-                status='ACTIVE')
+        project = Project(
+            project_igf_id='test_project_1',
+            deliverable='FASTQ',
+            status='ACTIVE'
+        )
         db.session.add(project)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
@@ -38,6 +39,7 @@ def test_async_trigger_airflow_pipeline(mock_object, db):
     return_value=requests.patch(
         'https://httpbin.org/patch',
         data={'key': 'value'},
+        timeout=5,
         headers={'Content-Type': 'application/json'}))
 def test_async_trigger_airflow_pipeline_multiple(mock_object, db):
     try:
@@ -70,21 +72,21 @@ def test_async_trigger_airflow_pipeline_multiple(mock_object, db):
     'app.rehydrate_metadata_view.get_airflow_dag_id',
     return_value='test_dag')
 def test_action_fetch_metadata_single_item(
-    mock_dag_id, mock_async, db
+    mock_dag_id, mock_async, db, tmp_path
 ):
     try:
-        project = \
-            Project(
-                project_igf_id='test_project_1',
-                deliverable='FASTQ',
-                status='ACTIVE')
+        project = Project(
+            project_igf_id='test_project_1',
+            deliverable='FASTQ',
+            status='ACTIVE'
+        )
         db.session.add(project)
         db.session.flush()
         db.session.commit()
     except:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
     result = action_fetch_metadata(project)
     assert len(result) == 1
     assert project.project_id in result
@@ -98,7 +100,7 @@ def test_action_fetch_metadata_single_item(
     'app.rehydrate_metadata_view.get_airflow_dag_id',
     return_value='test_dag')
 def test_action_fetch_metadata_list(
-    mock_dag_id, mock_async, db
+    mock_dag_id, mock_async, db, tmp_path
 ):
     try:
         p1 = Project(
@@ -116,7 +118,7 @@ def test_action_fetch_metadata_list(
     except:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
     result = action_fetch_metadata([p1, p2])
     assert len(result) == 2
     assert p1.project_id in result
@@ -131,7 +133,7 @@ def test_action_fetch_metadata_list(
     'app.rehydrate_metadata_view.get_airflow_dag_id',
     return_value='test_dag')
 def test_action_fetch_metadata_skips_cosmx(
-    mock_dag_id, mock_async, db
+    mock_dag_id, mock_async, db, tmp_path
 ):
     try:
         p1 = Project(
@@ -149,7 +151,7 @@ def test_action_fetch_metadata_skips_cosmx(
     except:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
     result = action_fetch_metadata([p1, p2])
     assert len(result) == 1
     assert p1.project_id not in result
@@ -163,7 +165,7 @@ def test_action_fetch_metadata_skips_cosmx(
     'app.rehydrate_metadata_view.get_airflow_dag_id',
     return_value='test_dag')
 def test_action_fetch_metadata_all_cosmx_no_trigger(
-    mock_dag_id, mock_async, db
+    mock_dag_id, mock_async, db, tmp_path
 ):
     try:
         p1 = Project(
@@ -176,7 +178,7 @@ def test_action_fetch_metadata_all_cosmx_no_trigger(
     except:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
     result = action_fetch_metadata([p1])
     assert len(result) == 0
     mock_async.assert_not_called()
@@ -189,21 +191,21 @@ def test_action_fetch_metadata_all_cosmx_no_trigger(
     'app.rehydrate_metadata_view.get_airflow_dag_id',
     return_value='test_dag')
 def test_action_fetch_metadata_single_cosmx_skipped(
-    mock_dag_id, mock_async, db
+    mock_dag_id, mock_async, db, tmp_path
 ):
     try:
-        project = \
-            Project(
-                project_igf_id='test_project_cosmx',
-                deliverable='COSMX',
-                status='ACTIVE')
+        project = Project(
+            project_igf_id='test_project_cosmx',
+            deliverable='COSMX',
+            status='ACTIVE'
+        )
         db.session.add(project)
         db.session.flush()
         db.session.commit()
     except:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
     result = action_fetch_metadata(project)
     assert len(result) == 0
     mock_async.assert_not_called()

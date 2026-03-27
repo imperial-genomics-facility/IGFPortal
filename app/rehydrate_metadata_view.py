@@ -2,7 +2,6 @@ import os
 import time
 import logging
 from app import (
-    db,
     celery
 )
 from app.models import Project
