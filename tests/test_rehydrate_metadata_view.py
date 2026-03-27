@@ -28,7 +28,7 @@ def test_async_trigger_airflow_pipeline(mock_object, db, tmp_path):
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = async_trigger_airflow_pipeline(
         'test_dag', [project.project_id])
     assert project.project_id in result
@@ -41,7 +41,7 @@ def test_async_trigger_airflow_pipeline(mock_object, db, tmp_path):
         data={'key': 'value'},
         timeout=5,
         headers={'Content-Type': 'application/json'}))
-def test_async_trigger_airflow_pipeline_multiple(mock_object, db):
+def test_async_trigger_airflow_pipeline_multiple(mock_object, db, tmp_path):
     try:
         p1 = Project(
             project_igf_id='test_project_1',
@@ -58,7 +58,7 @@ def test_async_trigger_airflow_pipeline_multiple(mock_object, db):
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = async_trigger_airflow_pipeline(
         'test_dag', [p1.project_id, p2.project_id])
     assert p1.project_id in result
@@ -86,7 +86,7 @@ def test_action_fetch_metadata_single_item(
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = action_fetch_metadata(project)
     assert len(result) == 1
     assert project.project_id in result
@@ -118,7 +118,7 @@ def test_action_fetch_metadata_list(
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = action_fetch_metadata([p1, p2])
     assert len(result) == 2
     assert p1.project_id in result
@@ -151,7 +151,7 @@ def test_action_fetch_metadata_skips_cosmx(
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = action_fetch_metadata([p1, p2])
     assert len(result) == 1
     assert p1.project_id not in result
@@ -178,7 +178,7 @@ def test_action_fetch_metadata_all_cosmx_no_trigger(
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = action_fetch_metadata([p1])
     assert len(result) == 0
     mock_async.assert_not_called()
@@ -205,7 +205,7 @@ def test_action_fetch_metadata_single_cosmx_skipped(
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path.as_posix()
     result = action_fetch_metadata(project)
     assert len(result) == 0
     mock_async.assert_not_called()
