@@ -1032,7 +1032,6 @@ def parse_and_add_new_raw_metadata(
                         )
                     )
                     db.session.flush()
-            
             db.session.commit()
         except:
             db.session.rollback()

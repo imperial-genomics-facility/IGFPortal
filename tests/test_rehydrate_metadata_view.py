@@ -15,7 +15,7 @@ from app.rehydrate_metadata_view import (
         data={'key': 'value'},
         timeout=5,
         headers={'Content-Type': 'application/json'}))
-def test_async_trigger_airflow_pipeline(mock_object, db):
+def test_async_trigger_airflow_pipeline(mock_object, db, tmp_path):
     try:
         project = Project(
             project_igf_id='test_project_1',
@@ -28,7 +28,7 @@ def test_async_trigger_airflow_pipeline(mock_object, db):
     except Exception:
         db.session.rollback()
         raise
-    os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
+    os.environ['AIRFLOW_CONF_FILE'] = tmp_path
     result = async_trigger_airflow_pipeline(
         'test_dag', [project.project_id])
     assert project.project_id in result
@@ -55,7 +55,7 @@ def test_async_trigger_airflow_pipeline_multiple(mock_object, db):
         db.session.add(p2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = '/tmp/'
@@ -83,7 +83,7 @@ def test_action_fetch_metadata_single_item(
         db.session.add(project)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = tmp_path
@@ -115,7 +115,7 @@ def test_action_fetch_metadata_list(
         db.session.add(p2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = tmp_path
@@ -148,7 +148,7 @@ def test_action_fetch_metadata_skips_cosmx(
         db.session.add(p2)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = tmp_path
@@ -175,7 +175,7 @@ def test_action_fetch_metadata_all_cosmx_no_trigger(
         db.session.add(p1)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = tmp_path
@@ -202,7 +202,7 @@ def test_action_fetch_metadata_single_cosmx_skipped(
         db.session.add(project)
         db.session.flush()
         db.session.commit()
-    except:
+    except Exception:
         db.session.rollback()
         raise
     os.environ['AIRFLOW_CONF_FILE'] = tmp_path
