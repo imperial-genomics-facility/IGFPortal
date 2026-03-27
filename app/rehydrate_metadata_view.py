@@ -87,16 +87,19 @@ def action_fetch_metadata(
 class RehydrateProjectMetadataView(ModelView):
     datamodel = SQLAInterface(Project)
     list_columns = [
-        "project_igf_id"
+        "project_igf_id",
+        "start_timestamp"
     ]
     label_columns = {
-        "project_igf_id": "Project name"
+        "project_igf_id": "Project name",
+        "start_timestamp": "Date"
     }
     base_permissions = [
         "can_list"
     ]
     base_filters = [
-        ["status", FilterInFunction, lambda: ["FASTQ", "ALIGNMENT", "ANALYSIS"]]
+        ["deliverable", FilterInFunction, lambda: ["FASTQ", "ALIGNMENT", "ANALYSIS"]],
+        ["status", FilterInFunction, lambda: ["ACTIVE"]]
     ]
     base_order = ("project_id", "desc")
 
@@ -104,7 +107,7 @@ class RehydrateProjectMetadataView(ModelView):
         "fetch_metadata",
         "Fetch metadata",
         confirmation="Run?",
-        multiple=False,
+        multiple=True,
         icon="fa-plane"
     )
     def fetch_metadata(self, item):
