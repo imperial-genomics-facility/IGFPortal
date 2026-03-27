@@ -117,7 +117,7 @@ class RehydrateProjectMetadataView(ModelView):
         except Exception as e:
             log.error(e)
             flash(
-                f"Failed to fetch metadata",
+                "Failed to fetch metadata",
                 "danger"
             )
             return redirect(
