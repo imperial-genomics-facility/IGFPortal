@@ -38,6 +38,9 @@ from app.cosmx_joined_slide_view import (
 from app.external_raw_seqrun_view import (
     RawExternalSeqrunView
 )
+from app.rehydrate_metadata_view import (
+    RehydrateProjectMetadataView
+)
 """
     Application wide 404 error handler
 """
@@ -157,6 +160,16 @@ appbuilder.add_view(
     icon="fa-list-ol",
     category="Metadata"
 )
+appbuilder.add_view(
+    RehydrateProjectMetadataView,
+    "Rehydrate metadata",
+    category_icon="fa-table",
+    icon="fa-space-shuttle",
+    category="Metadata"
+)
+"""
+    Analysis
+"""
 appbuilder.add_view(
     RawAnalysisV2View,
     "Create new analysis design",

@@ -1016,6 +1016,22 @@ def parse_and_add_new_raw_metadata(
                         formatted_csv_data=formatted_csv_data)
                     db.session.add(metadata)
                     db.session.flush()
+                else:
+                    (
+                        db.session
+                        .query(RawMetadataModel)
+                        .filter(RawMetadataModel.metadata_tag==metadata_tag)
+                        .update(
+                            dict(
+                                metadata_tag=metadata_tag,
+                                raw_csv_data=raw_csv_data,
+                                formatted_csv_data=formatted_csv_data,
+                                status="UNKNOWN"
+                            ),
+                            synchronize_session='fetch'
+                        )
+                    )
+                    db.session.flush()
             db.session.commit()
         except:
             db.session.rollback()

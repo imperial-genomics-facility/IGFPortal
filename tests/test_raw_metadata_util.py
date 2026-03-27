@@ -1,3 +1,4 @@
+import pandas as pd
 from app.models import (
     RawMetadataModel,
     Project,
@@ -249,3 +250,48 @@ def test_parse_and_add_new_raw_metadata(db):
     results = [i[0] for i in results]
     assert len(results) == 2
     assert 'test1' in results
+    (
+        db.session
+        .query(RawMetadataModel)
+        .filter(RawMetadataModel.metadata_tag=='test1')
+        .update(
+            {"status": "REJECTED"},
+            synchronize_session='fetch'
+        )
+    )
+    db.session.flush()
+    db.session.commit()
+    results = (
+        db.session
+        .query(
+            RawMetadataModel.metadata_tag,
+            RawMetadataModel.status
+        )
+        .filter(RawMetadataModel.metadata_tag=='test1')
+        .all()
+    )
+    assert len(results) == 1
+    assert results[0][0] == 'test1'
+    assert results[0][1] == 'REJECTED'
+    metadata_list = [{
+        'metadata_tag': 'test1',
+        'raw_csv_data': [{'project_id','sample_id'},{'c', 'd'}],
+        'formatted_csv_data': [{'project_id','sample_id'},{'c', 'd'}]
+    }]
+    parse_and_add_new_raw_metadata(
+        data=metadata_list
+    )
+    results = (
+        db.session
+        .query(
+            RawMetadataModel.metadata_tag,
+            RawMetadataModel.status,
+            RawMetadataModel.formatted_csv_data
+        )
+        .filter(RawMetadataModel.metadata_tag=='test1')
+        .all()
+    )
+    assert len(results) == 1
+    assert results[0][0] == 'test1'
+    assert results[0][1] == 'UNKNOWN'
+    assert results[0][2] == pd.DataFrame([{'project_id','sample_id'},{'c', 'd'}]).to_csv(index=False)
