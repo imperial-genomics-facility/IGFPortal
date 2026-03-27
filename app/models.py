@@ -1529,6 +1529,15 @@ class Project(Model):
     '''
     return  self.project_igf_id
 
+  def project_data(self):
+    url = url_for(
+      "RehydrateProjectMetadataView.get_samples_for_project",
+      id=self.project_id
+    )
+    return Markup(
+      f'<a href="{url}">samples</a>'
+    )
+
   def project_info(self):
       url = url_for(
         'ProjectView.get_project_data',

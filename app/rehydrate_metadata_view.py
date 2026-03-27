@@ -1,10 +1,25 @@
 import os
 import time
 import logging
+from flask import request
+from typing import Any
 from app import (
+    db,
     celery
 )
-from app.models import Project
+from sqlalchemy import (
+    select,
+    func,
+    coalesce,
+    desc
+)
+from app.models import (
+    Project,
+    Sample,
+    Experiment,
+    Run,
+    Run_attribute
+)
 from flask_appbuilder import ModelView
 from flask import (
     redirect,
@@ -18,10 +33,14 @@ from app.airflow.airflow_api_utils import (
     trigger_airflow_pipeline,
     get_airflow_dag_id
 )
+from flask_appbuilder.baseviews import expose
+from flask_appbuilder.security.decorators import has_access
 
 log = logging.getLogger(__name__)
 
 DAG_TAG = 'rehydrate_metadata_dag'
+
+PAGE_SIZE = 100
 
 @celery.task(bind=True)
 def async_trigger_airflow_pipeline(
@@ -83,25 +102,109 @@ def action_fetch_metadata(
             f"Failed to fetch metadata, error: {e}"
         )
 
+def get_sample_for_project(
+    project_id: int,
+    offset: int,
+    per_page: int
+) -> Any:
+    try:
+        results = (
+            db.session.query(
+                Project.project_igf_id,
+                Sample.sample_igf_id,
+                Sample.sample_submitter_id,
+                func.format(
+                    coalesce(func.sum(Run_attribute.attribute_value), 0), 0
+                ).label("total_read_count")
+            )
+            .join(Sample, Project.project_id == Sample.project_id)
+            .outerjoin(Experiment, Sample.sample_id == Experiment.sample_id)
+            .outerjoin(Run, Experiment.experiment_id == Run.experiment_id)
+            .outerjoin(
+                Run_attribute,
+                (Run_attribute.run_id == Run.run_id) &
+                (Run_attribute.attribute_name == "R1_READ_COUNT")
+            )
+            .filter(
+                Project.project_id == project_id,
+                Sample.sample_igf_id.isnot(None)
+            )
+            .group_by(Sample.sample_igf_id)
+            .order_by(
+                desc(
+                    Sample.sample_igf_id
+                )
+            )
+            .offset(offset)
+            .limit(per_page)
+            .all()
+        )
+        return results
+    except Exception as e:
+        raise ValueError(
+            f"Failed to get sample records, error: {e}"
+        )
+
 
 class RehydrateProjectMetadataView(ModelView):
     datamodel = SQLAInterface(Project)
     list_columns = [
         "project_igf_id",
+        "project_data",
         "start_timestamp"
     ]
     label_columns = {
         "project_igf_id": "Project name",
+        "project_data": "Samples",
         "start_timestamp": "Date"
     }
     base_permissions = [
-        "can_list"
+        "can_list",
+        "can_get_samples_for_project"
     ]
     base_filters = [
         ["deliverable", FilterInFunction, lambda: ["FASTQ", "ALIGNMENT", "ANALYSIS"]],
         ["status", FilterInFunction, lambda: ["ACTIVE"]]
     ]
     base_order = ("project_id", "desc")
+
+    @expose('/project_samples/<int:project_id>')
+    @has_access
+    def get_samples_for_project(self, project_id):
+        try:
+            page = request.args.get("page", 1, type=int)
+            per_page = request.args.get("per_page", PAGE_SIZE, type=int)
+            offset = (page - 1) * per_page
+            count_stmt = select(func.count()).select_from(
+                select(Sample.sample_igf_id)
+                .join(Sample, Project.project_id == Sample.project_id)
+                .filter(
+                    Project.project_id == project_id,
+                    Sample.sample_igf_id.isnot(None)
+                )
+                .subquery()
+            )
+            total = db.session.execute(count_stmt).scalar()
+            total_pages = max(1, (total + per_page - 1) // per_page)
+            rows = get_sample_for_project(
+                project_id=project_id,
+                per_page=per_page,
+                offset=offset
+            )
+            return self.render_template(
+                "project_sample_view.html",
+                rows=rows,
+                page=page,
+                per_page=per_page,
+                total=total,
+                total_pages=total_pages,
+            )
+        except Exception as e:
+            log.error(e)
+            flash("Failed to fetch samples", 'danger')
+            return redirect(
+                url_for('RehydrateProjectMetadataView.list')
+            )
 
     @action(
         "fetch_metadata",

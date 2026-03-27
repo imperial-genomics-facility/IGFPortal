@@ -1,0 +1,51 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<div class="container-fluid">
+  <h2>Sample Info</h2>
+
+  <!-- Table -->
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>Project</th>
+        <th>Sample id</th>
+        <th>Sample name</th>
+        <th>Read counts</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.project_igf_id }}</td>
+        <td>{{ row.sample_igf_id }}</td>
+        <td>{{ row.sample_submitter_id }}</td>
+        <td>{{ row.total_read_count }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="text-center">No records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Pagination — preserves search term across pages -->
+  <nav>
+    <ul class="pagination justify-content-center">
+      <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+        <a class="page-link" href="?page={{ page - 1 }}">«</a>
+      </li>
+      {% for p in range(1, total_pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+      </li>
+      {% endfor %}
+      <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+        <a class="page-link" href="?page={{ page + 1 }}">»</a>
+      </li>
+    </ul>
+  </nav>
+
+  <p class="text-center text-muted">
+    Showing page {{ page }} of {{ total_pages }} ({{ total }} total records)
+  </p>
+</div>
+{% endblock %}
