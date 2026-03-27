@@ -98,7 +98,8 @@ class RehydrateProjectMetadataView(ModelView):
         "can_list"
     ]
     base_filters = [
-        ["deliverable", FilterInFunction, lambda: ["FASTQ", "ALIGNMENT", "ANALYSIS"]]
+        ["deliverable", FilterInFunction, lambda: ["FASTQ", "ALIGNMENT", "ANALYSIS"]],
+        ["status", FilterInFunction, lambda: ["ACTIVE"]]
     ]
     base_order = ("project_id", "desc")
 
