@@ -9,20 +9,20 @@ from app.samplesheet.samplesheet_util import compare_sample_with_metadata_db
 
 
 
-def test_validate_samplesheet_data1(self):
+def test_validate_samplesheet_data1():
     sa = SampleSheet(infile="data/SampleSheet_v1.csv")
-    self.assertEqual(len(sa._data), 8)
+    assert len(sa._data) == 8
     errors = sa.validate_samplesheet_data()
-    self.assertEqual(len(errors), 10)
-    self.assertEqual(len([e for e in errors if "s4" in e]), 1)
-    self.assertEqual(len([e for e in errors if "IGF0001" in e]), 1)
-    self.assertEqual(len([e for e in errors if "TCCGGAGA, GTCAGTAC" in e]), 1)
+    assert len(errors) == 10
+    assert len([e for e in errors if "s4" in e]) == 1
+    assert len([e for e in errors if "IGF0001" in e]) == 1
+    assert len([e for e in errors if "TCCGGAGA, GTCAGTAC" in e]) == 1
 
-def test_validate_samplesheet_data2(self):
+def test_validate_samplesheet_data2():
     sa = SampleSheet(infile="data/SampleSheet_v2.csv")
-    self.assertEqual(len(sa._data), 16)
+    assert len(sa._data) == 16
     errors = sa.validate_samplesheet_data()
-    self.assertEqual(len(errors), 2)
+    assert len(errors) == 2
 
 
 
