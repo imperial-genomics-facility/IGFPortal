@@ -10,7 +10,6 @@ from app import (
 from sqlalchemy import (
     select,
     func,
-    coalesce,
     desc
 )
 from app.models import (
@@ -114,7 +113,7 @@ def get_sample_for_project(
                 Sample.sample_igf_id,
                 Sample.sample_submitter_id,
                 func.format(
-                    coalesce(func.sum(Run_attribute.attribute_value), 0), 0
+                    func.coalesce(func.sum(Run_attribute.attribute_value), 0), 0
                 ).label("total_read_count")
             )
             .join(Sample, Project.project_id == Sample.project_id)
