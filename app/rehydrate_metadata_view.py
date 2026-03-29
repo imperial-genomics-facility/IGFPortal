@@ -167,9 +167,9 @@ class RehydrateProjectMetadataView(ModelView):
     ]
     base_order = ("project_id", "desc")
 
-    @expose('/project_samples/<int:id>')
+    @expose('/project_samples/<int:project_id>')
     @has_access
-    def get_samples_for_project(self, id):
+    def get_samples_for_project(self, project_id):
         try:
             page = request.args.get("page", 1, type=int)
             per_page = request.args.get("per_page", PAGE_SIZE, type=int)
@@ -177,7 +177,7 @@ class RehydrateProjectMetadataView(ModelView):
             count_stmt = select(func.count()).select_from(
                 select(Sample.sample_igf_id)
                 .filter(
-                    Sample.project_id == id,
+                    Sample.project_id == project_id,
                     Sample.sample_igf_id.isnot(None)
                 )
                 .subquery()
@@ -185,7 +185,7 @@ class RehydrateProjectMetadataView(ModelView):
             total = db.session.execute(count_stmt).scalar()
             total_pages = max(1, (total + per_page - 1) // per_page)
             rows = get_sample_for_project(
-                project_id=id,
+                project_id=project_id,
                 per_page=per_page,
                 offset=offset
             )
