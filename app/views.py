@@ -164,7 +164,7 @@ appbuilder.add_view(
     RehydrateProjectMetadataView,
     "Project details",
     category_icon="fa-table",
-    icon="fa-space-shuttle",
+    icon="fa fa-th-list",
     category="Metadata"
 )
 """
