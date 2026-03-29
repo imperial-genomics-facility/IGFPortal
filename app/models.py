@@ -1532,7 +1532,7 @@ class Project(Model):
   def project_data(self):
     url = url_for(
       "RehydrateProjectMetadataView.get_samples_for_project",
-      id=self.project_id
+      project_id=self.project_id
     )
     return Markup(
       f'<a href="{url}">samples</a>'
