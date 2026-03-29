@@ -15,6 +15,8 @@ from app.rehydrate_metadata_view import (
     get_sample_for_project
 )
 
+REHYDRATE_PROJECT_SAMPLES_URL = '/rehydrateprojectmetadataview/project_samples/{}'
+
 
 def test_get_sample_for_project(db):
     # project1: fastq, acttive, two samples, one flowcell lane
@@ -147,6 +149,87 @@ def test_async_trigger_airflow_pipeline_multiple(mock_object, db, tmp_path):
         'test_dag', [p1.project_id, p2.project_id])
     assert p1.project_id in result
     assert p2.project_id in result
+
+
+def test_get_samples_for_project_returns_samples(db, test_client):
+    project = Project(
+        project_igf_id='test_project_1',
+        deliverable='FASTQ',
+        status='ACTIVE'
+    )
+    db.session.add(project)
+    db.session.flush()
+    project_id = project.project_id
+    sample1 = Sample(
+        sample_igf_id='test_sample_1',
+        project_id=project_id
+    )
+    sample2 = Sample(
+        sample_igf_id='test_sample_2',
+        project_id=project_id
+    )
+    db.session.add(sample1)
+    db.session.add(sample2)
+    db.session.flush()
+    db.session.commit()
+    rv = test_client.post('/login/', data=dict(
+        username='admin',
+        password='password'
+    ), follow_redirects=True)
+    assert rv.status_code == 200
+    with test_client.session_transaction() as session:
+        session['user_id'] = 1
+        session['_fresh'] = True
+    rv = test_client.get(
+        REHYDRATE_PROJECT_SAMPLES_URL.format(project_id))
+    assert rv.status_code == 200
+
+
+def test_get_samples_for_project_with_pagination(db, test_client):
+    project = Project(
+        project_igf_id='test_project_page',
+        deliverable='FASTQ',
+        status='ACTIVE'
+    )
+    db.session.add(project)
+    db.session.flush()
+    project_id = project.project_id
+    for i in range(5):
+        db.session.add(Sample(
+            sample_igf_id=f'test_sample_{i}',
+            project_id=project_id
+        ))
+    db.session.flush()
+    db.session.commit()
+    rv = test_client.post('/login/', data=dict(
+        username='admin',
+        password='password'
+    ), follow_redirects=True)
+    assert rv.status_code == 200
+    with test_client.session_transaction() as session:
+        session['user_id'] = 1
+        session['_fresh'] = True
+    rv = test_client.get(
+        REHYDRATE_PROJECT_SAMPLES_URL.format(project_id),
+        query_string={'page': 1, 'per_page': 3}
+    )
+    assert rv.status_code == 200
+
+
+def test_get_samples_for_project_invalid_id_redirects(db, test_client):
+    rv = test_client.post('/login/', data=dict(
+        username='admin',
+        password='password'
+    ), follow_redirects=True)
+    assert rv.status_code == 200
+    with test_client.session_transaction() as session:
+        session['user_id'] = 1
+        session['_fresh'] = True
+    rv = test_client.get(
+        REHYDRATE_PROJECT_SAMPLES_URL.format(99999),
+        follow_redirects=True
+    )
+    assert rv.status_code == 200
 
 
 @patch(

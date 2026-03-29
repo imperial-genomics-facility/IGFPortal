@@ -176,9 +176,8 @@ class RehydrateProjectMetadataView(ModelView):
             offset = (page - 1) * per_page
             count_stmt = select(func.count()).select_from(
                 select(Sample.sample_igf_id)
-                .join(Sample, Project.project_id == Sample.project_id)
                 .filter(
-                    Project.project_id == project_id,
+                    Sample.project_id == project_id,
                     Sample.sample_igf_id.isnot(None)
                 )
                 .subquery()
