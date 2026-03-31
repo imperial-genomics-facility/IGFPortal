@@ -92,7 +92,7 @@ def action_fetch_metadata(
             _ = (
                 async_trigger_airflow_pipeline
                 .apply_async(
-                    args=[airflow_dag_id, project_id_list, True]
+                    args=[airflow_dag_id, project_id_list]
                 )
             )
         return project_id_list
