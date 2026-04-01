@@ -185,7 +185,7 @@ def action_add_raw_external_seqrun(
         if len(run_list) > 0:
             _ = (
                 async_trigger_airflow_pipeline
-                .apply_async(args=[airflow_dag_id, run_list, True])
+                .apply_async(args=[airflow_dag_id, run_list])
             )
         return run_list, errors
     except Exception as e:
